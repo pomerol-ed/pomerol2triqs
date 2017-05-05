@@ -2,6 +2,6 @@ r"""
 DOC
 """
 
-from pomerol2triqs import Pomerol2TRIQS
+from pomerol2triqs import PomerolED
 
-__all__ = ['Pomerol2TRIQS']
+__all__ = ['PomerolED']
