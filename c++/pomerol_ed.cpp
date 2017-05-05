@@ -119,15 +119,76 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
   std::cout << "Pomerol: ground state energy is " << matrix_h->getGroundEnergy() + gs_shift << std::endl;
  }
 
- // Reset density matrix, we will compute it later if needed
+ // Reset density matrix and field operators, we will compute them later if needed
  rho.release();
+ ops_container.release();
 }
 
-block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const& gf_struct, int n_iw) const {
+// Translate gf_struct into a set of ParticleIndex
+std::set<Pomerol::ParticleIndex> pomerol_ed::gf_struct_to_pomerol_indices(gf_struct_t const& gf_struct) const {
+ std::set<Pomerol::ParticleIndex> indices;
+ for(auto const& b : gf_struct) {
+  for(auto const& i : b.second) {
+   auto it = index_converter.find({b.first, i});
+   if(it == index_converter.end())
+    TRIQS_RUNTIME_ERROR << "gf_struct_to_pomerol_indices: unexpected GF index " << b.first << "," << i;
+   std::string site;
+   unsigned short orb;
+   Pomerol::spin s;
+   std::tie(site, orb, s) = it->second;
+   indices.insert(index_info.getIndex(site, orb, s));
+  }
+ }
+ return indices;
+}
+
+// Create the Density Matrix.
+void pomerol_ed::compute_rho(double beta) {
+ if(!states_class || !matrix_h)
+  TRIQS_RUNTIME_ERROR << "compute_rho: internal error!";
+
+ if(!rho || rho->beta != beta) {
+  if(verbose && !comm.rank())
+   std::cout << "Pomerol: computing density matrix for \\beta = " << beta << std::endl;
+  rho.reset(new Pomerol::DensityMatrix(*states_class, *matrix_h, beta));
+  rho->prepare();
+  rho->compute();
+ }
+}
+
+void pomerol_ed::compute_field_operators(gf_struct_t const& gf_struct) {
+ if(!states_class || !matrix_h)
+  TRIQS_RUNTIME_ERROR << "compute_field_operators: internal error!";
+
+ auto new_ops = gf_struct_to_pomerol_indices(gf_struct);
+ if(!ops_container || computed_ops != new_ops) {
+  if(verbose && !comm.rank()) {
+   std::cout << "Pomerol: computing field operators with indices ";
+   bool comma = false;
+   for(auto i : new_ops) {
+    std::cout << (comma ? ", " : "") << i;
+    comma = true;
+   }
+   std::cout << std::endl;
+  }
+  computed_ops = new_ops;
+ }
+}
+
+block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const& gf_struct, double beta, int n_iw) {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: no Hamiltonian has been diagonalized";
+ compute_rho(beta);
+ compute_field_operators(gf_struct);
+
+ TRIQS_RUNTIME_ERROR << "exit";
  // TODO
 }
 
-block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const& gf_struct, int n_tau) const {
+block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const& gf_struct, double beta, int n_tau) {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: no Hamiltonian has been diagonalized";
+ compute_rho(beta);
+ compute_field_operators(gf_struct);
+
  // TODO
 }
 

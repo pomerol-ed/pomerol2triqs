@@ -19,7 +19,12 @@ V = [1.0*np.eye(num_orb) + 0.1*(np.ones((num_orb,num_orb)) - np.eye(num_orb))]*2
 
 spin_names = ("up", "dn")
 orb_names = range(num_orb)
+
 n_iw = 1024
+n_tau = 1000
+
+energy_window = (-5,5)
+n_w = 1000
 
 g2_n_iw = 5
 g2_n_inu = 10
@@ -65,3 +70,6 @@ H = H_loc + H_hyb + H_bath
 
 # Diagonalize H
 ed.diagonalize(H)
+
+# Compute G(i\omega)
+G_iw = ed.G_iw(gf_struct, beta, n_iw)

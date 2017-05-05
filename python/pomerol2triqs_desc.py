@@ -41,10 +41,10 @@ c.add_constructor("""(index_converter_t index_converter, bool verbose = false)""
 c.add_method("""void diagonalize(many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = """Diagonalize Hamiltonian""")
 
-c.add_method("""block_gf<triqs::gfs::imfreq> G_iw (gf_struct_t gf_struct, int n_iw)""",
+c.add_method("""block_gf<triqs::gfs::imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = r"""Green's function in Matsubara frequencies """)
 
-c.add_method("""block_gf<triqs::gfs::imtime> G_tau (gf_struct_t gf_struct, int n_tau)""",
+c.add_method("""block_gf<triqs::gfs::imtime> G_tau (gf_struct_t gf_struct, double beta, int n_tau)""",
              doc = r"""Green's function in imaginary time """)
 
 module.add_class(c)

@@ -14,9 +14,9 @@ endif()
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Append TRIQS installed files to the cmake load path
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${TRIQS_PATH}/share/triqs/cmake)
+list(APPEND CMAKE_MODULE_PATH ${TRIQS_PATH}/share/triqs/cmake)
 # Append Pomerol installed files to the cmake load path
-list(APPEND CMAKE_MODULE_PATH ${POMEROL_PATH}/share/pomerol/cmake ${TRIQS_PATH}/share/triqs/cmake)
+list(APPEND CMAKE_MODULE_PATH ${POMEROL_PATH}/share/pomerol/cmake)
 
 # Load TRIQS, including all predefined variables from TRIQS installation
 find_package(TRIQS REQUIRED)
@@ -50,16 +50,5 @@ if (${TRIQS_WITH_PYTHON_SUPPORT})
     add_subdirectory(python)
     if (${Tests})
         enable_testing()
-#        add_subdirectory(test)
     endif()
-# option(BUILD_DOC "Build documentation" OFF)
-# if(${BUILD_DOC})
-#   if(NOT ${TRIQS_WITH_DOCUMENTATION})
-#     message(FATAL_ERROR "Error: TRIQS library has not been compiled with its documentation")
-#   endif()
-#   add_subdirectory(doc)
-# endif(${BUILD_DOC})
 endif()
-
-# Compile C++ benchmarks
-#add_subdirectory(benchmark)
