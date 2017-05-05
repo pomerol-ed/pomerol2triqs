@@ -42,10 +42,13 @@ c.add_method("""void diagonalize(many_body_op_t hamiltonian, bool ignore_symmetr
              doc = """Diagonalize Hamiltonian""")
 
 c.add_method("""block_gf<triqs::gfs::imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
-             doc = r"""Green's function in Matsubara frequencies """)
+             doc = r"""Green's function in Matsubara frequencies""")
 
 c.add_method("""block_gf<triqs::gfs::imtime> G_tau (gf_struct_t gf_struct, double beta, int n_tau)""",
-             doc = r"""Green's function in imaginary time """)
+             doc = r"""Green's function in imaginary time""")
+
+c.add_method("""block_gf<triqs::gfs::refreq> G_w(gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0)""",
+             doc = r"""Retarded Green's function on real energy axis""")
 
 module.add_class(c)
 

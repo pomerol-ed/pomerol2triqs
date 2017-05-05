@@ -119,9 +119,20 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
   std::cout << "Pomerol: ground state energy is " << matrix_h->getGroundEnergy() + gs_shift << std::endl;
  }
 
- // Reset density matrix and field operators, we will compute them later if needed
+ // Reset containers, we will compute them later if needed
  rho.release();
  ops_container.release();
+ gf_container.release();
+}
+
+Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const& i) const {
+ auto it = index_converter.find(i);
+ if(it == index_converter.end()) return -1;
+ std::string site;
+ unsigned short orb;
+ Pomerol::spin s;
+ std::tie(site, orb, s) = it->second;
+ return index_info.getIndex(site, orb, s);
 }
 
 // Translate gf_struct into a set of ParticleIndex
@@ -129,14 +140,10 @@ std::set<Pomerol::ParticleIndex> pomerol_ed::gf_struct_to_pomerol_indices(gf_str
  std::set<Pomerol::ParticleIndex> indices;
  for(auto const& b : gf_struct) {
   for(auto const& i : b.second) {
-   auto it = index_converter.find({b.first, i});
-   if(it == index_converter.end())
+   auto pom_ind = lookup_pomerol_index({b.first, i});
+   if(pom_ind == -1)
     TRIQS_RUNTIME_ERROR << "gf_struct_to_pomerol_indices: unexpected GF index " << b.first << "," << i;
-   std::string site;
-   unsigned short orb;
-   Pomerol::spin s;
-   std::tie(site, orb, s) = it->second;
-   indices.insert(index_info.getIndex(site, orb, s));
+   indices.insert(pom_ind);
   }
  }
  return indices;
@@ -171,25 +178,121 @@ void pomerol_ed::compute_field_operators(gf_struct_t const& gf_struct) {
    }
    std::cout << std::endl;
   }
+
+  ops_container.reset(new Pomerol::FieldOperatorContainer(index_info,
+                                                          *states_class,
+                                                          *matrix_h));
+  ops_container->prepareAll(new_ops);
+  ops_container->computeAll();
+
   computed_ops = new_ops;
+  gf_container.release();
  }
+}
+
+void pomerol_ed::compute_gfs() {
+ if(!states_class || !matrix_h || !rho || !ops_container)
+  TRIQS_RUNTIME_ERROR << "compute_gfs: internal error!";
+
+ if(!gf_container) {
+  gf_container.reset(new Pomerol::GFContainer(index_info,
+                                              *states_class,
+                                              *matrix_h,
+                                              *rho,
+                                              *ops_container));
+
+  std::set<Pomerol::IndexCombination2> in;
+  for(auto i1 : computed_ops)
+  for(auto i2 : computed_ops)
+   in.insert({i1,i2});
+
+  gf_container->prepareAll(in);
+  gf_container->computeAll();
+ }
+}
+
+template<typename Mesh, typename Filler>
+block_gf<Mesh> pomerol_ed::fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const {
+
+ struct index_visitor  {
+  std::vector<std::string> indices;
+  void operator()(int i) { indices.push_back(std::to_string(i)); }
+  void operator()(std::string s) { indices.push_back(s); }
+ };
+
+ std::vector<std::string> block_names;
+ std::vector<gf<Mesh>> g_blocks;
+
+ for (auto const& bl : gf_struct) {
+  block_names.push_back(bl.first);
+  int n = bl.second.size();
+
+  index_visitor iv;
+  for (auto & ind: bl.second) { apply_visitor(iv, ind); }
+  std::vector<std::vector<std::string>> indices{{iv.indices,iv.indices}};
+
+  g_blocks.push_back(gf<Mesh>{mesh, {n, n}, indices});
+  auto & g = g_blocks.back();
+
+  for(int i1 : range(n)) {
+   Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({bl.first, bl.second[i1]});
+   for(int i2 : range(n)) {
+    Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({bl.first, bl.second[i2]});
+
+    if(verbose && !comm.rank())
+     std::cout << "fill_gf: Filling GF component (" << bl.first << ","
+                                                    << bl.second[i1] << ")("
+                                                    << bl.first << ","
+                                                    << bl.second[i2] << ")"
+                                                    << std::endl;
+     auto g_el = slice_target_to_scalar(g, i1, i2);
+     auto const& pom_g = (*gf_container)({pom_i1, pom_i2});
+     filler(g_el, pom_g);
+     g_el.singularity()(1) = (i1 == i2) ? 1 : 0;
+   }
+  }
+ }
+ return make_block_gf(block_names, g_blocks);
 }
 
 block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const& gf_struct, double beta, int n_iw) {
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: no Hamiltonian has been diagonalized";
  compute_rho(beta);
  compute_field_operators(gf_struct);
+ compute_gfs();
 
- TRIQS_RUNTIME_ERROR << "exit";
- // TODO
+ auto filler = [](gf_view<imfreq, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
+  for(auto iw : g_el.mesh()) g_el[iw] = pom_g(std::complex<double>(iw));
+ };
+ return fill_gf<imfreq>(gf_struct, {beta, Fermion, n_iw}, filler);
 }
 
 block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const& gf_struct, double beta, int n_tau) {
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: no Hamiltonian has been diagonalized";
  compute_rho(beta);
  compute_field_operators(gf_struct);
+ compute_gfs();
 
- // TODO
+ auto filler = [](gf_view<imtime, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
+  for(auto tau : g_el.mesh()) g_el[tau] = pom_g.of_tau(tau);
+ };
+ return fill_gf<imtime>(gf_struct, {beta, Fermion, n_tau}, filler);
+}
+
+block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
+                                 double beta,
+                                 std::pair<double, double> const& energy_window,
+                                 int n_w,
+                                 double im_shift) {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_w: no Hamiltonian has been diagonalized";
+ compute_rho(beta);
+ compute_field_operators(gf_struct);
+ compute_gfs();
+
+ auto filler = [im_shift](gf_view<refreq, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
+  for(auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1_j*im_shift);
+ };
+ return fill_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
 }
 
 }

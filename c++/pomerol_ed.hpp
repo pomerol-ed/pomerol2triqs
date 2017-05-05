@@ -49,11 +49,16 @@ class pomerol_ed {
  std::unique_ptr<Pomerol::DensityMatrix> rho;
  std::set<Pomerol::ParticleIndex> computed_ops;
  std::unique_ptr<Pomerol::FieldOperatorContainer> ops_container;
+ std::unique_ptr<Pomerol::GFContainer> gf_container;
 
  Pomerol::Lattice init();
+ Pomerol::ParticleIndex lookup_pomerol_index(indices_t const& i) const;
  std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const& gf_struct) const;
  void compute_rho(double beta);
  void compute_field_operators(gf_struct_t const& gf_struct);
+ void compute_gfs();
+ template<typename Mesh, typename Filler>
+ block_gf<Mesh> fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const;
 
 public:
 
@@ -68,6 +73,14 @@ public:
 
  /// Green's function in imaginary time
  block_gf<imtime> G_tau(gf_struct_t const& gf_struct, double beta, int n_tau);
+
+ /// Retarded Green's function on real energy axis
+ block_gf<refreq> G_w(gf_struct_t const& gf_struct,
+                      double beta,
+                      std::pair<double, double> const& energy_window,
+                      int n_w,
+                      double im_shift = 0
+                     );
 
 };
 

@@ -73,3 +73,15 @@ ed.diagonalize(H)
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
+
+# Compute G(\tau)
+G_tau = ed.G_tau(gf_struct, beta, n_tau)
+
+# Compute G(\omega)
+G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
+
+if mpi.is_master_node():
+    with HDFArchive('2band.h5', 'w') as ar:
+        ar['G_iw'] = G_iw
+        ar['G_tau'] = G_tau
+        ar['G_w'] = G_w
