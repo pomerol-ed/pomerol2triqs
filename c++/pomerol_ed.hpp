@@ -89,7 +89,7 @@ public:
 
  /// Two-particle Green's function, Matsubara frequencies
  TRIQS_WRAP_ARG_AS_DICT
- block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_iw(g2_parameters_t const& p);
+ block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_inu(g2_parameters_t const& p);
 
 };
 

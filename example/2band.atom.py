@@ -60,23 +60,27 @@ G_tau = ed.G_tau(gf_struct, beta, n_tau)
 G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
 
 # Compute G^{(2),ph}, AABB block order
-G2_iw_ph_AABB = ed.G2_iw(gf_struct = gf_struct, beta = beta, channel = "PH", block_order = "AABB", n_iw = g2_n_iw, n_inu = g2_n_inu)
+G2_inu_ph_AABB = ed.G2_inu(gf_struct = gf_struct, beta = beta, blocks = g2_blocks,
+                           channel = "PH", block_order = "AABB", n_iw = g2_n_iw, n_inu = g2_n_inu)
 
 # Compute G^{(2),ph}, ABBA block order
-G2_iw_ph_ABBA = ed.G2_iw(gf_struct = gf_struct, beta = beta, channel = "PH", block_order = "ABBA", n_iw = g2_n_iw, n_inu = g2_n_inu)
+G2_inu_ph_ABBA = ed.G2_inu(gf_struct = gf_struct, beta = beta, blocks = g2_blocks,
+                           channel = "PH", block_order = "ABBA", n_iw = g2_n_iw, n_inu = g2_n_inu)
 
 # Compute G^{(2),pp}, AABB block order
-G2_iw_pp_AABB = ed.G2_iw(gf_struct = gf_struct, beta = beta, channel = "PP", block_order = "AABB", n_iw = g2_n_iw, n_inu = g2_n_inu)
+G2_inu_pp_AABB = ed.G2_inu(gf_struct = gf_struct, beta = beta, blocks = g2_blocks,
+                           channel = "PP", block_order = "AABB", n_iw = g2_n_iw, n_inu = g2_n_inu)
 
 # Compute G^{(2),pp}, ABBA block order
-G2_iw_pp_ABBA = ed.G2_iw(gf_struct = gf_struct, beta = beta, channel = "PP", block_order = "ABBA", n_iw = g2_n_iw, n_inu = g2_n_inu)
+G2_inu_pp_ABBA = ed.G2_inu(gf_struct = gf_struct, beta = beta, blocks = g2_blocks,
+                           channel = "PP", block_order = "ABBA", n_iw = g2_n_iw, n_inu = g2_n_inu)
 
 if mpi.is_master_node():
     with HDFArchive('2band.atom.h5', 'w') as ar:
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w
-        ar['G2_iw_ph_AABB'] = G2_iw_ph_AABB
-        ar['G2_iw_ph_ABBA'] = G2_iw_ph_ABBA
-        ar['G2_iw_pp_AABB'] = G2_iw_pp_AABB
-        ar['G2_iw_pp_ABBA'] = G2_iw_pp_ABBA
+        ar['G2_inu_ph_AABB'] = G2_inu_ph_AABB
+        ar['G2_inu_ph_ABBA'] = G2_inu_ph_ABBA
+        ar['G2_inu_pp_AABB'] = G2_inu_pp_AABB
+        ar['G2_inu_pp_ABBA'] = G2_inu_pp_ABBA

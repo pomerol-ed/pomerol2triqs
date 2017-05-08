@@ -24,7 +24,7 @@
 
 \texttt{Pomerol} definition of the two-particle Green's function:
 \begin{equation}\label{g2_pomerol}
-	G^{(2),\pom}_{\alpha\beta\gamma\delta}(\w_1,\w_2,\w_3) = 
+	G^{(2),\pom}_{\alpha\beta\gamma\delta}(\w_1,\w_2,\w_3) =
 	- \int_0^\beta d\t_1d\t_1d\t_3
 		e^{i\w_1\t_1 + i\w_2\t_2 - i\w_3\t_3}
 		\aver{\TT
@@ -39,17 +39,17 @@
 			\frac{1}{\beta}\int_0^\beta d\t_1d\t_2d\t_3d\t_4\
 			e^{-i\n\t_1} e^{i(\n+\w)\tau_2} e^{-i(\n'+\w)\t_3} e^{i\n'\t_4}
 			\aver{\TT
-			c^\dag_\alpha(\t_1) c_\beta(\t_2) c^\dag_\gamma(\t_3) 
+			c^\dag_\alpha(\t_1) c_\beta(\t_2) c^\dag_\gamma(\t_3)
 			c_\delta(\t_4)}.
 	\end{equation}
-	
+
 	\item \textit{Particle-particle channel},
 		\begin{equation}\label{g2_pp}
 			G^{(2),pp}_{\alpha\beta\gamma\delta}(\w;\n,\n') =
 			\frac{1}{\beta}\int_0^\beta d\t_1d\t_2d\t_3d\t_4\
 			e^{-i\n\t_1} e^{i(\w-\n')\t_2} e^{-i(\w-\n)\t_3} e^{i\n'\t_4}
 			\aver{\TT
-			c^\dag_\alpha(\t_1) c_\beta(\t_2) c^\dag_\gamma(\t_3) 
+			c^\dag_\alpha(\t_1) c_\beta(\t_2) c^\dag_\gamma(\t_3)
 			c_\delta(\t_4)}.
 		\end{equation}
 \end{itemize}
@@ -60,7 +60,7 @@ Relation between ph- and pp-channels:
 	G^{(2),ph}_{\alpha\beta\gamma\delta}(\w-\n-\n';\n,\n').
 \end{equation}
 
-General \texttt{Pomerol}-\texttt{TRIQS/CTHYB} relations disregarding block 
+General \texttt{Pomerol}-\texttt{TRIQS/CTHYB} relations disregarding block
 structure.
 \begin{align}
 	G^{(2),ph}_{\alpha\beta\gamma\delta}(\w;\n,\n') &=
@@ -69,7 +69,7 @@ structure.
 	G^{(2),\pom}_{\beta\delta\alpha\gamma}(\w-\n',\n',\n).
 \end{align}
 
-Relations between $AABB$ and $ABBA$ block structures of $G^{(2)}$  in 
+Relations between $AABB$ and $ABBA$ block structures of $G^{(2)}$  in
 \texttt{TRIQS/CTHYB}.
 \begin{align}
 G^{(2),ph}_{(A,a)(B,d)(B,c)(A,b)}(\w;\n,\n') &= -
@@ -89,7 +89,7 @@ Relations for $AABB$ block structure of $G^{(2)}$ in \texttt{TRIQS/CTHYB}.
 Relations for $ABBA$ block structure of $G^{(2)}$ in \texttt{TRIQS/CTHYB}.
 \begin{align}
 	G^{(2),ph}_{(A,a)(B,d)(B,c)(A,b)}(\w;\n,\n') &= -
-	G^{(2),\pom}_{(A,b)(B,d)(A,a)(B,c)}(\n',\n+\w,\n),\\
+	G^{(2),\pom}_{(A,b)(B,d)(A,a)(B,c)}(\n',\w+\n,\n),\\
 	G^{(2),pp}_{(A,a)(B,d)(B,c)(A,b)}(\w;\n,\n') &= -
 	G^{(2),\pom}_{(A,b)(B,d)(A,a)(B,c)}(\n',\w-\n',\n).
 \end{align}
