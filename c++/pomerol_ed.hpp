@@ -12,6 +12,8 @@
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
 #include <triqs/utility/optional_compat.hpp>
 
+#include "g2_parameters.hpp"
+
 namespace pomerol2triqs {
 
 #ifdef POMEROL_COMPLEX_MATRIX_ELEMENTS
@@ -50,6 +52,8 @@ class pomerol_ed {
  std::set<Pomerol::ParticleIndex> computed_ops;
  std::unique_ptr<Pomerol::FieldOperatorContainer> ops_container;
  std::unique_ptr<Pomerol::GFContainer> gf_container;
+ g2_blocks_t computed_g2_blocks;
+ std::unique_ptr<Pomerol::TwoParticleGFContainer> g2_container;
 
  Pomerol::Lattice init();
  Pomerol::ParticleIndex lookup_pomerol_index(indices_t const& i) const;
@@ -57,6 +61,7 @@ class pomerol_ed {
  void compute_rho(double beta);
  void compute_field_operators(gf_struct_t const& gf_struct);
  void compute_gfs();
+ void compute_g2(gf_struct_t const& gf_struct, g2_blocks_t g2_blocks);
  template<typename Mesh, typename Filler>
  block_gf<Mesh> fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const;
 
@@ -81,6 +86,10 @@ public:
                       int n_w,
                       double im_shift = 0
                      );
+
+ /// Two-particle Green's function, Matsubara frequencies
+ TRIQS_WRAP_ARG_AS_DICT
+ block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_iw(g2_parameters_t const& p);
 
 };
 

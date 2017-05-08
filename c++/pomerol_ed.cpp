@@ -123,6 +123,7 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
  rho.release();
  ops_container.release();
  gf_container.release();
+ g2_container.release();
 }
 
 Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const& i) const {
@@ -187,6 +188,7 @@ void pomerol_ed::compute_field_operators(gf_struct_t const& gf_struct) {
 
   computed_ops = new_ops;
   gf_container.release();
+  g2_container.release();
  }
 }
 
@@ -208,6 +210,56 @@ void pomerol_ed::compute_gfs() {
 
   gf_container->prepareAll(in);
   gf_container->computeAll();
+ }
+}
+
+void pomerol_ed::compute_g2(gf_struct_t const& gf_struct, g2_blocks_t g2_blocks) {
+ if(!states_class || !matrix_h || !rho || !ops_container)
+  TRIQS_RUNTIME_ERROR << "compute_g2: internal error!";
+
+ if(g2_blocks.empty()) {
+  for(auto const& bl1 : gf_struct)
+  for(auto const& bl2 : gf_struct)
+   g2_blocks.insert({bl1.first, bl2.first});
+ }
+
+ if(!g2_container || computed_g2_blocks != g2_blocks) {
+  g2_container.reset(new Pomerol::TwoParticleGFContainer(index_info,
+                                                         *states_class,
+                                                         *matrix_h,
+                                                         *rho,
+                                                         *ops_container));
+
+  std::set<Pomerol::IndexCombination4> in;
+
+  auto get_inner_indices = [&gf_struct](std::string const& bn) -> gf_struct_t:: mapped_type const& {
+   auto it = gf_struct.find(bn);
+   if(it == gf_struct.end())
+    TRIQS_RUNTIME_ERROR << "compute_g2: block " << bn << " is not in gf_struct";
+   return it->second;
+  };
+
+  for(auto const& bl : g2_blocks) {
+   std::string const& A = bl.first;
+   std::string const& B = bl.second;
+   auto const& A_inner = get_inner_indices(A);
+   auto const& B_inner = get_inner_indices(B);
+
+   for(auto a : A_inner)
+   for(auto b : A_inner)
+   for(auto c : B_inner)
+   for(auto d : B_inner) {
+    in.insert({lookup_pomerol_index({A, a}),
+               lookup_pomerol_index({A, b}),
+               lookup_pomerol_index({B, c}),
+               lookup_pomerol_index({B, d})});
+   }
+  }
+
+  g2_container->prepareAll(in);
+  g2_container->computeAll(false, {}, comm);
+
+  computed_g2_blocks = g2_blocks;
  }
 }
 
@@ -252,7 +304,7 @@ block_gf<Mesh> pomerol_ed::fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> c
    }
   }
  }
- return make_block_gf(block_names, g_blocks);
+ return make_block_gf(block_names, std::move(g_blocks));
 }
 
 block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const& gf_struct, double beta, int n_iw) {
@@ -293,6 +345,46 @@ block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
   for(auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1_j*im_shift);
  };
  return fill_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
+}
+
+block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> pomerol_ed::G2_iw(g2_parameters_t const& p) {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw: no Hamiltonian has been diagonalized";
+ compute_rho(p.beta);
+ compute_field_operators(p.gf_struct);
+ compute_g2(p.gf_struct, p.blocks);
+
+ std::vector<std::vector<gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>>>> gf_vecvec;
+ std::vector<std::string> block_names;
+
+ gf_mesh<cartesian_product<imfreq, imfreq, imfreq>> mesh{{p.beta, Fermion, p.n_iw},
+                                                         {p.beta, Fermion, p.n_inu},
+                                                         {p.beta, Fermion, p.n_inu}};
+
+ for (auto const& bl1 : p.gf_struct) {
+  auto & A  = bl1.first;
+  int bl1_size = bl1.second.size();
+  block_names.push_back(A);
+
+  std::vector<gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>>> gf_vec;
+  for (auto const& bl2 : p.gf_struct) {
+   auto & B  = bl2.first;
+   int bl2_size = bl2.second.size();
+
+   gf_vec.emplace_back(mesh, make_shape(bl1_size, bl1_size, bl2_size, bl2_size));
+
+   if(computed_g2_blocks.count({A, B})) {
+    auto const& A_inner = bl1.second;
+    auto const& B_inner = bl2.second;
+
+    auto & g2_block = gf_vec.back();
+
+    // TODO
+   }
+  }
+  gf_vecvec.emplace_back(std::move(gf_vec));
+ }
+
+ return make_block2_gf(block_names, block_names, std::move(gf_vecvec));
 }
 
 }

@@ -42,13 +42,15 @@ add_definitions(${TRIQS_CXX_DEFINITIONS})
 
 #option(Tests "Enable Tests" ON)
 
+include_directories(c++)
+
 # Compile C++ code
 add_subdirectory(c++)
 
 # Python interface
 if (${TRIQS_WITH_PYTHON_SUPPORT})
     add_subdirectory(python)
-    if (${Tests})
-        enable_testing()
-    endif()
+#    if (${Tests})
+#        enable_testing()
+#    endif()
 endif()
