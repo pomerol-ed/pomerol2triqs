@@ -65,6 +65,11 @@ class pomerol_ed {
  template<typename Mesh, typename Filler>
  block_gf<Mesh> fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const;
 
+ using w_nu_nup_t = cartesian_product<imfreq, imfreq, imfreq>;
+ template<typename Mesh, typename Filler>
+ block2_gf<w_nu_nup_t, tensor_valued<4>>
+ fill_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, Filler filler) const;
+
 public:
 
  pomerol_ed(index_converter_t const& index_converter, bool verbose = false);
@@ -89,7 +94,7 @@ public:
 
  /// Two-particle Green's function, Matsubara frequencies
  TRIQS_WRAP_ARG_AS_DICT
- block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_inu(g2_parameters_t const& p);
+ block2_gf<w_nu_nup_t, tensor_valued<4>> G2_inu(g2_parameters_t const& p);
 
 };
 

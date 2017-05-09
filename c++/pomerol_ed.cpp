@@ -348,33 +348,27 @@ block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
  return fill_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
 }
 
-block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> pomerol_ed::G2_inu(g2_parameters_t const& p) {
- if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw: no Hamiltonian has been diagonalized";
- compute_rho(p.beta);
- compute_field_operators(p.gf_struct);
- compute_g2(p.gf_struct, p.blocks);
+template<typename Mesh, typename Filler>
+auto pomerol_ed::fill_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, Filler filler) const ->
+block2_gf<w_nu_nup_t, tensor_valued<4>> {
 
- std::vector<std::vector<gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>>>> gf_vecvec;
+ std::vector<std::vector<gf<Mesh, tensor_valued<4>>>> gf_vecvec;
  std::vector<std::string> block_names;
 
- gf_mesh<cartesian_product<imfreq, imfreq, imfreq>> mesh{{p.beta, Fermion, p.n_iw},
-                                                         {p.beta, Fermion, p.n_inu},
-                                                         {p.beta, Fermion, p.n_inu}};
-
- for (auto const& bl1 : p.gf_struct) {
+ for (auto const& bl1 : gf_struct) {
   auto & A  = bl1.first;
   int A_size = bl1.second.size();
   int s1 = A_size;
   block_names.push_back(A);
 
-  std::vector<gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>>> gf_vec;
-  for (auto const& bl2 : p.gf_struct) {
+  std::vector<gf<Mesh, tensor_valued<4>>> gf_vec;
+  for (auto const& bl2 : gf_struct) {
    auto & B  = bl2.first;
    int B_size = bl2.second.size();
    int s3 = B_size;
 
-   int s2 = p.block_order == AABB ? s1 : s3;
-   int s4 = p.block_order == AABB ? s3 : s1;
+   int s2 = block_order == AABB ? s1 : s3;
+   int s4 = block_order == AABB ? s3 : s1;
 
    gf_vec.emplace_back(mesh, make_shape(s1, s2, s3, s4));
 
@@ -389,36 +383,52 @@ block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> pomerol_e
     for(int c : range(B_size))
     for(int d : range(B_size)) {
 
-     auto g_el = p.block_order == AABB ? slice_target_to_scalar(g2_block, a, b, c, d) :
-                                         slice_target_to_scalar(g2_block, a, d, c, b);
+     auto g2_el = block_order == AABB ? slice_target_to_scalar(g2_block, a, b, c, d) :
+                                        slice_target_to_scalar(g2_block, a, d, c, b);
 
      Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({A, A_inner[b]});
      Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({B, B_inner[d]});
      Pomerol::ParticleIndex pom_i3 = lookup_pomerol_index({A, A_inner[a]});
      Pomerol::ParticleIndex pom_i4 = lookup_pomerol_index({B, B_inner[c]});
-
      auto const& pom_g2 = (*g2_container)({pom_i1, pom_i2, pom_i3, pom_i4});
 
-     for(auto w_nu_nup : g_el.mesh()) {
-      int w_n = std::get<0>(w_nu_nup).index();
-      int nu_n = std::get<1>(w_nu_nup).index();
-      int nup_n = std::get<2>(w_nu_nup).index();
-
-      int W_n = p.channel == PH ? w_n + nu_n : w_n - nup_n;
-
-      if(p.block_order == AABB) {
-       g_el[w_nu_nup] = pom_g2(W_n, nup_n, nu_n);
-      } else {
-       g_el[w_nu_nup] = -pom_g2(nup_n, W_n, nu_n);
-      }
-     }
+     filler(g2_el, pom_g2);
     }
    }
   }
   gf_vecvec.emplace_back(std::move(gf_vec));
  }
 
+ std::cout << block_names.size() << '\t' << gf_vecvec.size() << std::endl;
  return make_block2_gf(block_names, block_names, std::move(gf_vecvec));
+}
+
+auto pomerol_ed::G2_inu(g2_parameters_t const& p) -> block2_gf<w_nu_nup_t, tensor_valued<4>> {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw: no Hamiltonian has been diagonalized";
+ compute_rho(p.beta);
+ compute_field_operators(p.gf_struct);
+ compute_g2(p.gf_struct, p.blocks);
+
+ gf_mesh<w_nu_nup_t> mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, p.n_inu}, {p.beta, Fermion, p.n_inu}};
+
+ auto filler = [&p](gf_view<w_nu_nup_t, scalar_valued> g2_el,
+                    Pomerol::ElementWithPermFreq<Pomerol::TwoParticleGF> const& pom_g2) {
+  for(auto w_nu_nup : g2_el.mesh()) {
+   int w_n = std::get<0>(w_nu_nup).index();
+   int nu_n = std::get<1>(w_nu_nup).index();
+   int nup_n = std::get<2>(w_nu_nup).index();
+
+   int W_n = p.channel == PH ? w_n + nu_n : w_n - nup_n;
+
+   if(p.block_order == AABB) {
+    g2_el[w_nu_nup] = pom_g2(W_n, nup_n, nu_n);
+   } else {
+    g2_el[w_nu_nup] = -pom_g2(nup_n, W_n, nu_n);
+   }
+  }
+ };
+
+ return fill_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, filler);
 }
 
 }
