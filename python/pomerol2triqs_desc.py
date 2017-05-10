@@ -53,8 +53,11 @@ c.add_method("""block_gf<imtime> G_tau (gf_struct_t gf_struct, double beta, int 
 c.add_method("""block_gf<refreq> G_w(gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0)""",
              doc = r"""Retarded Green's function on real energy axis""")
 
-c.add_method("""block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_inu(**pomerol2triqs::g2_parameters_t)""",
+c.add_method("""block2_gf<cartesian_product<imfreq, imfreq, imfreq>, tensor_valued<4>> G2_iw_inu_inup(**pomerol2triqs::g2_iw_inu_inup_params_t)""",
              doc = r"""Two-particle Green's function, Matsubara frequencies""")
+
+c.add_method("""block2_gf<cartesian_product<imfreq, legendre, legendre>, tensor_valued<4>> G2_iw_l_lp(**pomerol2triqs::g2_iw_l_lp_params_t)""",
+             doc = r"""Two-particle Green's function, bosonic Matsubara frequency + Legendre coefficients""")
 
 module.add_class(c)
 

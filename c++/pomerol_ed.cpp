@@ -1,6 +1,28 @@
 #include "pomerol_ed.hpp"
 
+#include <boost/math/special_functions/bessel.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <triqs/arrays.hpp>
+
 namespace pomerol2triqs {
+
+// Generalization of triqs::utility::legendre_T
+// See eq. (4.5) in Lewin Boehnke's thesis
+inline std::complex<double> t_bar(int o, int l) {
+ if(o == 0) return l == 0 ? 1 : 0;
+
+ const double pi = boost::math::constants::pi<double>();
+ bool neg_o = false;
+ if(o < 0) {
+  neg_o = true;
+  o = -o;
+ }
+
+ std::complex<double> res = (sqrt(2 * l + 1) / sqrt(o)) *  std::pow(1_j, o + l) *
+                            boost::math::cyl_bessel_j(l + 0.5, o * pi / 2);
+ // \bar T_{-ol} = \bar T_{ol}^*
+ return neg_o ? std::conj(res) : res;
+}
 
 Pomerol::Lattice pomerol_ed::init() {
 
@@ -350,7 +372,7 @@ block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
 
 template<typename Mesh, typename Filler>
 auto pomerol_ed::fill_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, Filler filler) const ->
-block2_gf<w_nu_nup_t, tensor_valued<4>> {
+block2_gf<Mesh, tensor_valued<4>> {
 
  std::vector<std::vector<gf<Mesh, tensor_valued<4>>>> gf_vecvec;
  std::vector<std::string> block_names;
@@ -383,6 +405,22 @@ block2_gf<w_nu_nup_t, tensor_valued<4>> {
     for(int c : range(B_size))
     for(int d : range(B_size)) {
 
+     if(verbose && !comm.rank()) {
+      std::cout << "fill_g2: filling G^2 element ";
+      if(block_order == AABB) {
+       std::cout << "(" << A << "," << a << ")";
+       std::cout << "(" << A << "," << b << ")";
+       std::cout << "(" << B << "," << c << ")";
+       std::cout << "(" << B << "," << d << ")";
+      } else {
+       std::cout << "(" << A << "," << a << ")";
+       std::cout << "(" << B << "," << d << ")";
+       std::cout << "(" << B << "," << c << ")";
+       std::cout << "(" << A << "," << b << ")";
+      }
+      std::cout << std::endl;
+     }
+
      auto g2_el = block_order == AABB ? slice_target_to_scalar(g2_block, a, b, c, d) :
                                         slice_target_to_scalar(g2_block, a, d, c, b);
 
@@ -399,17 +437,19 @@ block2_gf<w_nu_nup_t, tensor_valued<4>> {
   gf_vecvec.emplace_back(std::move(gf_vec));
  }
 
- std::cout << block_names.size() << '\t' << gf_vecvec.size() << std::endl;
  return make_block2_gf(block_names, block_names, std::move(gf_vecvec));
 }
 
-auto pomerol_ed::G2_inu(g2_parameters_t const& p) -> block2_gf<w_nu_nup_t, tensor_valued<4>> {
- if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw: no Hamiltonian has been diagonalized";
+auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w_nu_nup_t, tensor_valued<4>> {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: no Hamiltonian has been diagonalized";
  compute_rho(p.beta);
  compute_field_operators(p.gf_struct);
  compute_g2(p.gf_struct, p.blocks);
 
  gf_mesh<w_nu_nup_t> mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, p.n_inu}, {p.beta, Fermion, p.n_inu}};
+
+ if(verbose && !comm.rank())
+  std::cout << "G2_iw_inu_inup: filling output container" << std::endl;
 
  auto filler = [&p](gf_view<w_nu_nup_t, scalar_valued> g2_el,
                     Pomerol::ElementWithPermFreq<Pomerol::TwoParticleGF> const& pom_g2) {
@@ -430,5 +470,78 @@ auto pomerol_ed::G2_inu(g2_parameters_t const& p) -> block2_gf<w_nu_nup_t, tenso
 
  return fill_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, filler);
 }
+
+auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t, tensor_valued<4>> {
+ if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: no Hamiltonian has been diagonalized";
+ compute_rho(p.beta);
+ compute_field_operators(p.gf_struct);
+ compute_g2(p.gf_struct, p.blocks);
+
+ gf_mesh<w_l_lp_t> mesh{{p.beta, Boson, p.n_iw},
+                        {p.beta, Fermion, static_cast<size_t>(p.n_l)},
+                        {p.beta, Fermion, static_cast<size_t>(p.n_l)}};
+
+ if(verbose && !comm.rank())
+  std::cout << "G2_iw_l_lp: filling output container" << std::endl;
+
+ auto filler = [&p](gf_view<w_l_lp_t, scalar_valued> g2_el,
+                    Pomerol::ElementWithPermFreq<Pomerol::TwoParticleGF> const& pom_g2) {
+
+  auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
+   int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n;
+   if(p.block_order == AABB)
+    return pom_g2(W_n, nup_n, nu_n);
+   else
+    return -pom_g2(nup_n, W_n, nu_n);
+  };
+
+  array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
+  array<bool, 2> llp_element_converged(p.n_l, p.n_l);
+  int n_llp_elements_converged;
+
+  for(auto iw : std::get<0>(g2_el.mesh())) {
+   int w_m = iw.index();
+
+   llp_element_converged() = false;
+   n_llp_elements_converged = 0;
+
+   // Summation over n and n' is done by adding new border points to
+   // the square summation domain.
+   for(int r = 0; r < p.n_inu_sum; ++r) { // r is current size of the domain
+    if(n_llp_elements_converged == p.n_l*p.n_l) break;
+
+    border_contrib() = 0;
+    for(int n = -r; n <= r; ++n) {
+     auto iw_val_1 = get_g2_iw_inu_inup_val(w_m, r,    n);
+     auto iw_val_2 = get_g2_iw_inu_inup_val(w_m, -r-1, n-1);
+     auto iw_val_3 = get_g2_iw_inu_inup_val(w_m, n-1,  r);
+     auto iw_val_4 = get_g2_iw_inu_inup_val(w_m, n,    -r-1);
+
+     for(auto l : std::get<1>(g2_el.mesh()))
+     for(auto lp : std::get<2>(g2_el.mesh())) {
+      if(llp_element_converged(l, lp)) continue;
+
+      using std::conj;
+      std::complex<double> val = 0;
+      val += t_bar(2*r      + w_m + 1, l) * iw_val_1 * conj(t_bar(2*n      + w_m + 1, lp));
+      val += t_bar(2*(-r-1) + w_m + 1, l) * iw_val_2 * conj(t_bar(2*(n-1)  + w_m + 1, lp));
+      val += t_bar(2*(n-1)  + w_m + 1, l) * iw_val_3 * conj(t_bar(2*(n-1)  + w_m + 1, lp));
+      val += t_bar(2*n      + w_m + 1, l) * iw_val_4 * conj(t_bar(2*(-r-1) + w_m + 1, lp));
+
+      g2_el[{iw, l, lp}] += val;
+      border_contrib(l, lp) += val;
+      if(std::abs(border_contrib(l, lp)) < p.inu_sum_tol) {
+       llp_element_converged(l, lp) = true;
+       ++n_llp_elements_converged;
+      }
+     }
+    }
+   }
+  }
+ };
+
+ return fill_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, filler);
+}
+
 
 }

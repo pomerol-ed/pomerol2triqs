@@ -94,4 +94,31 @@ Relations for $ABBA$ block structure of $G^{(2)}$ in \texttt{TRIQS/CTHYB}.
 	G^{(2),\pom}_{(A,b)(B,d)(A,a)(B,c)}(\n',\w-\n',\n).
 \end{align}
 
+Mixed Matsubara/Legendre representation of $G^{(2)}$ as a transformation of
+$G^{(2)}_{\alpha\beta\gamma\delta}(\w;\nu,\nu')$ (both channels)
+\cite{LewinThesis}.
+\begin{equation}\label{legendre_transform}
+	G^{(2)}_{\alpha\beta\gamma\delta}(\w;\ell,\ell') \equiv
+	\sum_{n,n'\in\mathbb{Z}}
+	\bar T_{2n+m+1,\ell}
+	G^{(2)}_{\alpha\beta\gamma\delta}(\w;\nu_n,\nu_{n'})
+	\bar T^*_{2n'+m+1,\ell'},
+\end{equation}
+\begin{equation}
+	\bar T_{o,\ell} \equiv \frac{\sqrt{2\ell+1}}{\beta}
+	\int_0^\beta d\t e^{io\pi\frac{\t}{\beta}} P_\ell[x(\t)] =
+	\sqrt{2\ell+1}i^o i^\ell j_\ell\left(\frac{o\pi}{2}\right).
+\end{equation}
+
+\bibliographystyle{plain}
+
+\begin{thebibliography}{9}
+	\bibitem{LewinThesis}
+	Lewin Volker Boehnke,
+	\emph{Susceptibilities in materials with multiple strongly correlated 
+	orbitals}
+	PhD thesis, Universit\"at Hamburg, 2015,
+	\url{http://ediss.sub.uni-hamburg.de/volltexte/2015/7325/pdf/Dissertation.pdf}
+\end{thebibliography}
+
 \end{document}
