@@ -8,33 +8,53 @@ from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product
 
-# Input parameters
-beta = 10.0
-num_orb = 2
-mu = 1.5
-U = 2.0
-J = 0.2
+# 2-orbital impurity Anderson model (bath: 2 sites * 2 orbitals)
+
+####################
+# Input parameters #
+####################
+
+beta = 10.0             # Inverse temperature
+num_orb = 2             # Number of orbitals
+U = 2.0                 # Coulomb repulsion
+mu = 1.5                # Chemical potential
+J = 0.2                 # Hund coupling
+
+# Levels of the bath sites
 epsilon = [-1.3, 1.3]
+# Hopping matrices
 V = [2.0*np.eye(num_orb) + 0.2*(np.ones((num_orb, num_orb)) - np.eye(num_orb))]*2
 
 spin_names = ("up", "dn")
 orb_names = range(num_orb)
 
+# Number of Matsubara frequencies for GF calculation
 n_iw = 1024
+
+# Number of imaginary time slices for GF calculation
 n_tau = 10001
 
+# Energy window for real frequency GF calculation
 energy_window = (-5, 5)
+# Number of frequency points for real frequency GF calculation
 n_w = 1000
 
+# Number of bosonic Matsubara frequencies for G^2 calculations
 g2_n_iw = 5
+# Number of fermionic Matsubara frequencies for G^2 calculations
 g2_n_inu = 10
+# Number of Legendre coefficients for G^2 calculations
 g2_n_l = 10
+# Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
 gf_struct = set_operator_structure(spin_names, orb_names, True)
 
 # Conversion from TRIQS to Pomerol notation for operator indices
+# TRIQS: block_name, inner_index
+# Pomerol: site_label, orbital_index, spin_name
 index_converter = {}
+
 # Local degrees of freedom
 index_converter.update({(sn, o) : ("loc", o, "down" if sn == "dn" else "up")
                         for sn, o in product(spin_names, orb_names)})
@@ -42,6 +62,7 @@ index_converter.update({(sn, o) : ("loc", o, "down" if sn == "dn" else "up")
 index_converter.update({("B%i_%s" % (k, sn), o) : ("bath" + str(k), o, "down" if sn == "dn" else "up")
                         for k, sn, o in product(range(len(epsilon)), spin_names, orb_names)})
 
+# Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
 
 # Number of particles on the impurity
@@ -80,10 +101,14 @@ G_tau = ed.G_tau(gf_struct, beta, n_tau)
 # Compute G(\omega)
 G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
 
+###########
+# G^{(2)} #
+###########
+
 common_g2_params = {'gf_struct' : gf_struct,
                     'beta' : beta,
                     'blocks' : g2_blocks,
-                    'n_iw' : g2_n_iw }
+                    'n_iw' : g2_n_iw}
 
 ###############################
 # G^{(2)}(i\omega;i\nu,i\nu') #
@@ -140,6 +165,10 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
                                    block_order = "ABBA",
                                    n_l = g2_n_l,
                                    **common_g2_params)
+
+################
+# Save results #
+################
 
 if mpi.is_master_node():
     with HDFArchive('2band.atom.h5', 'w') as ar:

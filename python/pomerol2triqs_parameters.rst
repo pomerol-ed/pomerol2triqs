@@ -5,9 +5,9 @@
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | beta           | double                       | --                 | Inverse temperature                                              |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
-| channel        | pomerol2triqs::channel_t     | PH                 | Channel in which Matsubara frequency representation is defined.  |
+| channel        | channel_t                    | PH                 | Channel in which Matsubara frequency representation is defined.  |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
-| block_order    | pomerol2triqs::block_order_t | AABB               | Order of block indices in the definition of G^2.                 |
+| block_order    | block_order_t                | AABB               | Order of block indices in the definition of G^2.                 |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | blocks         | g2_blocks_t                  | measure all blocks | List of block index pairs of G^2 to measure.                     |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
@@ -29,9 +29,9 @@
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | beta           | double                       | --                 | Inverse temperature                                              |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
-| channel        | pomerol2triqs::channel_t     | PH                 | Channel in which Matsubara frequency representation is defined.  |
+| channel        | channel_t                    | PH                 | Channel in which Matsubara frequency representation is defined.  |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
-| block_order    | pomerol2triqs::block_order_t | AABB               | Order of block indices in the definition of G^2.                 |
+| block_order    | block_order_t                | AABB               | Order of block indices in the definition of G^2.                 |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | blocks         | g2_blocks_t                  | measure all blocks | List of block index pairs of G^2 to measure.                     |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+

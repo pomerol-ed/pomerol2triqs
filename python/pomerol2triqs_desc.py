@@ -31,18 +31,18 @@ module.add_enum("spin",          ["down", "up"], "Pomerol", "Spin projection")
 module.add_enum("block_order_t", ["AABB", "ABBA"], "pomerol2triqs", "G^{(2)} block order")
 module.add_enum("channel_t",     ["PP", "PH"], "pomerol2triqs", "G^{(2)} channel")
 
-# The class pomerol2triqs
+# The class pomerol_ed
 c = class_(
         py_type = "PomerolED",  # name of the python class
         c_type = "pomerol_ed",   # name of the C++ class
-        doc = r"",   # doc of the C++ class
+        doc = r"Main solver class of pomerol2triqs",   # doc of the C++ class
 )
 
 c.add_constructor("""(index_converter_t index_converter, bool verbose = false)""",
-                  doc = """ """)
+                  doc = r"""Create a new solver object""")
 
 c.add_method("""void diagonalize(many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
-             doc = """Diagonalize Hamiltonian""")
+             doc = r"""Diagonalize Hamiltonian""")
 
 c.add_method("""block_gf<imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = r"""Green's function in Matsubara frequencies""")

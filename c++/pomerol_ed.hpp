@@ -41,8 +41,6 @@ class pomerol_ed {
  Pomerol::Lattice bare_lattice;
  Pomerol::IndexClassification index_info;
 
- many_body_op_t h;
-
  std::unique_ptr<Pomerol::Lattice> lattice;
  std::unique_ptr<Pomerol::IndexHamiltonian> storage;
  std::unique_ptr<Pomerol::Symmetrizer> symm;
@@ -73,11 +71,11 @@ class pomerol_ed {
 
 public:
 
+ /// Create a new solver object
  pomerol_ed(index_converter_t const& index_converter, bool verbose = false);
 
+ /// Diagonalize Hamiltonian
  void diagonalize(many_body_op_t const& hamiltonian, bool ignore_symmetries = false);
-
- many_body_op_t const& hamiltonian() const { return h; }
 
  /// Green's function in Matsubara frequencies
  block_gf<imfreq> G_iw(gf_struct_t const& gf_struct, double beta, int n_iw);
