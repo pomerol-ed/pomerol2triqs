@@ -77,7 +77,7 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
 
  for(auto const& term : hamiltonian) {
   if(term.monomial.empty()) {
-   gs_shift = term.coef.real();
+    gs_shift = std::real(term.coef);
    continue;    // Constant term is unphysical anyway ...
   }
   OperatorSequence.clear();
