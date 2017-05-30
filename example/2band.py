@@ -8,7 +8,7 @@ from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product
 
-# 2-orbital impurity Anderson model (bath: 2 sites * 2 orbitals)
+# 2-orbital impurity Anderson model (bath: 1 site * 2 orbitals)
 
 ####################
 # Input parameters #
@@ -21,9 +21,9 @@ mu = 1.5                # Chemical potential
 J = 0.2                 # Hund coupling
 
 # Levels of the bath sites
-epsilon = [-1.3, 1.3]
-# Hopping matrices
-V = [2.0*np.eye(num_orb) + 0.2*(np.ones((num_orb, num_orb)) - np.eye(num_orb))]*2
+epsilon = np.array([-0.2, 0.2])
+# Hopping matrix
+V = 0.7*np.eye(num_orb) + 0.1*(np.ones((num_orb, num_orb)) - np.eye(num_orb))
 
 spin_names = ("up", "dn")
 orb_names = range(num_orb)
@@ -59,8 +59,8 @@ index_converter = {}
 index_converter.update({(sn, o) : ("loc", o, "down" if sn == "dn" else "up")
                         for sn, o in product(spin_names, orb_names)})
 # Bath degrees of freedom
-index_converter.update({("B%i_%s" % (k, sn), o) : ("bath" + str(k), o, "down" if sn == "dn" else "up")
-                        for k, sn, o in product(range(len(epsilon)), spin_names, orb_names)})
+index_converter.update({("B_" + sn, o) : ("bath", o, "down" if sn == "dn" else "up")
+                        for sn, o in product(spin_names, orb_names)})
 
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
@@ -76,15 +76,12 @@ H_loc = h_int_kanamori(spin_names, orb_names,
 H_loc -= mu*N
 
 # Bath Hamiltonian
-H_bath = sum(eps*n("B%i_%s" % (k, sn), o)
-             for sn, (k, eps), o in product(spin_names, enumerate(epsilon), orb_names))
+H_bath = sum(epsilon[o] * n("B_" + sn, o) for sn, o in product(spin_names, orb_names))
 
 # Hybridization Hamiltonian
-H_hyb = Operator()
-for k, v in enumerate(V):
-    H_hyb += sum(        v[o1,o2]   * c_dag("B%i_%s" % (k, sn), o1) * c(sn, o2) +
-                 np.conj(v[o2,o1])  * c_dag(sn, o1) * c("B%i_%s" % (k, sn), o2)
-                 for sn, o1, o2 in product(spin_names, orb_names, orb_names))
+H_hyb = sum(        V[o1,o2]  * c_dag("B_" + sn, o1) * c(sn, o2) +
+            np.conj(V[o2,o1]) * c_dag(sn, o1) * c("B_" + sn, o2)
+            for sn, o1, o2 in product(spin_names, orb_names, orb_names))
 
 # Complete Hamiltonian
 H = H_loc + H_hyb + H_bath
@@ -94,6 +91,7 @@ ed.diagonalize(H)
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
+print "Density:", G_iw['up'].density()[0,0], G_iw['up'].density()[1,1]
 
 # Compute G(\tau)
 G_tau = ed.G_tau(gf_struct, beta, n_tau)
@@ -171,7 +169,7 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
 ################
 
 if mpi.is_master_node():
-    with HDFArchive('2band.atom.h5', 'w') as ar:
+    with HDFArchive('2band.h5', 'w') as ar:
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w
