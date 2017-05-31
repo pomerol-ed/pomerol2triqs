@@ -91,7 +91,6 @@ ed.diagonalize(H)
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
-print "Density:", G_iw['up'].density()[0,0], G_iw['up'].density()[1,1]
 
 # Compute G(\tau)
 G_tau = ed.G_tau(gf_struct, beta, n_tau)
