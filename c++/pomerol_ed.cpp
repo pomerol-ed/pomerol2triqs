@@ -133,7 +133,7 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
 
  // Matrix representation of the Hamiltonian
  matrix_h.reset(new Pomerol::Hamiltonian(index_info, *storage, *states_class));
- matrix_h->prepare();
+ matrix_h->prepare(comm);
  matrix_h->compute(comm);
 
  // Get ground state energy
@@ -144,8 +144,6 @@ void pomerol_ed::diagonalize(many_body_op_t const& hamiltonian, bool ignore_symm
  // Reset containers, we will compute them later if needed
  rho.release();
  ops_container.release();
- gf_container.release();
- g2_container.release();
 }
 
 Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const& i) const {
@@ -209,85 +207,18 @@ void pomerol_ed::compute_field_operators(gf_struct_t const& gf_struct) {
   ops_container->computeAll();
 
   computed_ops = new_ops;
-  gf_container.release();
-  g2_container.release();
  }
 }
 
-void pomerol_ed::compute_gfs() {
- if(!states_class || !matrix_h || !rho || !ops_container)
-  TRIQS_RUNTIME_ERROR << "compute_gfs: internal error!";
-
- if(!gf_container) {
-  gf_container.reset(new Pomerol::GFContainer(index_info,
-                                              *states_class,
-                                              *matrix_h,
-                                              *rho,
-                                              *ops_container));
-
-  std::set<Pomerol::IndexCombination2> in;
-  for(auto i1 : computed_ops)
-  for(auto i2 : computed_ops)
-   in.insert({i1,i2});
-
-  gf_container->prepareAll(in);
-  gf_container->computeAll();
- }
-}
-
-void pomerol_ed::compute_g2(gf_struct_t const& gf_struct, g2_blocks_t g2_blocks) {
- if(!states_class || !matrix_h || !rho || !ops_container)
-  TRIQS_RUNTIME_ERROR << "compute_g2: internal error!";
-
- if(g2_blocks.empty()) {
-  for(auto const& bl1 : gf_struct)
-  for(auto const& bl2 : gf_struct)
-   g2_blocks.insert({bl1.first, bl2.first});
- }
-
- if(!g2_container || computed_g2_blocks != g2_blocks) {
-  g2_container.reset(new Pomerol::TwoParticleGFContainer(index_info,
-                                                         *states_class,
-                                                         *matrix_h,
-                                                         *rho,
-                                                         *ops_container));
-
-  std::set<Pomerol::IndexCombination4> in;
-
-  auto get_inner_indices = [&gf_struct](std::string const& bn) -> gf_struct_t:: mapped_type const& {
-   auto it = gf_struct.find(bn);
-   if(it == gf_struct.end())
-    TRIQS_RUNTIME_ERROR << "compute_g2: block " << bn << " is not in gf_struct";
-   return it->second;
-  };
-
-  for(auto const& bl : g2_blocks) {
-   std::string const& A = bl.first;
-   std::string const& B = bl.second;
-   auto const& A_inner = get_inner_indices(A);
-   auto const& B_inner = get_inner_indices(B);
-
-   for(auto a : A_inner)
-   for(auto b : A_inner)
-   for(auto c : B_inner)
-   for(auto d : B_inner) {
-    in.insert({lookup_pomerol_index({A, b}),
-               lookup_pomerol_index({B, d}),
-               lookup_pomerol_index({A, a}),
-               lookup_pomerol_index({B, c})
-               });
-   }
-  }
-
-  g2_container->prepareAll(in);
-  g2_container->computeAll(false, {}, comm, false);
-
-  computed_g2_blocks = g2_blocks;
- }
-}
+//////////////////////
+// Green's function //
+//////////////////////
 
 template<typename Mesh, typename Filler>
-block_gf<Mesh> pomerol_ed::fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const {
+block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const {
+
+ if(!states_class || !matrix_h || !rho || !ops_container)
+  TRIQS_RUNTIME_ERROR << "compute_gf: internal error!";
 
  struct index_visitor  {
   std::vector<std::string> indices;
@@ -321,7 +252,14 @@ block_gf<Mesh> pomerol_ed::fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> c
                                                     << bl.second[i2] << ")"
                                                     << std::endl;
      auto g_el = slice_target_to_scalar(g, i1, i2);
-     auto const& pom_g = (*gf_container)({pom_i1, pom_i2});
+
+     Pomerol::GreensFunction pom_g(*states_class, *matrix_h,
+                                   ops_container->getAnnihilationOperator(pom_i1),
+                                   ops_container->getCreationOperator(pom_i2),
+                                   *rho);
+     pom_g.prepare();
+     pom_g.compute();
+
      filler(g_el, pom_g);
      g_el.singularity()(1) = (i1 == i2) ? 1 : 0;
    }
@@ -334,24 +272,22 @@ block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const& gf_struct, double beta, int
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: no Hamiltonian has been diagonalized";
  compute_rho(beta);
  compute_field_operators(gf_struct);
- compute_gfs();
 
  auto filler = [](gf_view<imfreq, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
   for(auto iw : g_el.mesh()) g_el[iw] = pom_g(std::complex<double>(iw));
  };
- return fill_gf<imfreq>(gf_struct, {beta, Fermion, n_iw}, filler);
+ return compute_gf<imfreq>(gf_struct, {beta, Fermion, n_iw}, filler);
 }
 
 block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const& gf_struct, double beta, int n_tau) {
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: no Hamiltonian has been diagonalized";
  compute_rho(beta);
  compute_field_operators(gf_struct);
- compute_gfs();
 
  auto filler = [](gf_view<imtime, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
   for(auto tau : g_el.mesh()) g_el[tau] = pom_g.of_tau(tau);
  };
- return fill_gf<imtime>(gf_struct, {beta, Fermion, n_tau}, filler);
+ return compute_gf<imtime>(gf_struct, {beta, Fermion, n_tau}, filler);
 }
 
 block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
@@ -362,17 +298,28 @@ block_gf<refreq> pomerol_ed::G_w(gf_struct_t const& gf_struct,
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G_w: no Hamiltonian has been diagonalized";
  compute_rho(beta);
  compute_field_operators(gf_struct);
- compute_gfs();
 
  auto filler = [im_shift](gf_view<refreq, scalar_valued> g_el, Pomerol::GreensFunction const& pom_g) {
   for(auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1_j*im_shift);
  };
- return fill_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
+ return compute_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
 }
 
+///////////////////////////////////
+// Two-particle Green's function //
+///////////////////////////////////
+
 template<typename Mesh, typename Filler>
-auto pomerol_ed::fill_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, Filler filler) const ->
-block2_gf<Mesh, tensor_valued<4>> {
+auto pomerol_ed::compute_g2(gf_struct_t const& gf_struct,
+                            gf_mesh<Mesh> const& mesh,
+                            block_order_t block_order,
+                            g2_blocks_t const& g2_blocks,
+                            Filler filler) const -> block2_gf<Mesh, tensor_valued<4>> {
+
+ if(!states_class || !matrix_h || !rho || !ops_container)
+  TRIQS_RUNTIME_ERROR << "compute_g2: internal error!";
+
+ bool compute_all_blocks = g2_blocks.empty();
 
  std::vector<std::vector<gf<Mesh, tensor_valued<4>>>> gf_vecvec;
  std::vector<std::string> block_names;
@@ -394,7 +341,7 @@ block2_gf<Mesh, tensor_valued<4>> {
 
    gf_vec.emplace_back(mesh, make_shape(s1, s2, s3, s4));
 
-   if(computed_g2_blocks.count({A, B})) {
+   if(compute_all_blocks || g2_blocks.count({A, B})) {
     auto const& A_inner = bl1.second;
     auto const& B_inner = bl2.second;
 
@@ -406,7 +353,7 @@ block2_gf<Mesh, tensor_valued<4>> {
     for(int d : range(B_size)) {
 
      if(verbose && !comm.rank()) {
-      std::cout << "fill_g2: filling G^2 element ";
+      std::cout << "compute_g2: filling G^2 element ";
       if(block_order == AABB) {
        std::cout << "(" << A << "," << a << ")";
        std::cout << "(" << A << "," << b << ")";
@@ -428,7 +375,15 @@ block2_gf<Mesh, tensor_valued<4>> {
      Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({B, B_inner[d]});
      Pomerol::ParticleIndex pom_i3 = lookup_pomerol_index({A, A_inner[a]});
      Pomerol::ParticleIndex pom_i4 = lookup_pomerol_index({B, B_inner[c]});
-     auto const& pom_g2 = (*g2_container)({pom_i1, pom_i2, pom_i3, pom_i4});
+
+     Pomerol::TwoParticleGF pom_g2(*states_class, *matrix_h,
+                                   ops_container->getAnnihilationOperator(pom_i1),
+                                   ops_container->getAnnihilationOperator(pom_i2),
+                                   ops_container->getCreationOperator(pom_i3),
+                                   ops_container->getCreationOperator(pom_i4),
+                                   *rho);
+     pom_g2.prepare();
+     pom_g2.compute(false, {}, comm);
 
      filler(g2_el, pom_g2);
     }
@@ -444,15 +399,13 @@ auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: no Hamiltonian has been diagonalized";
  compute_rho(p.beta);
  compute_field_operators(p.gf_struct);
- compute_g2(p.gf_struct, p.blocks);
 
  gf_mesh<w_nu_nup_t> mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, p.n_inu}, {p.beta, Fermion, p.n_inu}};
 
  if(verbose && !comm.rank())
   std::cout << "G2_iw_inu_inup: filling output container" << std::endl;
 
- auto filler = [&p](gf_view<w_nu_nup_t, scalar_valued> g2_el,
-                    Pomerol::ElementWithPermFreq<Pomerol::TwoParticleGF> const& pom_g2) {
+ auto filler = [&p](gf_view<w_nu_nup_t, scalar_valued> g2_el, auto const& pom_g2) {
   for(auto w_nu_nup : g2_el.mesh()) {
    int w_n = std::get<0>(w_nu_nup).index();
    int nu_n = std::get<1>(w_nu_nup).index();
@@ -468,14 +421,13 @@ auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w
   }
  };
 
- return fill_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, filler);
+ return compute_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
 }
 
 auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t, tensor_valued<4>> {
  if(!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: no Hamiltonian has been diagonalized";
  compute_rho(p.beta);
  compute_field_operators(p.gf_struct);
- compute_g2(p.gf_struct, p.blocks);
 
  gf_mesh<w_l_lp_t> mesh{{p.beta, Boson, p.n_iw},
                         {p.beta, Fermion, static_cast<size_t>(p.n_l)},
@@ -484,8 +436,7 @@ auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t,
  if(verbose && !comm.rank())
   std::cout << "G2_iw_l_lp: filling output container" << std::endl;
 
- auto filler = [&p](gf_view<w_l_lp_t, scalar_valued> g2_el,
-                    Pomerol::ElementWithPermFreq<Pomerol::TwoParticleGF> const& pom_g2) {
+ auto filler = [&p](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const& pom_g2) {
 
   auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
    int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n;
@@ -540,8 +491,7 @@ auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t,
   }
  };
 
- return fill_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, filler);
+ return compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
 }
-
 
 }

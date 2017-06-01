@@ -49,25 +49,20 @@ class pomerol_ed {
  std::unique_ptr<Pomerol::DensityMatrix> rho;
  std::set<Pomerol::ParticleIndex> computed_ops;
  std::unique_ptr<Pomerol::FieldOperatorContainer> ops_container;
- std::unique_ptr<Pomerol::GFContainer> gf_container;
- g2_blocks_t computed_g2_blocks;
- std::unique_ptr<Pomerol::TwoParticleGFContainer> g2_container;
 
  Pomerol::Lattice init();
  Pomerol::ParticleIndex lookup_pomerol_index(indices_t const& i) const;
  std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const& gf_struct) const;
  void compute_rho(double beta);
  void compute_field_operators(gf_struct_t const& gf_struct);
- void compute_gfs();
- void compute_g2(gf_struct_t const& gf_struct, g2_blocks_t g2_blocks);
  template<typename Mesh, typename Filler>
- block_gf<Mesh> fill_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const;
+ block_gf<Mesh> compute_gf(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, Filler filler) const;
 
  using w_nu_nup_t = cartesian_product<imfreq, imfreq, imfreq>;
  using w_l_lp_t = cartesian_product<imfreq, legendre, legendre>;
  template<typename Mesh, typename Filler>
  block2_gf<Mesh, tensor_valued<4>>
- fill_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, Filler filler) const;
+ compute_g2(gf_struct_t const& gf_struct, gf_mesh<Mesh> const& mesh, block_order_t block_order, g2_blocks_t const& g2_blocks, Filler filler) const;
 
 public:
 
