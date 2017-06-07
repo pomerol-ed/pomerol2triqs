@@ -29,7 +29,7 @@ module.add_using("namespace Pomerol")
 
 module.add_enum("spin",          ["down", "up"], "Pomerol", "Spin projection")
 module.add_enum("block_order_t", ["AABB", "ABBA"], "pomerol2triqs", "G^{(2)} block order")
-module.add_enum("channel_t",     ["PP", "PH"], "pomerol2triqs", "G^{(2)} channel")
+module.add_enum("channel_t",     ["PP", "PH", "AllFermionic"], "pomerol2triqs", "G^{(2)} channel")
 
 # The class pomerol_ed
 c = class_(

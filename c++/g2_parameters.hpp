@@ -6,7 +6,7 @@ using triqs::hilbert_space::gf_struct_t;
 namespace pomerol2triqs {
 
   enum block_order_t { AABB, ABBA };
-  enum channel_t { PP, PH };
+  enum channel_t { PP, PH, AllFermionic };
 
    using g2_blocks_t = std::set<std::pair<std::string, std::string>>;
 
