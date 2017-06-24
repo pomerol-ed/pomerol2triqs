@@ -40,7 +40,7 @@ set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
 message(STATUS "TRIQS : Adding compilation flags detected by the library")
 add_definitions(${TRIQS_CXX_DEFINITIONS})
 
-#option(Tests "Enable Tests" ON)
+option(Tests "Enable Tests" ON)
 
 include_directories(c++)
 
@@ -50,7 +50,8 @@ add_subdirectory(c++)
 # Python interface
 if (${TRIQS_WITH_PYTHON_SUPPORT})
     add_subdirectory(python)
-#    if (${Tests})
-#        enable_testing()
-#    endif()
+    if (${Tests})
+        enable_testing()
+        add_subdirectory(test)
+    endif()
 endif()
