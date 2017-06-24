@@ -28,6 +28,9 @@ endif()
 # Load Pomerol
 find_package(pomerol REQUIRED)
 
+# Find MPI
+find_package(MPI)
+
 # Get hash
 triqs_get_git_hash(${CMAKE_SOURCE_DIR} "POMEROL2TRIQS")
 if(${GIT_RESULT} EQUAL 0)

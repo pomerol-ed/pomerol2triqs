@@ -405,8 +405,11 @@ auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w
  if(verbose && !comm.rank())
   std::cout << "G2_iw_inu_inup: filling output container" << std::endl;
 
- auto filler = [&p](gf_view<w_nu_nup_t, scalar_valued> g2_el, auto const& pom_g2) {
+ auto filler = [&p, this](gf_view<w_nu_nup_t, scalar_valued> g2_el, auto const& pom_g2) {
+  long mesh_index = 0;
   for(auto w_nu_nup : g2_el.mesh()) {
+   if((mesh_index++) % comm.size() != comm.rank()) continue;
+
    int w_n = std::get<0>(w_nu_nup).index();
    int nu_n = std::get<1>(w_nu_nup).index();
    int nup_n = std::get<2>(w_nu_nup).index();
@@ -421,7 +424,10 @@ auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w
   }
  };
 
- return compute_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
+ auto g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
+ g2() = mpi_all_reduce(g2(), comm);
+
+ return g2;
 }
 
 auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t, tensor_valued<4>> {
@@ -457,7 +463,7 @@ auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const& p) -> block2_gf<w_l_lp_t,
    n_llp_elements_converged = 0;
 
    // Summation over n and n' is done by adding new border points to
-   // the square summation domain.
+   // a square summation domain.
    for(int r = 0; r < p.n_inu_sum; ++r) { // r is current size of the domain
     if(n_llp_elements_converged == p.n_l*p.n_l) break;
 

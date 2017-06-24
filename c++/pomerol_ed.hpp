@@ -11,6 +11,7 @@
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
 #include <triqs/utility/optional_compat.hpp>
+#include <triqs/mpi/boost.hpp>
 
 #include "g2_parameters.hpp"
 
@@ -34,7 +35,7 @@ using index_converter_t = std::map<indices_t, pomerol_indices_t>;
 
 class pomerol_ed {
 
- boost::mpi::communicator comm;
+ triqs::mpi::communicator comm;
 
  const bool verbose;
  index_converter_t index_converter;
