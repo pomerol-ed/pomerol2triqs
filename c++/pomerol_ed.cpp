@@ -413,9 +413,9 @@ auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const& p) -> block2_gf<w
      int n3 = std::get<2>(w_nu_nup).index();
 
      if(p.block_order == AABB)
-      g2_el[w_nu_nup] = -pom_g2(n2, n1 + n3 - n2, n1);
+      g2_el[w_nu_nup] = +pom_g2(n2, n1 + n3 - n2, n1);
      else
-      g2_el[w_nu_nup] = pom_g2(n1 + n3 - n2, n2, n1);
+      g2_el[w_nu_nup] = -pom_g2(n1 + n3 - n2, n2, n1);
 
     } else { // p.channel == PH or PP
      
