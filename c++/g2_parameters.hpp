@@ -8,7 +8,7 @@ namespace pomerol2triqs {
   enum block_order_t { AABB, ABBA };
   enum channel_t { PP, PH, AllFermionic };
 
-   using g2_blocks_t = std::set<std::pair<std::string, std::string>>;
+  using g2_blocks_t = std::set<std::pair<std::string, std::string>>;
 
   struct g2_iw_inu_inup_params_t {
 
@@ -35,8 +35,7 @@ namespace pomerol2triqs {
     int n_inu = 30;
 
     g2_iw_inu_inup_params_t() {}
-    g2_iw_inu_inup_params_t(gf_struct_t const& gf_struct, double beta) :
-     gf_struct(gf_struct), beta(beta) {}
+    g2_iw_inu_inup_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
 
   struct g2_iw_l_lp_params_t {
@@ -70,7 +69,6 @@ namespace pomerol2triqs {
     double inu_sum_tol = 1e-6;
 
     g2_iw_l_lp_params_t() {}
-    g2_iw_l_lp_params_t(gf_struct_t const& gf_struct, double beta) :
-     gf_struct(gf_struct), beta(beta) {}
+    g2_iw_l_lp_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
 }
