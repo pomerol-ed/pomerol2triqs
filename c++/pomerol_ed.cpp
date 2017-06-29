@@ -379,9 +379,9 @@ namespace pomerol2triqs {
           int n3 = std::get<2>(w_nu_nup).index();
 
           if (p.block_order == AABB)
-            g2_el[w_nu_nup] = +pom_g2(n2, n1 + n3 - n2, n1);
+            g2_el[w_nu_nup] = -pom_g2(n2, n1 + n3 - n2, n1);
           else
-            g2_el[w_nu_nup] = -pom_g2(n1 + n3 - n2, n2, n1);
+            g2_el[w_nu_nup] = +pom_g2(n1 + n3 - n2, n2, n1);
 
         } else { // p.channel == PH or PP
 
@@ -392,9 +392,9 @@ namespace pomerol2triqs {
           int W_n = p.channel == PH ? w_n + nu_n : w_n - nup_n;
 
           if (p.block_order == AABB) {
-            g2_el[w_nu_nup] = pom_g2(W_n, nup_n, nu_n);
+            g2_el[w_nu_nup] = -pom_g2(W_n, nup_n, nu_n);
           } else {
-            g2_el[w_nu_nup] = -pom_g2(nup_n, W_n, nu_n);
+            g2_el[w_nu_nup] = +pom_g2(nup_n, W_n, nu_n);
           }
         }
       }
@@ -432,9 +432,9 @@ namespace pomerol2triqs {
       auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
         int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n;
         if (p.block_order == AABB)
-          return pom_g2(W_n, nup_n, nu_n);
+          return -pom_g2(W_n, nup_n, nu_n);
         else
-          return -pom_g2(nup_n, W_n, nu_n);
+          return +pom_g2(nup_n, W_n, nu_n);
       };
 
       array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
