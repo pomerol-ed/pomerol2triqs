@@ -427,7 +427,7 @@ namespace pomerol2triqs {
 
     if (verbose && !comm.rank()) std::cout << "G2_iw_l_lp: filling output container" << std::endl;
 
-    auto filler = [&p](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const &pom_g2) {
+    auto filler = [&p, this](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const &pom_g2) {
 
       auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
         int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n;
@@ -441,7 +441,10 @@ namespace pomerol2triqs {
       array<bool, 2> llp_element_converged(p.n_l, p.n_l);
       int n_llp_elements_converged;
 
+      long mesh_index = 0;
       for (auto iw : std::get<0>(g2_el.mesh())) {
+        if((mesh_index++) % comm.size() != comm.rank()) continue;
+
         int w_m = iw.index();
 
         llp_element_converged()  = false;
@@ -482,6 +485,9 @@ namespace pomerol2triqs {
       }
     };
 
-    return compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
+    auto g2 = compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
+    g2() = mpi_all_reduce(g2(), comm);
+
+    return g2;
   }
 }
