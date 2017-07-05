@@ -4,6 +4,10 @@ set(python_destination pytriqs/applications/impurity_solvers/pomerol2triqs)
 # make the build_xxx, install python files...
 triqs_prepare_local_pytriqs(${python_destination})
 
+# sitecustomize.py for build
+set(package_name "pytriqs.applications.impurity_solvers")
+configure_file(${CMAKE_SOURCE_DIR}/cmake/sitecustomize.py ${CMAKE_CURRENT_BINARY_DIR}/sitecustomize.py @ONLY)
+
 # Build the python module for the solver
 triqs_python_extension(pomerol2triqs ${python_destination})
 target_link_libraries(pomerol2triqs pomerol2triqs_c)
