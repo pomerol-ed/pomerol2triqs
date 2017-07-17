@@ -125,7 +125,7 @@ for (m, w), (i, nu), (ip, nup) in g2_mesh_enum:
     i -= g2_n_inu
     ip -= g2_n_inu
     d_w_0 = int(m == 0)
-    d_w_nu_nup = int(m == i + ip)
+    d_w_nu_nup = int(m == i + ip + 1)
     d_nu_nup = int(i == ip)
 
 
@@ -137,9 +137,9 @@ for (m, w), (i, nu), (ip, nup) in g2_mesh_enum:
         G2_iw_inu_inup_ph_ABBA_wick[s1, s2].data[m + (g2_n_iw - 1), i + g2_n_inu, ip + g2_n_inu] = \
             beta * d_w_0 * d_s1_s2 * G(s1, i) * G(s2, ip) - beta * d_nu_nup * G(s2, m + i) * G(s1, i)
         G2_iw_inu_inup_pp_AABB_wick[s1, s2].data[m + (g2_n_iw - 1), i + g2_n_inu, ip + g2_n_inu] = \
-            beta * d_w_nu_nup * G(s1, i) * G(s2, ip) - beta * d_nu_nup * d_s1_s2 * G(s1, m - i) * G(s2, i)
+            beta * d_w_nu_nup * G(s1, i) * G(s2, ip) - beta * d_nu_nup * d_s1_s2 * G(s1, m - i - 1) * G(s2, i)
         G2_iw_inu_inup_pp_ABBA_wick[s1, s2].data[m + (g2_n_iw - 1), i + g2_n_inu, ip + g2_n_inu] = \
-            beta * d_w_nu_nup * d_s1_s2 * G(s1, i) * G(s2, ip) - beta * d_nu_nup * G(s2, m - i) * G(s1, i)
+            beta * d_w_nu_nup * d_s1_s2 * G(s1, i) * G(s2, ip) - beta * d_nu_nup * G(s2, m - i - 1) * G(s1, i)
 
 for s1, s2 in product(spin_names, spin_names):
     assert_gfs_are_close(G2_iw_inu_inup_ph_AABB_wick[s1, s2], G2_iw_inu_inup_ph_AABB[s1, s2])

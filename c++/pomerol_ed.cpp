@@ -389,7 +389,7 @@ namespace pomerol2triqs {
           int nu_n  = std::get<1>(w_nu_nup).index();
           int nup_n = std::get<2>(w_nu_nup).index();
 
-          int W_n = p.channel == PH ? w_n + nu_n : w_n - nup_n;
+          int W_n = p.channel == PH ? w_n + nu_n : w_n - nup_n - 1;
 
           if (p.block_order == AABB) {
             g2_el[w_nu_nup] = -pom_g2(W_n, nup_n, nu_n);
@@ -430,7 +430,7 @@ namespace pomerol2triqs {
     auto filler = [&p, this](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const &pom_g2) {
 
       auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
-        int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n;
+        int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n - 1;
         if (p.block_order == AABB)
           return -pom_g2(W_n, nup_n, nu_n);
         else
