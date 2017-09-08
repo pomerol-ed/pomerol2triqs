@@ -470,7 +470,7 @@ namespace pomerol2triqs {
                 std::complex<double> val = 0;
                 val += t_bar(2 * r + w_m + 1, l) * iw_val_1 * conj(t_bar(2 * n + w_m + 1, lp));
                 val += t_bar(2 * (-r - 1) + w_m + 1, l) * iw_val_2 * conj(t_bar(2 * (n - 1) + w_m + 1, lp));
-                val += t_bar(2 * (n - 1) + w_m + 1, l) * iw_val_3 * conj(t_bar(2 * (n - 1) + w_m + 1, lp));
+                val += t_bar(2 * (n - 1) + w_m + 1, l) * iw_val_3 * conj(t_bar(2 * r + w_m + 1, lp));
                 val += t_bar(2 * n + w_m + 1, l) * iw_val_4 * conj(t_bar(2 * (-r - 1) + w_m + 1, lp));
 
                 g2_el[{iw, l, lp}] += val;
