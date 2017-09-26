@@ -54,6 +54,8 @@ namespace pomerol2triqs {
     Pomerol::Lattice init();
     Pomerol::ParticleIndex lookup_pomerol_index(indices_t const &i) const;
     std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const;
+    double diagonalize_prepare(many_body_op_t const &hamiltonian);
+    void diagonalize_main(double gs_shift);
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const;
@@ -68,8 +70,11 @@ namespace pomerol2triqs {
     /// Create a new solver object
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
 
-    /// Diagonalize Hamiltonian
+    /// Diagonalize Hamiltonian optionally employing conservation of N and S_z
     void diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries = false);
+
+    /// Diagonalize Hamiltonian using provided integrals of motion
+    void diagonalize(many_body_op_t const &hamiltonian, std::vector<many_body_op_t> const& integrals_of_motion);
 
     /// Green's function in Matsubara frequencies
     block_gf<imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);

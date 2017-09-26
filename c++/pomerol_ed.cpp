@@ -56,8 +56,7 @@ namespace pomerol2triqs {
     }
   }
 
-  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries) {
-
+  double pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian) {
     // Workaround for the broken std::vector<bool>
     struct bool_ {
       bool b;
@@ -109,13 +108,10 @@ namespace pomerol2triqs {
       std::cout << *storage << std::endl;
     }
 
-    // Check the Hamiltonian commutes with the total number of particles
-    Pomerol::OperatorPresets::N N(index_info.getIndexSize());
-    if (!storage->commutes(N)) TRIQS_RUNTIME_ERROR << "diagonalize: Hamiltonian does not conserve the total number of particles";
+    return gs_shift;
+  }
 
-    // Construct Symmetrizer
-    symm.reset(new Pomerol::Symmetrizer(index_info, *storage));
-    symm->compute(ignore_symmetries);
+  void pomerol_ed::diagonalize_main(double gs_shift) {
 
     // Classify many-body states
     states_class.reset(new Pomerol::StatesClassification(index_info, *symm));
@@ -132,6 +128,55 @@ namespace pomerol2triqs {
     // Reset containers, we will compute them later if needed
     rho.release();
     ops_container.release();
+  }
+
+  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries) {
+
+    double gs_shift = diagonalize_prepare(hamiltonian);
+
+    // Check the Hamiltonian commutes with the total number of particles
+    Pomerol::OperatorPresets::N N(index_info.getIndexSize());
+    if (!storage->commutes(N)) TRIQS_RUNTIME_ERROR << "diagonalize: Hamiltonian does not conserve the total number of particles";
+
+    // Construct Symmetrizer
+    symm.reset(new Pomerol::Symmetrizer(index_info, *storage));
+    symm->compute(ignore_symmetries);
+
+    diagonalize_main(gs_shift);
+  }
+
+  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, std::vector<many_body_op_t> const& integrals_of_motion) {
+
+    double gs_shift = diagonalize_prepare(hamiltonian);
+
+    std::vector<Pomerol::Operator> iom;
+    for(auto const& op : integrals_of_motion) {
+      Pomerol::Operator pom_op;
+      for (auto const &term : op) {
+        Pomerol::Operator pom_term;
+        pom_term += term.coef;
+        for (auto o : term.monomial) {
+          Pomerol::ParticleIndex pom_ind = lookup_pomerol_index(o.indices);
+
+          if (pom_ind == -1)
+            TRIQS_RUNTIME_ERROR << "diagonalize: invalid integral of motion, unexpected operator indices " << o.indices;
+
+          if(o.dagger)
+            pom_term *= Pomerol::OperatorPresets::c_dag(pom_ind);
+          else
+            pom_term *= Pomerol::OperatorPresets::c(pom_ind);
+        }
+
+        pom_op += pom_term;
+      }
+      iom.push_back(pom_op);
+    }
+
+    // Construct Symmetrizer
+    symm.reset(new Pomerol::Symmetrizer(index_info, *storage));
+    symm->compute(iom);
+
+    diagonalize_main(gs_shift);
   }
 
   Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const &i) const {

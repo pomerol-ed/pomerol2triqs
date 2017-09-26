@@ -44,6 +44,9 @@ c.add_constructor("""(index_converter_t index_converter, bool verbose = false)""
 c.add_method("""void diagonalize(many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = r"""Diagonalize Hamiltonian""")
 
+c.add_method("""void diagonalize(many_body_op_t hamiltonian, std::vector<many_body_op_t> integrals_of_motion)""",
+             doc = r"""Diagonalize Hamiltonian""")
+
 c.add_method("""block_gf<imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = r"""Green's function in Matsubara frequencies""")
 
