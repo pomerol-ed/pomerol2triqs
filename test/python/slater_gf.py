@@ -4,7 +4,7 @@ from pytriqs.operators import *
 from pytriqs.operators.util.op_struct import set_operator_structure, get_mkind
 from pytriqs.operators.util.U_matrix import U_matrix, cubic_names
 from pytriqs.operators.util.hamiltonians import h_int_slater
-from pytriqs.operators.util.observables import N_op, S_op, S2_op, L_op, L2_op
+from pytriqs.operators.util.observables import N_op, S_op, L_op
 from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
 from pytriqs.utility import mpi
 from pytriqs.utility.comparison_tests import *
@@ -58,28 +58,24 @@ H = h_int_slater(spin_names, orb_names, U_mat, False)
 # Number of particles
 N = N_op(spin_names, orb_names, False)
 
-# Spin operators
+# z-component of spin
 Sz = S_op('z', spin_names, orb_names, False)
-S2 = S2_op(spin_names, orb_names, False)
 
-# Angular momentum operators
+# z-component of angular momentum
 Lz = L_op('z', spin_names, orb_names, off_diag = False, basis = 'cubic')
-L2 = L2_op(spin_names, orb_names, off_diag = False, basis = 'cubic')
 
 # Double check that we are actually using integrals of motion
 h_comm = lambda op: H*op - op*H
 assert h_comm(N).is_zero()
 assert h_comm(Sz).is_zero()
-assert h_comm(S2).is_zero()
 assert h_comm(Lz).is_zero()
-assert h_comm(L2).is_zero()
 
 # Diagonalize H
 
 # Do not split H into blocks (uncomment to generate reference data)
 #ed.diagonalize(H, True)
 
-ed.diagonalize(H, [N, Sz, S2, Lz, S2])
+ed.diagonalize(H, [N, Sz, Lz])
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
