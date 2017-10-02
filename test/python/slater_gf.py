@@ -2,7 +2,7 @@ from pytriqs.archive import HDFArchive
 from pytriqs.gf import *
 from pytriqs.operators import *
 from pytriqs.operators.util.op_struct import set_operator_structure, get_mkind
-from pytriqs.operators.util.U_matrix import U_matrix, cubic_names
+from pytriqs.operators.util.U_matrix import U_matrix
 from pytriqs.operators.util.hamiltonians import h_int_slater
 from pytriqs.operators.util.observables import N_op, S_op, L_op
 from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
@@ -27,8 +27,8 @@ F2 = J*(14.0/(1.0 + 0.625))
 F4 = F2*0.625
 
 spin_names = ("up", "dn")
-orb_names = cubic_names(2)
-U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis="cubic")
+orb_names = range(-L, L+1)
+U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
 # Number of Matsubara frequencies for GF calculation
 n_iw = 200
@@ -62,7 +62,7 @@ N = N_op(spin_names, orb_names, False)
 Sz = S_op('z', spin_names, orb_names, False)
 
 # z-component of angular momentum
-Lz = L_op('z', spin_names, orb_names, off_diag = False, basis = 'cubic')
+Lz = L_op('z', spin_names, orb_names, off_diag = False, basis = 'spherical')
 
 # Double check that we are actually using integrals of motion
 h_comm = lambda op: H*op - op*H
