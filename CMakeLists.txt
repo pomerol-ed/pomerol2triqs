@@ -11,10 +11,10 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Load TRIQS and Cpp2Py
 find_package(TRIQS 1.5 EXACT REQUIRED)
-find_package(Cpp2Py 1.5 REQUIRED REQUIRED)
+find_package(Cpp2Py 1.5 REQUIRED)
 
 # Append TRIQS installed files to the cmake load path
-list(APPEND CMAKE_MODULE_PATH ${TRIQS_PATH}/share/cmake)
+list(APPEND CMAKE_MODULE_PATH ${TRIQS_ROOT}/share/cmake)
 # Append Pomerol installed files to the cmake load path
 list(APPEND CMAKE_MODULE_PATH ${POMEROL_PATH}/share/pomerol/cmake)
 
@@ -44,7 +44,7 @@ message(STATUS "Git hash: ${POMEROL2TRIQS_GIT_HASH}")
 option(Tests "Enable Tests" ON)
 
 # Compile options
-add_compile_options(-std=c++14 $<$<CONFIG:Release>:-march=native>)
+add_compile_options($<$<CONFIG:Release>:-march=native>)
 
 include_directories(c++)
 
