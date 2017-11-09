@@ -1,3 +1,21 @@
+/**
+ * pomerol2triqs
+ *
+ * Copyright (C) 2017 Igor Krivenko
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #pragma once
 
 #include <utility>
@@ -10,7 +28,6 @@
 #include <triqs/gfs.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
-#include <triqs/utility/optional_compat.hpp>
 #include <triqs/mpi/boost.hpp>
 
 #include "g2_parameters.hpp"
@@ -33,6 +50,10 @@ namespace pomerol2triqs {
   using pomerol_indices_t = std::tuple<std::string, unsigned int, Pomerol::spin>;
   using index_converter_t = std::map<indices_t, pomerol_indices_t>;
 
+  using w_nu_nup_t = cartesian_product<imfreq, imfreq, imfreq>;
+  using w_l_lp_t   = cartesian_product<imfreq, legendre, legendre>;
+
+  /// Main solver class of pomerol2triqs
   class pomerol_ed {
 
     triqs::mpi::communicator comm;
@@ -60,13 +81,12 @@ namespace pomerol2triqs {
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const;
 
-    using w_nu_nup_t = cartesian_product<imfreq, imfreq, imfreq>;
-    using w_l_lp_t   = cartesian_product<imfreq, legendre, legendre>;
     template <typename Mesh, typename Filler>
     block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, block_order_t block_order,
                                                  g2_blocks_t const &g2_blocks, Filler filler) const;
 
     public:
+
     /// Create a new solver object
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
 
@@ -86,11 +106,11 @@ namespace pomerol2triqs {
     block_gf<refreq> G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w, double im_shift = 0);
 
     /// Two-particle Green's function, Matsubara frequencies
-    TRIQS_WRAP_ARG_AS_DICT
+    CPP2PY_ARG_AS_DICT
     block2_gf<w_nu_nup_t, tensor_valued<4>> G2_iw_inu_inup(g2_iw_inu_inup_params_t const &p);
 
     /// Two-particle Green's function, bosonic Matsubara frequency + Legendre coefficients
-    TRIQS_WRAP_ARG_AS_DICT
+    CPP2PY_ARG_AS_DICT
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
   };
 }

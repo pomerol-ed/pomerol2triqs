@@ -19,8 +19,12 @@
 #
 ################################################################################
 
-r"""pomerol2triqs Python module"""
+version = "@POMEROL2TRIQS_VERSION@"
+triqs_hash = "@TRIQS_GIT_HASH@"
+pomerol2triqs_hash = "@POMEROL2TRIQS_GIT_HASH@"
 
-from pomerol2triqs import PomerolED
+def show_version():
+  print "\nYou are using the pomerol2triqs solver version %s\n" % version
 
-__all__ = ['PomerolED']
+def show_git_hash():
+  print "\nYou are using the pomerol2triqs solver git hash %s based on triqs git hash %s\n"%(pomerol2triqs_hash, triqs_hash)

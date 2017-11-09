@@ -5,9 +5,9 @@ from pytriqs.operators.util.op_struct import set_operator_structure, get_mkind
 from pytriqs.operators.util.U_matrix import U_matrix
 from pytriqs.operators.util.hamiltonians import h_int_slater
 from pytriqs.operators.util.observables import N_op, S_op, L_op
-from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
 from pytriqs.utility import mpi
 from pytriqs.utility.comparison_tests import *
+from pomerol2triqs import PomerolED
 from itertools import product
 
 # 5-orbital atom with Slater interaction term

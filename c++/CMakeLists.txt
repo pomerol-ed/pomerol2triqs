@@ -1,8 +1,14 @@
 add_library(pomerol2triqs_c pomerol_ed.cpp)
 
-target_link_libraries(pomerol2triqs_c ${TRIQS_LIBRARY_ALL} ${pomerol_LIBRARIES})
-include_directories(${TRIQS_INCLUDE_ALL} ${pomerol_INCLUDE_DIRS})
-triqs_set_rpath_for_target(pomerol2triqs_c)
+target_link_libraries(pomerol2triqs_c PUBLIC triqs  ${pomerol_LIBRARIES})
 
-install(TARGETS pomerol2triqs_c DESTINATION lib)
-install(FILES pomerol_ed.hpp DESTINATION include/pomerol2triqs)
+target_include_directories(pomerol2triqs_c PUBLIC ${pomerol_INCLUDE_DIRS})
+target_compile_options(pomerol2triqs_c PRIVATE
+  -DPOMEROL2TRIQS_GIT_HASH=${POMEROL2TRIQS_GIT_HASH}
+  -DPOMEROL2TRIQS_GIT_HASH=${POMEROL2TRIQS_GIT_HASH}
+)
+
+install(TARGETS pomerol2triqs_c DESTINATION lib EXPORT pomerol2triqs-targets)
+install(EXPORT pomerol2triqs-targets DESTINATION share/cmake)
+
+install(FILES pomerol_ed.hpp g2_parameters.hpp DESTINATION include/pomerol2triqs)

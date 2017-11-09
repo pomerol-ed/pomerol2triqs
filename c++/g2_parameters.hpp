@@ -5,11 +5,14 @@ using triqs::hilbert_space::gf_struct_t;
 
 namespace pomerol2triqs {
 
+  /// Order of block indices for Block2Gf objects
   enum block_order_t { AABB, ABBA };
+  /// Channel in which Matsubara frequency representation is defined
   enum channel_t { PP, PH, AllFermionic };
 
   using g2_blocks_t = std::set<std::pair<std::string, std::string>>;
 
+  /// Arguments of G2_iw_inu_inup()
   struct g2_iw_inu_inup_params_t {
 
     /// Structure of G^2 blocks.
@@ -38,6 +41,7 @@ namespace pomerol2triqs {
     g2_iw_inu_inup_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
 
+  /// Arguments of G2_iw_l_lp()
   struct g2_iw_l_lp_params_t {
 
     /// Structure of G^2 blocks.

@@ -1,16 +1,17 @@
-# where will the python end up in triqs?
-set(python_destination pytriqs/applications/impurity_solvers/pomerol2triqs)
+# Build the python module
+add_cpp2py_module(pomerol2triqs)
 
-# make the build_xxx, install python files...
-triqs_prepare_local_pytriqs(${python_destination})
+target_link_libraries(pomerol2triqs triqs pomerol2triqs_c)
+include_directories(${pomerol_INCLUDE_DIRS})
 
-# sitecustomize.py for build
-set(package_name "pytriqs.applications.impurity_solvers")
-configure_file(${CMAKE_SOURCE_DIR}/cmake/sitecustomize.py ${CMAKE_CURRENT_BINARY_DIR}/sitecustomize.py @ONLY)
+# Configure the version
+configure_file(version.py.in version.py)
 
-# Build the python module for the solver
-triqs_python_extension(pomerol2triqs ${python_destination})
-target_link_libraries(pomerol2triqs pomerol2triqs_c)
-include_directories(${TRIQS_INCLUDE_ALL} ${CMAKE_CURRENT_SOURCE_DIR} ${pomerol_INCLUDE_DIRS})
-triqs_set_rpath_for_target(pomerol2triqs)
-install(TARGETS pomerol2triqs DESTINATION ${TRIQS_PYTHON_LIB_DEST_ROOT}/${python_destination})
+# Copy __init__.py
+file(COPY __init__.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# Install python module to proper location
+set(PYTHON_LIB_DEST ${CPP2PY_PYTHON_LIB_DEST_ROOT}/pomerol2triqs)
+install(TARGETS pomerol2triqs DESTINATION ${PYTHON_LIB_DEST})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/version.py
+        DESTINATION ${PYTHON_LIB_DEST})

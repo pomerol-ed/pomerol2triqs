@@ -2,8 +2,8 @@ from pytriqs.archive import HDFArchive
 from pytriqs.gf import *
 from pytriqs.operators import Operator, c, c_dag, n
 from pytriqs.utility import mpi
-from pytriqs.applications.impurity_solvers.pomerol2triqs import PomerolED
 from pytriqs.utility.comparison_tests import *
+from pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product
 
