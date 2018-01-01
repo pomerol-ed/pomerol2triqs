@@ -2,9 +2,9 @@
 set(POMEROL2TRIQS_VERSION "0.2")
 
 # Start configuration
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(pomerol2triqs CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -45,8 +45,6 @@ option(Tests "Enable Tests" ON)
 
 # Compile options
 add_compile_options($<$<CONFIG:Release>:-march=native>)
-# Workaround for Boost not being compatible with C++17
-add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR)
 
 include_directories(c++)
 
