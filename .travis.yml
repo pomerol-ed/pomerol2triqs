@@ -1,6 +1,7 @@
 language: cpp
 sudo: required
 dist: trusty
+group: deprecated-2017Q4
 
 compiler:
   - gcc
@@ -44,7 +45,7 @@ script:
   # Build and install TRIQS
   - cd $TRAVIS_BUILD_DIR/..
   - git clone https://github.com/TRIQS/triqs.git triqs.git
-  - pushd triqs.git && git checkout unstable && popd
+  - pushd triqs.git && git checkout final_cpp14_compat && popd
   - mkdir triqs.build && pushd triqs.build
   - |
     cmake ../triqs.git \
