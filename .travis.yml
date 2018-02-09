@@ -65,7 +65,7 @@ script:
   # Install cpp2py
   - cd $TRAVIS_BUILD_DIR/..
   - git clone https://github.com/TRIQS/cpp2py.git cpp2py.git
-  - pushd cpp2py.git && git checkout master && popd
+  - pushd cpp2py.git && git checkout 3dcfb6b3c40522c0b55e234f8ab62472d73a142a && popd
   - mkdir cpp2py.build && pushd cpp2py.build
   - |
     cmake ../cpp2py.git -DCMAKE_CXX_COMPILER=${CXX} \
