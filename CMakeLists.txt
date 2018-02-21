@@ -4,7 +4,7 @@ set(POMEROL2TRIQS_VERSION "0.2")
 # Start configuration
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(pomerol2triqs CXX)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -50,8 +50,6 @@ endif()
 option(Tests "Enable Tests" ON)
 
 # Compile options
-add_compile_options($<$<CONFIG:Release>:-march=native>)
-
 include_directories(c++)
 
 triqs_set_rpath_for_all_targets()

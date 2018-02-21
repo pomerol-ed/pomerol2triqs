@@ -9,6 +9,8 @@ from itertools import product
 
 # Single orbital Anderson model
 
+from pytriqs.operators import *
+
 ####################
 # Input parameters #
 ####################
@@ -84,6 +86,8 @@ if mpi.is_master_node():
         ar['G_w'] = G_w
 
     with HDFArchive("anderson_gf.ref.h5", 'r') as ar:
+        print ar['H']
+        print H
         assert (ar['H'] - H).is_zero()
         assert_block_gfs_are_close(ar['G_iw'], G_iw)
         assert_block_gfs_are_close(ar['G_tau'], G_tau)
