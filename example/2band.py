@@ -65,6 +65,9 @@ index_converter.update({("B_" + sn, o) : ("bath", o, "down" if sn == "dn" else "
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
 
+# Density matrix blocks with small diagonal elements will be discarded
+ed.rho_threshold = 1e-6
+
 # Number of particles on the impurity
 N = sum(n(sn, o) for sn, o in product(spin_names, orb_names))
 

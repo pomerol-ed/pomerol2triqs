@@ -42,6 +42,11 @@ c = class_(
 
 c.add_constructor("""(index_converter_t index_converter, bool verbose = false)""", doc = """Create a new solver object""")
 
+c.add_property(name = "rho_threshold",
+               getter = cfunction("double get_rho_threshold()"),
+               setter = cfunction("void set_rho_threshold(double threshold)"),
+               doc = """Truncation threshold for density matrix elements""")
+
 c.add_method("""void diagonalize (many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = """Diagonalize Hamiltonian optionally employing conservation of N and S_z""")
 
