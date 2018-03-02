@@ -29,7 +29,7 @@ Installation
 License
 -------
 
-Copyright (C) 2017 Igor Krivenko
+Copyright (C) 2017-2018 Igor Krivenko
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

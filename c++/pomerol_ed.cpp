@@ -230,6 +230,7 @@ namespace pomerol2triqs {
       rho.reset(new Pomerol::DensityMatrix(*states_class, *matrix_h, beta));
       rho->prepare();
       rho->compute();
+      if(rho_threshold > 0) rho->truncateBlocks(rho_threshold, verbose);
     }
   }
 

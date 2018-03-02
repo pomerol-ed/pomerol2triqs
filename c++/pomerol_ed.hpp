@@ -63,6 +63,8 @@ namespace pomerol2triqs {
     Pomerol::Lattice bare_lattice;
     Pomerol::IndexClassification index_info;
 
+    double rho_threshold = 0;
+
     std::unique_ptr<Pomerol::Lattice> lattice;
     std::unique_ptr<Pomerol::IndexHamiltonian> storage;
     std::unique_ptr<Pomerol::Symmetrizer> symm;
@@ -112,5 +114,11 @@ namespace pomerol2triqs {
     /// Two-particle Green's function, bosonic Matsubara frequency + Legendre coefficients
     CPP2PY_ARG_AS_DICT
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
+
+    /// Get truncation threshold for density matrix elements
+    double get_rho_threshold() const { return rho_threshold; }
+
+    /// Set truncation threshold for density matrix elements
+    void set_rho_threshold(double threshold) { rho_threshold = threshold; }
   };
 }
