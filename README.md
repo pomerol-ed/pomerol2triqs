@@ -19,6 +19,7 @@ Installation
 ------------
 
 - Install the latest version of [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library (`master` branch).
+- Install [cpp2py](https://github.com/TRIQS/cpp2py) (as of commit **`3dcfb6b3c40522c0b55e234f8ab62472d73a142a`**).
 - Install the latest C++14-compatible version of [TRIQS 1.5](https://triqs.ipht.cnrs.fr/1.x/install.html) library (**`final_cpp14_compat`** tag).
 - `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
