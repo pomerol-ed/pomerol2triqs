@@ -19,12 +19,15 @@ Installation
 ------------
 
 - Install the latest version of [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library (`master` branch).
-- Install [cpp2py](https://github.com/TRIQS/cpp2py) (as of commit **`3dcfb6b3c40522c0b55e234f8ab62472d73a142a`**).
-- Install the latest C++14-compatible version of [TRIQS 1.5](https://triqs.ipht.cnrs.fr/1.x/install.html) library (**`final_cpp14_compat`** tag).
+- Install the latest version of [cpp2py](https://github.com/TRIQS/cpp2py) (`master` branch).
+- Install the latest version of [TRIQS](http://triqs.github.io/triqs/unstable/install.html) library (**`unstable`** branch).
+- `source <path_to_cpp2py_install_dir>/share/cpp2pyvars.sh`
+- `source <path_to_triqs_install_dir>/share/triqsvars.sh`
 - `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
-- `cmake ../pomerol2triqs.git -DCMAKE_BUILD_TYPE=Release -DTRIQS_PATH=<path_to_triqs_install_dir> -DPOMEROL_PATH=<path_to_pomerol_install_dir>`
+- `cmake ../pomerol2triqs.git -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=<path_to_install_dir> -DPOMEROL_PATH=<path_to_pomerol_install_dir>`
 - `make`
+- `make test`
 - `make install`
 
 License

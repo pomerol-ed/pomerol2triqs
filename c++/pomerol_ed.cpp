@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017 Igor Krivenko
+ * Copyright (C) 2017-2018 Igor Krivenko
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,7 +280,7 @@ namespace pomerol2triqs {
       int n = bl.second.size();
 
       index_visitor iv;
-      for (auto &ind : bl.second) { apply_visitor(iv, ind); }
+      for (auto &ind : bl.second) { visit(iv, ind); }
       std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
 
       g_blocks.push_back(gf<Mesh>{mesh, {n, n}, indices});

@@ -4,7 +4,7 @@ set(POMEROL2TRIQS_VERSION "0.2")
 # Start configuration
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(pomerol2triqs CXX)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -40,18 +40,10 @@ find_package(MPI)
 # Get git hash
 triqs_get_git_hash_of_source_dir(POMEROL2TRIQS_GIT_HASH)
 message(STATUS "Git hash: ${POMEROL2TRIQS_GIT_HASH}")
-set(EXPECTED_TRIQS_HASH "6c20b3de8df8ed926a9415b98eef7e2c05e16c17")
-if(NOT TRIQS_GIT_HASH EQUAL EXPECTED_TRIQS_HASH)
-  message(WARNING "pomerol2triqs requires a C++14-compatible revision of TRIQS 1.5. "
-                  "Please, check out 'final_cpp14_compat' tag in TRIQS repository and reinstall the library, "
-                  "unless you know what you are doing.")
-endif()
 
 option(Tests "Enable Tests" ON)
 
 # Compile options
-add_compile_options($<$<CONFIG:Release>:-march=native>)
-
 include_directories(c++)
 
 triqs_set_rpath_for_all_targets()
