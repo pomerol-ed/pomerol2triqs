@@ -9,8 +9,6 @@ from itertools import product
 
 # Single orbital Anderson model
 
-from pytriqs.operators import *
-
 ####################
 # Input parameters #
 ####################
