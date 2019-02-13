@@ -32,7 +32,7 @@ g2_n_inu = 5
 g2_blocks = set([("up", "up"), ("dn", "dn"), ("up", "dn")])
 
 # GF structure
-gf_struct = {'up' : [0], 'dn' : [0]}
+gf_struct = [['up', [0]], ['dn', [0]]]
 
 # Conversion from TRIQS to Pomerol notation for operator indices
 index_converter = {}

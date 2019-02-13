@@ -282,8 +282,9 @@ namespace pomerol2triqs {
       index_visitor iv;
       for (auto &ind : bl.second) { visit(iv, ind); }
       std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
-
-      g_blocks.push_back(gf<Mesh>{mesh, {n, n}, indices});
+      triqs::utility::mini_vector<int, 2> target_shape{n, n};
+      g_blocks.push_back(gf<Mesh>{mesh, target_shape, indices});
+      
       auto &g = g_blocks.back();
 
       for (int i1 : range(n)) {
@@ -302,7 +303,6 @@ namespace pomerol2triqs {
           pom_g.compute();
 
           filler(g_el, pom_g);
-          g_el.singularity()(1) = (i1 == i2) ? 1 : 0;
         }
       }
     }
