@@ -1,7 +1,9 @@
 pomerol2triqs
 =============
 
-Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library
+[![Build Status](https://travis-ci.org/krivenko/pomerol2triqs.svg?branch=master)](https://travis-ci.org/krivenko/pomerol2triqs)
+
+Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library.
 
 To learn how to use this wrapper, see `example` subdir in the source directory.
 
