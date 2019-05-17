@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2018 Igor Krivenko
+ * Copyright (C) 2017-2019 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -284,7 +284,7 @@ namespace pomerol2triqs {
       std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
       triqs::utility::mini_vector<int, 2> target_shape{n, n};
       g_blocks.push_back(gf<Mesh>{mesh, target_shape, indices});
-      
+
       auto &g = g_blocks.back();
 
       for (int i1 : range(n)) {
