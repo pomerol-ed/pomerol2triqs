@@ -10,8 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Load TRIQS and Cpp2Py
-find_package(TRIQS 2.0 REQUIRED)
-find_package(Cpp2Py 1.5 REQUIRED)
+find_package(TRIQS 2.1.0 REQUIRED)
+find_package(Cpp2Py 1.6 REQUIRED)
 
 # Append TRIQS installed files to the cmake load path
 list(APPEND CMAKE_MODULE_PATH ${TRIQS_ROOT}/share/cmake)
