@@ -43,7 +43,7 @@ g2_n_l = 10
 # Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
-gf_struct = {'up' : [0], 'dn' : [0]}
+gf_struct = [('up', [0]), ('dn', [0])]
 
 # Conversion from TRIQS to Pomerol notation for operator indices
 # TRIQS: block_name, inner_index
