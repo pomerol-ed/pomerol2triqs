@@ -28,13 +28,18 @@ namespace pomerol2triqs {
   std::complex<double> pomerol_ed::ensemble_average(indices_t const &i,
                                                     indices_t const &j,
                                                     double beta) {
+    Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
+    if (pom_i == -1)
+      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected first index " << i;
+    Pomerol::ParticleIndex pom_j = lookup_pomerol_index(j);
+    if (pom_j == -1)
+      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected second index " << j;
+
     if (!matrix_h)
       TRIQS_RUNTIME_ERROR << "ensemble_average: no Hamiltonian has been diagonalized";
     compute_rho(beta);
 
-    Pomerol::QuadraticOperator op(index_info, *states_class, *matrix_h,
-                                 lookup_pomerol_index(i),
-                                 lookup_pomerol_index(j));
+    Pomerol::QuadraticOperator op(index_info, *states_class, *matrix_h, pom_i, pom_j);
     op.prepare();
     op.compute();
 
