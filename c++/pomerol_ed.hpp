@@ -100,6 +100,9 @@ namespace pomerol2triqs {
     /// Diagonalize Hamiltonian using provided integrals of motion
     void diagonalize(many_body_op_t const &hamiltonian, std::vector<many_body_op_t> const& integrals_of_motion);
 
+    /// Compute the ensemble average of c^+_i c_j
+    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta);
+
     /// Green's function in Matsubara frequencies
     block_gf<imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);
 

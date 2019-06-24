@@ -254,4 +254,4 @@ namespace pomerol2triqs {
 
     return g2;
   }
-}
+} // namespace pomerol2triqs

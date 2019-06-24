@@ -235,4 +235,5 @@ namespace pomerol2triqs {
       computed_ops = new_ops;
     }
   }
-}
+
+} // namespace pomerol2triqs

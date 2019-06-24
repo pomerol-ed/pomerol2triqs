@@ -53,6 +53,9 @@ c.add_method("""void diagonalize (many_body_op_t hamiltonian, bool ignore_symmet
 c.add_method("""void diagonalize (many_body_op_t hamiltonian, std::vector<many_body_op_t> integrals_of_motion)""",
              doc = """Diagonalize Hamiltonian using provided integrals of motion""")
 
+c.add_method("""std::complex<double> ensemble_average(indices_t i, indices_t j, double beta)""",
+             doc = """Compute the ensemble average of c^+_i c_j""")
+
 c.add_method("""block_gf<triqs::gfs::imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = """Green\'s function in Matsubara frequencies""")
 
