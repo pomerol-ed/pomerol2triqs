@@ -107,7 +107,13 @@ c.add_method("""block2_gf<w_l_lp_t,tensor_valued<4>> G2_iw_l_lp (**pomerol2triqs
 | n_inu_sum      | int                          | 500                | Maximum number of positive Matsubara frequencies in summation.             |
 +----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
 | inu_sum_tol    | double                       | 1e-6               | Tolerance for Matsubara frequency summation.                               |
-+----------------+------------------------------+--------------------+--------------------------------------------------------------------------0-+""")
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+""")
+
+c.add_method("""gf<imtime, scalar_valued> chi_tau(indices_t i1, indices_t j1, indices_t i2, indices_t j2, double beta, int n_tau, bool connected = false)""",
+             doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part""")
+
+c.add_method("""gf<imfreq, scalar_valued> chi_inu(indices_t i1, indices_t j1, indices_t i2, indices_t j2, double beta, int n_inu, bool connected = false)""",
+             doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies""")
 
 module.add_class(c)
 

@@ -28,12 +28,13 @@ namespace pomerol2triqs {
   std::complex<double> pomerol_ed::ensemble_average(indices_t const &i,
                                                     indices_t const &j,
                                                     double beta) {
+
     Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
     if (pom_i == -1)
-      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected first index " << i;
+      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected index i = " << i;
     Pomerol::ParticleIndex pom_j = lookup_pomerol_index(j);
     if (pom_j == -1)
-      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected second index " << j;
+      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected index j = " << j;
 
     if (!matrix_h)
       TRIQS_RUNTIME_ERROR << "ensemble_average: no Hamiltonian has been diagonalized";
@@ -47,6 +48,74 @@ namespace pomerol2triqs {
     EA.prepare();
 
     return EA.getResult();
+  }
+
+  template <typename Mesh, typename Filler>
+  gf<Mesh, scalar_valued> pomerol_ed::compute_chi(indices_t const &i1,
+                                                  indices_t const &j1,
+                                                  indices_t const &i2,
+                                                  indices_t const &j2,
+                                                  bool connected,
+                                                  gf_mesh<Mesh> const &mesh,
+                                                  Filler filler) const {
+    if (!states_class || !matrix_h || !rho)
+      TRIQS_RUNTIME_ERROR << "compute_chi: internal error!";
+
+    auto checked_lookup = [&](indices_t const &i) {
+      Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
+      if (pom_i == -1)
+        TRIQS_RUNTIME_ERROR << "compute_chi: unexpected index " << i;
+      return pom_i;
+    };
+
+    Pomerol::ParticleIndex pom_i1 = checked_lookup(i1);
+    Pomerol::ParticleIndex pom_j1 = checked_lookup(j1);
+    Pomerol::ParticleIndex pom_i2 = checked_lookup(i2);
+    Pomerol::ParticleIndex pom_j2 = checked_lookup(j2);
+
+    Pomerol::QuadraticOperator A(index_info, *states_class, *matrix_h, pom_i1, pom_j1);
+    Pomerol::QuadraticOperator B(index_info, *states_class, *matrix_h, pom_i2, pom_j2);
+
+    A.prepare(); A.compute();
+    B.prepare(); B.compute();
+
+    Pomerol::Susceptibility pom_chi(*states_class, *matrix_h, A, B, *rho);
+    pom_chi.prepare();
+    pom_chi.compute();
+    if(connected) pom_chi.subtractDisconnected();
+
+    gf<Mesh, scalar_valued> chi(mesh);
+    filler(chi, pom_chi);
+
+    return chi;
+  }
+
+  gf<imtime, scalar_valued> pomerol_ed::chi_tau(indices_t const &i1,
+                                                indices_t const &j1,
+                                                indices_t const &i2,
+                                                indices_t const &j2,
+                                                double beta, int n_tau, bool connected) {
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_tau: no Hamiltonian has been diagonalized";
+    compute_rho(beta);
+
+    auto filler = [](gf_view<imtime, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
+      for (auto tau : chi.mesh()) chi[tau] = pom_chi.of_tau(double(tau));
+    };
+    return compute_chi<imtime>(i1, j1, i2, j2, connected, {beta, Boson, n_tau}, filler);
+  }
+
+  gf<imfreq, scalar_valued> pomerol_ed::chi_inu(indices_t const &i1,
+                                                indices_t const &j1,
+                                                indices_t const &i2,
+                                                indices_t const &j2,
+                                                double beta, int n_inu, bool connected) {
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_inu: no Hamiltonian has been diagonalized";
+    compute_rho(beta);
+
+    auto filler = [](gf_view<imfreq, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
+      for (auto inu : chi.mesh()) chi[inu] = pom_chi(std::complex<double>(inu));
+    };
+    return compute_chi<imfreq>(i1, j1, i2, j2, connected, {beta, Boson, n_inu}, filler);
   }
 
 } // namespace pomerol2triqs

@@ -52,3 +52,43 @@ assert abs(n_up - n_up_ref) < 1e-10
 assert abs(n_dn - n_dn_ref) < 1e-10
 assert abs(S_p) < 1e-10
 assert abs(S_m) < 1e-10
+
+# Compute 3 susceptibilities
+# < n_up ; n_up >
+# < n_up ; n_dn >
+# < S_+ ; S_- >
+
+# Number of Matsubara frequencies for susceptibility calculation
+n_inu = 200
+
+chi_up_up = ed.chi_inu(('up',0), ('up',0), ('up',0), ('up',0), beta, n_inu, True)
+chi_up_dn = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_inu, True)
+chi_Sp_Sm = ed.chi_inu(('up',0), ('dn',0), ('dn',0), ('up',0), beta, n_inu, True)
+
+for inu in chi_up_up.mesh:
+  zero_freq = abs(complex(inu)) < 1e-10
+
+  chi_up_up_ref = (w[1] + w[3]) * (1 - w[1] - w[3]) * beta if zero_freq else 0
+  assert abs(chi_up_up[inu] - chi_up_up_ref) < 1e-10
+
+  chi_up_dn_ref = (w[3] - (w[1] + w[3]) * (w[2] + w[3])) * beta if zero_freq else 0
+  assert abs(chi_up_dn[inu] - chi_up_dn_ref) < 1e-10
+
+  if h_field == 0:
+    chi_Sp_Sm_ref = w[1] * beta if zero_freq else 0
+  else:
+    chi_Sp_Sm_ref = -(w[1] - w[2]) / (inu - 2*h_field)
+  assert abs(chi_Sp_Sm[inu] - chi_Sp_Sm_ref) < 1e-10
+
+# Number of time slices for susceptibility calculation
+n_tau = 200
+
+chi_up_up = ed.chi_tau(('up',0), ('up',0), ('up',0), ('up',0), beta, n_tau, True)
+chi_up_dn = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True)
+
+for tau in chi_up_up.mesh:
+  chi_up_up_ref = (w[1] + w[3]) * (1 - w[1] - w[3])
+  assert abs(chi_up_up[tau] - chi_up_up_ref) < 1e-10
+
+  chi_up_dn_ref = (w[3] - (w[1] + w[3]) * (w[2] + w[3]))
+  assert abs(chi_up_dn[tau] - chi_up_dn_ref) < 1e-10

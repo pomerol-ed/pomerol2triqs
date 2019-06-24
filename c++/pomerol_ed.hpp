@@ -84,10 +84,20 @@ namespace pomerol2triqs {
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const;
+    template <typename Mesh, typename Filler> gf<Mesh, scalar_valued> compute_chi(indices_t const &i1,
+                                                                                  indices_t const &j1,
+                                                                                  indices_t const &i2,
+                                                                                  indices_t const &j2,
+                                                                                  bool connected,
+                                                                                  gf_mesh<Mesh> const &mesh,
+                                                                                  Filler filler) const;
 
     template <typename Mesh, typename Filler>
-    block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, block_order_t block_order,
-                                                 g2_blocks_t const &g2_blocks, Filler filler) const;
+    block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct,
+                                                 gf_mesh<Mesh> const &mesh,
+                                                 block_order_t block_order,
+                                                 g2_blocks_t const &g2_blocks,
+                                                 Filler filler) const;
 
     public:
 
@@ -119,6 +129,20 @@ namespace pomerol2triqs {
     /// Two-particle Green's function, bosonic Matsubara frequency + Legendre coefficients
     CPP2PY_ARG_AS_DICT
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
+
+    /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part
+    gf<imtime, scalar_valued> chi_tau(indices_t const &i1,
+                                      indices_t const &j1,
+                                      indices_t const &i2,
+                                      indices_t const &j2,
+                                      double beta, int n_tau, bool connected = false);
+
+    /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies
+    gf<imfreq, scalar_valued> chi_inu(indices_t const &i1,
+                                      indices_t const &j1,
+                                      indices_t const &i2,
+                                      indices_t const &j2,
+                                      double beta, int n_inu, bool connected = false);
 
     /// Get truncation threshold for density matrix elements
     double get_rho_threshold() const { return rho_threshold; }
