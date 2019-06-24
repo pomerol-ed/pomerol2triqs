@@ -66,6 +66,9 @@ H -= mu*N
 # Diagonalize H
 ed.diagonalize(H)
 
+# Compute occupations
+occ = [ed.ensemble_average(i, i, beta).real for i in product(spin_names, orb_names)]
+
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
 
@@ -146,6 +149,7 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
 
 if mpi.is_master_node():
     with HDFArchive('2band.atom.h5', 'w') as ar:
+        ar['occ'] = occ
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w

@@ -79,6 +79,9 @@ H = H_loc + H_hyb + H_bath
 # Diagonalize H
 ed.diagonalize(H)
 
+# Compute occupations
+occ = [ed.ensemble_average((s, 0), (s, 0), beta).real for s in spin_names]
+
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
 
@@ -131,6 +134,7 @@ G2_iw_inu_inup_pp_ABBA = ed.G2_iw_inu_inup(channel = "PP",
 
 if mpi.is_master_node():
     with HDFArchive('anderson.h5', 'w') as ar:
+        ar['occ'] = occ
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w
