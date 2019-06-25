@@ -1,4 +1,4 @@
-add_library(pomerol2triqs_c pomerol_ed.cpp)
+add_library(pomerol2triqs_c pomerol_ed.cpp g.cpp g2.cpp chi.cpp)
 
 target_link_libraries(pomerol2triqs_c PUBLIC triqs  ${pomerol_LIBRARIES})
 

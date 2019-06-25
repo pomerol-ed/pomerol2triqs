@@ -41,7 +41,7 @@ g2_n_l = 10
 # Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
-gf_struct = {"up" : orb_names, "dn" : orb_names}
+gf_struct = [("up", orb_names), ("dn", orb_names)]
 print "Block structure of single-particle Green's functions:", gf_struct
 
 # Conversion from TRIQS to Pomerol notation for operator indices
@@ -66,6 +66,9 @@ H -= mu*N
 # Diagonalize H
 ed.diagonalize(H)
 
+# Compute occupations
+occ = [ed.ensemble_average(i, i, beta).real for i in product(spin_names, orb_names)]
+
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
 
@@ -74,6 +77,18 @@ G_tau = ed.G_tau(gf_struct, beta, n_tau)
 
 # Compute G(\omega)
 G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
+
+# Compute \chi(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)>
+chi_tau = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau)
+
+# Compute \chi(i\nu)
+chi_inu = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw)
+
+# Compute \chi_c(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)> - <n_{up,0}><n_{dn,0}>
+chi_tau_c = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True)
+
+# Compute \chi_c(i\nu)
+chi_inu_c = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
 
 ###########
 # G^{(2)} #
@@ -146,9 +161,14 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
 
 if mpi.is_master_node():
     with HDFArchive('2band.atom.h5', 'w') as ar:
+        ar['occ'] = occ
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w
+        ar['chi_tau'] = chi_tau
+        ar['chi_inu'] = chi_inu
+        ar['chi_tau_c'] = chi_tau_c
+        ar['chi_inu_c'] = chi_inu_c
         ar['G2_iw_inu_inup_ph_AABB'] = G2_iw_inu_inup_ph_AABB
         ar['G2_iw_inu_inup_ph_ABBA'] = G2_iw_inu_inup_ph_ABBA
         ar['G2_iw_inu_inup_pp_AABB'] = G2_iw_inu_inup_pp_AABB

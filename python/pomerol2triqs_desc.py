@@ -53,6 +53,9 @@ c.add_method("""void diagonalize (many_body_op_t hamiltonian, bool ignore_symmet
 c.add_method("""void diagonalize (many_body_op_t hamiltonian, std::vector<many_body_op_t> integrals_of_motion)""",
              doc = """Diagonalize Hamiltonian using provided integrals of motion""")
 
+c.add_method("""std::complex<double> ensemble_average(indices_t i, indices_t j, double beta)""",
+             doc = """Compute the ensemble average of c^+_i c_j""")
+
 c.add_method("""block_gf<triqs::gfs::imfreq> G_iw (gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = """Green\'s function in Matsubara frequencies""")
 
@@ -104,7 +107,13 @@ c.add_method("""block2_gf<w_l_lp_t,tensor_valued<4>> G2_iw_l_lp (**pomerol2triqs
 | n_inu_sum      | int                          | 500                | Maximum number of positive Matsubara frequencies in summation.             |
 +----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
 | inu_sum_tol    | double                       | 1e-6               | Tolerance for Matsubara frequency summation.                               |
-+----------------+------------------------------+--------------------+--------------------------------------------------------------------------0-+""")
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+""")
+
+c.add_method("""gf<imtime, scalar_valued> chi_tau(indices_t i1, indices_t j1, indices_t i2, indices_t j2, double beta, int n_tau, bool connected = false)""",
+             doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part""")
+
+c.add_method("""gf<imfreq, scalar_valued> chi_inu(indices_t i1, indices_t j1, indices_t i2, indices_t j2, double beta, int n_inu, bool connected = false)""",
+             doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies""")
 
 module.add_class(c)
 
