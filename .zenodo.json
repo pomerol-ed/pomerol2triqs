@@ -1,0 +1,11 @@
+{
+  "title": "pomerol2triqs: Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library",
+  "license": "GPL-3.0",
+  "creators": [
+    {
+      "affiliation": "University of Michigan, Ann Arbor, MI, USA",
+      "name": "Igor Krivenko"
+    }
+  ],
+  "access_right": "open"
+}
