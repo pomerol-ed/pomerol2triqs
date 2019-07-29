@@ -1,5 +1,5 @@
 # Version number of the application
-set(POMEROL2TRIQS_VERSION "0.2")
+set(POMEROL2TRIQS_VERSION "0.3")
 
 # Start configuration
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
