@@ -177,7 +177,7 @@ namespace pomerol2triqs {
     else
       g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh_bff, p.block_order, p.blocks, filler);
 
-    g2() = mpi_all_reduce(g2(), comm);
+    g2() = mpi::all_reduce(g2(), comm);
 
     return g2;
   }
@@ -250,7 +250,7 @@ namespace pomerol2triqs {
     };
 
     auto g2 = compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
-    g2() = mpi_all_reduce(g2(), comm);
+    g2() = mpi::all_reduce(g2(), comm);
 
     return g2;
   }

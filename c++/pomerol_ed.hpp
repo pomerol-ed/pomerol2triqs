@@ -30,7 +30,6 @@
 #include <triqs/gfs.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
-#include <triqs/mpi/boost.hpp>
 
 #include "g2_parameters.hpp"
 
@@ -58,7 +57,7 @@ namespace pomerol2triqs {
   /// Main solver class of pomerol2triqs
   class pomerol_ed {
 
-    triqs::mpi::communicator comm;
+    boost::mpi::communicator comm;
 
     const bool verbose;
     index_converter_t index_converter;
