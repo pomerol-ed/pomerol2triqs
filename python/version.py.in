@@ -2,7 +2,7 @@
 #
 # pomerol2triqs
 #
-# Copyright (C) 2017-2019 Igor Krivenko <igor.s.krivenko @ gmail.com>
+# Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

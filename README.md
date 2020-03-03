@@ -37,7 +37,7 @@ Installation
 License
 -------
 
-Copyright (C) 2017-2019 Igor Krivenko <igor.s.krivenko @ gmail.com>
+Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
 
 With contributions from Hugo U.R. Strand
 
