@@ -79,11 +79,11 @@ before_script:
   - cd $TRAVIS_BUILD_DIR/..
 
   # Download and install Eigen3
-  - wget http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
-  - tar xf 3.3.7.tar.bz2
+  - wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2
+  - tar xf eigen-3.3.7.tar.bz2
   - mkdir eigen.build
   - pushd eigen.build
-  - cmake $(readlink -f ../eigen-eigen-*) -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR
+  - cmake $(readlink -f ../eigen-*) -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR
   - make install
   - popd
 
