@@ -83,7 +83,7 @@ before_script:
   - tar xf eigen-3.3.7.tar.bz2
   - mkdir eigen.build
   - pushd eigen.build
-  - cmake $(readlink -f ../eigen-*) -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR
+  - cmake $(readlink -f ../eigen-3.3.7) -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR
   - make install
   - popd
 
