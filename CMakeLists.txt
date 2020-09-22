@@ -3,6 +3,10 @@ set(POMEROL2TRIQS_VERSION "0.3")
 
 # Start configuration
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_policy(VERSION 3.8)
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
 project(pomerol2triqs CXX)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -10,8 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Load TRIQS and Cpp2Py
-find_package(TRIQS 2.1.0 REQUIRED)
-find_package(Cpp2Py 1.6 REQUIRED)
+find_package(TRIQS 3.0.0 REQUIRED)
 
 # Append TRIQS installed files to the cmake load path
 list(APPEND CMAKE_MODULE_PATH ${TRIQS_ROOT}/share/cmake)
