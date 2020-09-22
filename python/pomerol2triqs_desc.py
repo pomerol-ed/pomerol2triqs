@@ -1,13 +1,12 @@
 # Generated automatically using the command :
-# c++2py ../c++/pomerol_ed.hpp -p -m pomerol2triqs -o pomerol2triqs --moduledoc="TRIQS wrapper around Pomerol ED library" --cxxflags="-std=c++14" -C pytriqs --only="pomerol_ed block_order_t channel_t" -N pomerol2triqs -I../c++ -I/usr/include/eigen3 -I${POMEROL_DIR}/include
+# c++2py ./../c++/pomerol_ed.hpp -p -m pomerol2triqs -o pomerol2triqs --moduledoc="TRIQS wrapper around Pomerol ED library" --cxxflags="-std=c++17" -C triqs --only="pomerol_ed block_order_t channel_t" -N pomerol2triqs -I../c++ -I/usr/include/eigen3 -I/mnt/home/wentzell/opt/pomerol/include
 from cpp2py.wrap_generator import *
 
 # The module
-module = module_(full_name = "pomerol2triqs", doc = "TRIQS wrapper around Pomerol ED library", app_name = "pomerol2triqs")
+module = module_(full_name = "pomerol2triqs", doc = r"TRIQS wrapper around Pomerol ED library", app_name = "pomerol2triqs")
 
 # Imports
-import pytriqs.gf
-import pytriqs.operators
+module.add_imports(*['triqs.gf', 'triqs.operators'])
 
 # Add here all includes
 module.add_include("pomerol_ed.hpp")
@@ -20,8 +19,8 @@ module.add_preamble("""
 #include <cpp2py/converters/set.hpp>
 #include <cpp2py/converters/string.hpp>
 #include <cpp2py/converters/tuple.hpp>
-#include <cpp2py/converters/vector.hpp>
 #include <cpp2py/converters/variant.hpp>
+#include <cpp2py/converters/vector.hpp>
 #include <triqs/cpp2py_converters/gf.hpp>
 #include <triqs/cpp2py_converters/operators_real_complex.hpp>
 

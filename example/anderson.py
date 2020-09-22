@@ -1,7 +1,7 @@
-from pytriqs.archive import HDFArchive
-from pytriqs.gf import *
-from pytriqs.operators import Operator, c, c_dag, n
-from pytriqs.utility import mpi
+from h5 import HDFArchive
+from triqs.gf import *
+from triqs.operators import Operator, c, c_dag, n
+from triqs.utility import mpi
 from pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product

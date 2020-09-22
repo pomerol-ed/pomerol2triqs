@@ -1,12 +1,12 @@
-from pytriqs.archive import HDFArchive
-from pytriqs.gf import *
-from pytriqs.operators import *
-from pytriqs.operators.util.op_struct import set_operator_structure, get_mkind
-from pytriqs.operators.util.U_matrix import U_matrix
-from pytriqs.operators.util.hamiltonians import h_int_slater
-from pytriqs.operators.util.observables import N_op, S_op, L_op
-from pytriqs.utility import mpi
-from pytriqs.utility.comparison_tests import *
+from h5 import HDFArchive
+from triqs.gf import *
+from triqs.operators import *
+from triqs.operators.util.op_struct import set_operator_structure, get_mkind
+from triqs.operators.util.U_matrix import U_matrix
+from triqs.operators.util.hamiltonians import h_int_slater
+from triqs.operators.util.observables import N_op, S_op, L_op
+from triqs.utility import mpi
+from triqs.utility.comparison_tests import *
 from pomerol2triqs import PomerolED
 from itertools import product
 
