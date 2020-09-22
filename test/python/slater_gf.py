@@ -27,7 +27,7 @@ F2 = J*(14.0/(1.0 + 0.625))
 F4 = F2*0.625
 
 spin_names = ("up", "dn")
-orb_names = range(-L, L+1)
+orb_names = list(range(-L, L+1))
 U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
 # Number of Matsubara frequencies for GF calculation

@@ -41,7 +41,7 @@ gf_struct = [['up', [0]], ['dn', [0]]]
 index_converter = {}
 index_converter.update({(sn, 0) : ("loc", 0, "down" if sn == "dn" else "up") for sn in spin_names})
 index_converter.update({("B%i_%s" % (k, sn), 0) : ("bath" + str(k), 0, "down" if sn == "dn" else "up")
-                        for k, sn in product(range(len(epsilon)), spin_names)})
+                        for k, sn in product(list(range(len(epsilon))), spin_names)})
 
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
