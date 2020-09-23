@@ -24,8 +24,7 @@ Installation
 ------------
 
 - Install the latest version of [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library (`master` branch).
-- Install the [TRIQS](http://triqs.github.io/triqs/2.2.x/install.html) library version 2.2.x.
-- `source <path_to_triqs_install_dir>/share/cpp2pyvars.sh`
+- Install the [TRIQS](http://triqs.github.io/triqs/3.0.x/install.html) library version 3.0.x.
 - `source <path_to_triqs_install_dir>/share/triqsvars.sh`
 - `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
@@ -39,7 +38,7 @@ License
 
 Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
 
-With contributions from Hugo U.R. Strand
+With contributions from Hugo U.R. Strand and Nils Wentzell.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
