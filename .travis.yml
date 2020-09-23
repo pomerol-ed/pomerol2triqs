@@ -1,5 +1,5 @@
 language: cpp
-sudo: required
+os: linux
 dist: bionic
 
 branches:
@@ -7,7 +7,7 @@ branches:
     - master
     - travis
 
-matrix:
+jobs:
   include:
   - compiler: clang
     addons:
