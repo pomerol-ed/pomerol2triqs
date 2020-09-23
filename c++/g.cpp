@@ -102,7 +102,7 @@ namespace pomerol2triqs {
     compute_field_operators(gf_struct);
 
     auto filler = [im_shift](gf_view<refreq, scalar_valued> g_el, Pomerol::GreensFunction const &pom_g) {
-      for (auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1_j * im_shift);
+      for (auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1i * im_shift);
     };
     return compute_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
   }

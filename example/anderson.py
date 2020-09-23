@@ -1,7 +1,7 @@
-from pytriqs.archive import HDFArchive
-from pytriqs.gf import *
-from pytriqs.operators import Operator, c, c_dag, n
-from pytriqs.utility import mpi
+from h5 import HDFArchive
+from triqs.gf import *
+from triqs.operators import Operator, c, c_dag, n
+from triqs.utility import mpi
 from pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product
@@ -54,7 +54,7 @@ index_converter = {}
 index_converter.update({(sn, 0) : ("loc", 0, "down" if sn == "dn" else "up") for sn in spin_names})
 # Bath degrees of freedom
 index_converter.update({("B%i_%s" % (k, sn), 0) : ("bath" + str(k), 0, "down" if sn == "dn" else "up")
-                        for k, sn in product(range(len(epsilon)), spin_names)})
+                        for k, sn in product(list(range(len(epsilon))), spin_names)})
 
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)

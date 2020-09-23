@@ -41,7 +41,7 @@ namespace pomerol2triqs {
       o     = -o;
     }
 
-    std::complex<double> res = (sqrt(2 * l + 1) / sqrt(o)) * std::pow(1_j, o + l) * boost::math::cyl_bessel_j(l + 0.5, o * pi / 2);
+    std::complex<double> res = (sqrt(2 * l + 1) / sqrt(o)) * std::pow(dcomplex{1i}, o + l) * boost::math::cyl_bessel_j(l + 0.5, o * pi / 2);
     // \bar T_{-ol} = \bar T_{ol}^*
     return neg_o ? std::conj(res) : res;
   }

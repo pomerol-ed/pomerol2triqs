@@ -1,8 +1,8 @@
-from pytriqs.archive import HDFArchive
-from pytriqs.gf import *
-from pytriqs.operators import Operator, c, c_dag, n
-from pytriqs.operators.util.hamiltonians import h_int_kanamori
-from pytriqs.utility import mpi
+from h5 import HDFArchive
+from triqs.gf import *
+from triqs.operators import Operator, c, c_dag, n
+from triqs.operators.util.hamiltonians import h_int_kanamori
+from triqs.utility import mpi
 from pomerol2triqs import PomerolED
 import numpy as np
 from itertools import product
@@ -25,7 +25,7 @@ epsilon = np.array([-0.2, 0.2])
 V = 0.7*np.eye(num_orb) + 0.1*(np.ones((num_orb, num_orb)) - np.eye(num_orb))
 
 spin_names = ("up", "dn")
-orb_names = range(num_orb)
+orb_names = list(range(num_orb))
 
 # Number of Matsubara frequencies for GF calculation
 n_iw = 1024
@@ -48,7 +48,7 @@ g2_n_l = 10
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
 gf_struct = [("up", orb_names), ("dn", orb_names)]
-print "Block structure of single-particle Green's functions:", gf_struct
+print("Block structure of single-particle Green's functions:", gf_struct)
 
 # Conversion from TRIQS to Pomerol notation for operator indices
 # TRIQS: block_name, inner_index
