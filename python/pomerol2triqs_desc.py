@@ -1,5 +1,5 @@
 # Generated automatically using the command :
-# c++2py ./../c++/pomerol_ed.hpp -p -m pomerol2triqs -o pomerol2triqs --moduledoc="TRIQS wrapper around Pomerol ED library" --cxxflags="-std=c++17" -C triqs --only="pomerol_ed block_order_t channel_t" -N pomerol2triqs -I../c++ -I/usr/include/eigen3 -I/mnt/home/wentzell/opt/pomerol/include
+# c++2py ./../c++/pomerol_ed.hpp -p -m pomerol2triqs -o pomerol2triqs --moduledoc="TRIQS wrapper around Pomerol ED library" --cxxflags="-std=c++17" -C triqs --only="pomerol_ed block_order_t channel_t" -N pomerol2triqs -I../c++ -I/usr/include/eigen3 -I${POMEROL_DIR}/include
 from cpp2py.wrap_generator import *
 
 # The module
