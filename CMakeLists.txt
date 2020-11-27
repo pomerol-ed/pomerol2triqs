@@ -34,6 +34,12 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR (NOT IS_ABSOLUTE ${CMAKE_INSTA
 endif()
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
+# Python Support
+option(PythonSupport "Build with Python support" ON)
+if(PythonSupport AND NOT TRIQS_WITH_PYTHON_SUPPORT)
+  message(FATAL_ERROR "TRIQS was installed without Python support. Cannot build the Python Interface. Disable the build with -DPythonSupport=OFF")
+endif()
+
 # Load Pomerol
 find_package(pomerol REQUIRED)
 
@@ -55,7 +61,7 @@ triqs_set_rpath_for_all_targets()
 add_subdirectory(c++)
 
 # Python interface
-if(${TRIQS_WITH_PYTHON_SUPPORT})
+if(PythonSupport)
   add_subdirectory(python)
 endif()
 
@@ -64,3 +70,7 @@ if(${Tests})
   enable_testing()
   add_subdirectory(test)
 endif()
+
+# Additional configuration files
+add_subdirectory(share)
+
