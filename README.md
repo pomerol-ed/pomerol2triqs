@@ -2,7 +2,8 @@ pomerol2triqs
 =============
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3908394.svg)](https://doi.org/10.5281/zenodo.3908394)
-[![Build Status](https://travis-ci.org/krivenko/pomerol2triqs.svg?branch=master)](https://travis-ci.org/krivenko/pomerol2triqs)
+[![CI](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml/badge.svg)](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml)
+
 
 Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library.
 
