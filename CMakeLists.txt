@@ -8,7 +8,6 @@ if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 project(pomerol2triqs CXX)
-set(CMAKE_CXX_STANDARD 17)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
