@@ -1,5 +1,5 @@
 # Version number of the application
-set(POMEROL2TRIQS_VERSION "0.5")
+set(POMEROL2TRIQS_VERSION "0.6")
 
 # Start configuration
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
@@ -40,7 +40,8 @@ if(PythonSupport AND NOT TRIQS_WITH_PYTHON_SUPPORT)
 endif()
 
 # Load Pomerol
-find_package(pomerol REQUIRED)
+find_package(pomerol 2.0 CONFIG REQUIRED)
+message(STATUS "Found pomerol ${pomerol_VERSION}")
 
 # Find MPI
 find_package(MPI)

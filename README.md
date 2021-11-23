@@ -24,7 +24,8 @@ Notation for the two-particle Green's functions is adopted from the
 Installation
 ------------
 
-- Install the latest version of [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library (`master` branch).
+- Install the [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library, version 2.0 or newer
+  **(Pomerol 1.x is supported only by pomerol2triqs 0.5 and older)**.
 - Install the [TRIQS](http://triqs.github.io/triqs/3.0.x/install.html) library version 3.0.x.
 - `source <path_to_triqs_install_dir>/share/triqsvars.sh`
 - `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
@@ -37,7 +38,7 @@ Installation
 License
 -------
 
-Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
+Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
 
 With contributions from Hugo U.R. Strand and Nils Wentzell.
 

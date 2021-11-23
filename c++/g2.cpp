@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
+ * Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace pomerol2triqs {
   auto pomerol_ed::compute_g2(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, block_order_t block_order, g2_blocks_t const &g2_blocks,
                               Filler filler) const -> block2_gf<Mesh, tensor_valued<4>> {
 
-    if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_g2: internal error!";
+    if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_g2: Internal error!";
 
     bool compute_all_blocks = g2_blocks.empty();
 
@@ -85,8 +85,8 @@ namespace pomerol2triqs {
               for (int c : range(B_size))
                 for (int d : range(B_size)) {
 
-                  if (verbose && !comm.rank()) {
-                    std::cout << "compute_g2: filling G^2 element ";
+                  if (verbose && !pMPI::rank(comm)) {
+                    std::cout << "compute_g2: Filling G^2 element ";
                     if (block_order == AABB) {
                       std::cout << "(" << A << "," << a << ")";
                       std::cout << "(" << A << "," << b << ")";
@@ -125,16 +125,16 @@ namespace pomerol2triqs {
   }
 
   auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const &p) -> block2_gf<w_nu_nup_t, tensor_valued<4>> {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: No Hamiltonian has been diagonalized";
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
 
-    if (verbose && !comm.rank()) std::cout << "G2_iw_inu_inup: filling output container" << std::endl;
+    if (verbose && !pMPI::rank(comm)) std::cout << "G2_iw_inu_inup: Filling output container" << std::endl;
 
     auto filler = [&p, this](gf_view<w_nu_nup_t, scalar_valued> g2_el, auto const &pom_g2) {
       long mesh_index = 0;
       for (auto w_nu_nup : g2_el.mesh()) {
-        if ((mesh_index++) % comm.size() != comm.rank()) continue;
+        if ((mesh_index++) % pMPI::size(comm) != pMPI::rank(comm)) continue;
 
         if (p.channel == AllFermionic) {
 
@@ -183,13 +183,13 @@ namespace pomerol2triqs {
   }
 
   auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const &p) -> block2_gf<w_l_lp_t, tensor_valued<4>> {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: No Hamiltonian has been diagonalized";
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
 
     gf_mesh<w_l_lp_t> mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}};
 
-    if (verbose && !comm.rank()) std::cout << "G2_iw_l_lp: filling output container" << std::endl;
+    if (verbose && !pMPI::rank(comm)) std::cout << "G2_iw_l_lp: Filling output container" << std::endl;
 
     auto filler = [&p, this](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const &pom_g2) {
 
@@ -207,7 +207,7 @@ namespace pomerol2triqs {
 
       long mesh_index = 0;
       for (auto iw : std::get<0>(g2_el.mesh())) {
-        if((mesh_index++) % comm.size() != comm.rank()) continue;
+        if((mesh_index++) % pMPI::size(comm) != pMPI::rank(comm)) continue;
 
         int w_m = iw.index();
 

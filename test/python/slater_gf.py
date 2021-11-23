@@ -30,6 +30,9 @@ spin_names = ("up", "dn")
 orb_names = list(range(-L, L+1))
 U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
+# Do not split H into blocks
+ignore_symmetries = False
+
 # Number of Matsubara frequencies for GF calculation
 n_iw = 200
 
@@ -71,11 +74,7 @@ assert h_comm(Sz).is_zero()
 assert h_comm(Lz).is_zero()
 
 # Diagonalize H
-
-# Do not split H into blocks (uncomment to generate reference data)
-#ed.diagonalize(H, True)
-
-ed.diagonalize(H, [N, Sz, Lz])
+ed.diagonalize(H, ignore_symmetries)
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)

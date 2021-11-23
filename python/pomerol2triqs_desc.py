@@ -26,9 +26,10 @@ module.add_preamble("""
 
 using namespace pomerol2triqs;
 using namespace Pomerol;
+using namespace Pomerol::LatticePresets;
 """)
 
-module.add_enum("spin",          ['down', 'up'], "Pomerol", "Spin projection")
+module.add_enum("spin",          ['down', 'up'], "Pomerol::LatticePresets", "Spin projection")
 module.add_enum("block_order_t", ['AABB', 'ABBA'], "pomerol2triqs", """Order of block indices for Block2Gf objects""")
 module.add_enum("channel_t", ['PP', 'PH', 'AllFermionic'], "pomerol2triqs", """Channel in which Matsubara frequency representation is defined""")
 
@@ -47,10 +48,7 @@ c.add_property(name = "rho_threshold",
                doc = """Truncation threshold for density matrix elements""")
 
 c.add_method("""void diagonalize (many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
-             doc = """Diagonalize Hamiltonian optionally employing conservation of N and S_z""")
-
-c.add_method("""void diagonalize (many_body_op_t hamiltonian, std::vector<many_body_op_t> integrals_of_motion)""",
-             doc = """Diagonalize Hamiltonian using provided integrals of motion""")
+             doc = """Diagonalize Hamiltonian optionally employing its symmetries""")
 
 c.add_method("""std::complex<double> ensemble_average(indices_t i, indices_t j, double beta)""",
              doc = """Compute the ensemble average of c^+_i c_j""")

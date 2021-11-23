@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
+ * Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,170 +21,85 @@
 
 namespace pomerol2triqs {
 
-  Pomerol::Lattice pomerol_ed::init() {
-
-    Pomerol::Lattice l;
-
-    std::map<std::string, int> site_max_orb;
-    for (auto const &ind : index_converter) {
-      std::string pomerol_site;
-      int pomerol_orb;
-      std::tie(pomerol_site, pomerol_orb, std::ignore) = ind.second;
-
-      auto it = site_max_orb.find(pomerol_site);
-      if (it == site_max_orb.end())
-        site_max_orb[pomerol_site] = pomerol_orb;
-      else
-        it->second = std::max(it->second, pomerol_orb);
-    }
-
-    for (auto const &site_orb : site_max_orb) l.addSite(new Pomerol::Lattice::Site(site_orb.first, site_orb.second + 1, 2));
-
-    return l;
-  }
-
   pomerol_ed::pomerol_ed(index_converter_t const &index_converter, bool verbose)
-     : verbose(verbose), index_converter(index_converter), bare_lattice(init()), index_info(bare_lattice.getSiteMap()) {
-    index_info.prepare();
-    if (verbose && !comm.rank()) {
-      std::cout << "Pomerol: lattice sites" << std::endl;
-      bare_lattice.printSites();
+     : verbose(verbose), index_converter(index_converter) {
+    for (auto const &ind : index_converter) {
+      index_info.addInfo(ind.second);
+    }
+    if (verbose && !pMPI::rank(comm)) {
       std::cout << "Pomerol: operator indices" << std::endl;
-      index_info.printIndices();
+      std::cout << index_info << std::endl;
     }
   }
 
-  double pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian) {
-    // Workaround for the broken std::vector<bool>
-    struct bool_ {
-      bool b;
-    };
-
-    std::vector<bool_> OperatorSequence;
-    std::vector<std::string> SiteLabels;
-    std::vector<unsigned short> Orbitals;
-    std::vector<unsigned short> Spins;
-
-    lattice.reset(new Pomerol::Lattice(bare_lattice));
-
-    double gs_shift = 0;
+  template<typename HExprType>
+  void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian) {
+    h_expr.reset(new h_expr_t(HExprType()));
 
     for (auto const &term : hamiltonian) {
-      if (term.monomial.empty()) {
-        gs_shift = std::real(term.coef);
-        continue; // Constant term is unphysical anyway ...
-      }
-      OperatorSequence.clear();
-      SiteLabels.clear();
-      Orbitals.clear();
-      Spins.clear();
-
-      for (auto o : term.monomial) {
+      HExprType pom_term(static_cast<typename HExprType::scalar_type>(term.coef));
+      for(auto const& o : term.monomial) {
         auto it = index_converter.find(o.indices);
-        if (it == index_converter.end()) TRIQS_RUNTIME_ERROR << "diagonalize: invalid Hamiltonian, unexpected operator indices " << o.indices;
+        if (it == index_converter.end())
+          TRIQS_RUNTIME_ERROR << "diagonalize: Invalid Hamiltonian, unexpected operator indices " << o.indices;
 
-        OperatorSequence.push_back({o.dagger});
-
-        std::string site;
-        unsigned short orb;
-        Pomerol::spin s;
-        std::tie(site, orb, s) = it->second;
-        SiteLabels.push_back(site);
-        Orbitals.push_back(orb);
-        Spins.push_back(s);
+        pom_term = pom_term * (o.dagger ?
+            Pomerol::Operators::c_dag(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)) :
+            Pomerol::Operators::c(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second))
+          );
       }
-
-      lattice->addTerm(new Pomerol::Lattice::Term(term.monomial.size(), reinterpret_cast<bool *>(OperatorSequence.data()), term.coef,
-                                                  SiteLabels.data(), Orbitals.data(), Spins.data()));
+      std::get<HExprType>(*h_expr) += pom_term;
     }
 
-    storage.reset(new Pomerol::IndexHamiltonian(lattice.get(), index_info));
-    storage->prepare();
-
-    if (verbose && !comm.rank()) {
-      std::cout << "Pomerol: terms of Hamiltonian" << std::endl;
-      std::cout << *storage << std::endl;
+    if (verbose && !pMPI::rank(comm)) {
+      std::cout << "Pomerol: Hamiltonian" << std::endl;
+      std::cout << *h_expr << std::endl;
     }
-
-    return gs_shift;
   }
 
-  void pomerol_ed::diagonalize_main(double gs_shift) {
+  void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian) {
+    using namespace Pomerol::LatticePresets;
+
+    if(std::all_of(hamiltonian.cbegin(),
+                   hamiltonian.cend(),
+                   [](auto const& term) { return term.coef.is_real(); })
+    )
+      diagonalize_prepare_impl<RealExpr>(hamiltonian);
+    else
+      diagonalize_prepare_impl<ComplexExpr>(hamiltonian);
+  }
+
+  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries) {
+    diagonalize_prepare(hamiltonian);
+
+    // Create Hilbert space
+    std::visit([&](auto const& h) { hs.reset(new hilbert_space_t(index_info, h)); },
+               *h_expr);
+    if(!ignore_symmetries)
+      hs->compute();
 
     // Classify many-body states
-    states_class.reset(new Pomerol::StatesClassification(index_info, *symm));
-    states_class->compute();
+    states_class.reset(new Pomerol::StatesClassification());
+    states_class->compute(*hs);
 
     // Matrix representation of the Hamiltonian
-    matrix_h.reset(new Pomerol::Hamiltonian(index_info, *storage, *states_class));
-    matrix_h->prepare(comm);
+    matrix_h.reset(new Pomerol::Hamiltonian(*states_class));
+    std::visit([&](auto const& h) { matrix_h->prepare(h, *hs, comm); }, *h_expr);
     matrix_h->compute(comm);
 
     // Get ground state energy
-    if (verbose && !comm.rank()) { std::cout << "Pomerol: ground state energy is " << matrix_h->getGroundEnergy() + gs_shift << std::endl; }
+    if (verbose && !pMPI::rank(comm))
+      std::cout << "Pomerol: Ground state energy is " << matrix_h->getGroundEnergy() << std::endl;
 
     // Reset containers, we will compute them later if needed
     rho.release();
     ops_container.release();
   }
 
-  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries) {
-
-    double gs_shift = diagonalize_prepare(hamiltonian);
-
-    // Check the Hamiltonian commutes with the total number of particles
-    Pomerol::OperatorPresets::N N(index_info.getIndexSize());
-    if (!storage->commutes(N)) TRIQS_RUNTIME_ERROR << "diagonalize: Hamiltonian does not conserve the total number of particles";
-
-    // Construct Symmetrizer
-    symm.reset(new Pomerol::Symmetrizer(index_info, *storage));
-    symm->compute(ignore_symmetries);
-
-    diagonalize_main(gs_shift);
-  }
-
-  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, std::vector<many_body_op_t> const& integrals_of_motion) {
-
-    double gs_shift = diagonalize_prepare(hamiltonian);
-
-    std::vector<Pomerol::Operator> iom;
-    for(auto const& op : integrals_of_motion) {
-      Pomerol::Operator pom_op;
-      for (auto const &term : op) {
-        Pomerol::Operator pom_term;
-        pom_term += term.coef;
-        for (auto o : term.monomial) {
-          Pomerol::ParticleIndex pom_ind = lookup_pomerol_index(o.indices);
-
-          if (pom_ind == -1)
-            TRIQS_RUNTIME_ERROR << "diagonalize: invalid integral of motion, unexpected operator indices " << o.indices;
-
-          if(o.dagger)
-            pom_term *= Pomerol::OperatorPresets::c_dag(pom_ind);
-          else
-            pom_term *= Pomerol::OperatorPresets::c(pom_ind);
-        }
-
-        pom_op += pom_term;
-      }
-      iom.push_back(pom_op);
-    }
-
-    // Construct Symmetrizer
-    symm.reset(new Pomerol::Symmetrizer(index_info, *storage));
-    symm->compute(iom);
-
-    diagonalize_main(gs_shift);
-  }
-
   Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const &i) const {
     auto it = index_converter.find(i);
     if (it == index_converter.end()) return -1;
-    std::string site;
-    unsigned short orb;
-    Pomerol::spin s;
-    std::tie(site, orb, s) = it->second;
-    return index_info.getIndex(site, orb, s);
+    return index_info.getIndex(it->second);
   }
 
   // Translate gf_struct into a set of ParticleIndex
@@ -193,7 +108,7 @@ namespace pomerol2triqs {
     for (auto const &b : gf_struct) {
       for (auto const &i : b.second) {
         auto pom_ind = lookup_pomerol_index({b.first, i});
-        if (pom_ind == -1) TRIQS_RUNTIME_ERROR << "gf_struct_to_pomerol_indices: unexpected GF index " << b.first << "," << i;
+        if (pom_ind == -1) TRIQS_RUNTIME_ERROR << "gf_struct_to_pomerol_indices: Unexpected GF index " << b.first << "," << i;
         indices.insert(pom_ind);
       }
     }
@@ -202,10 +117,11 @@ namespace pomerol2triqs {
 
   // Create the Density Matrix.
   void pomerol_ed::compute_rho(double beta) {
-    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "compute_rho: internal error!";
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "compute_rho: Internal error!";
 
     if (!rho || rho->beta != beta) {
-      if (verbose && !comm.rank()) std::cout << "Pomerol: computing density matrix for \\beta = " << beta << std::endl;
+      if (verbose && !pMPI::rank(comm))
+        std::cout << "Pomerol: Computing density matrix for \\beta = " << beta << std::endl;
       rho.reset(new Pomerol::DensityMatrix(*states_class, *matrix_h, beta));
       rho->prepare();
       rho->compute();
@@ -214,12 +130,12 @@ namespace pomerol2triqs {
   }
 
   void pomerol_ed::compute_field_operators(gf_struct_t const &gf_struct) {
-    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "compute_field_operators: internal error!";
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "compute_field_operators: Internal error!";
 
     auto new_ops = gf_struct_to_pomerol_indices(gf_struct);
     if (!ops_container || computed_ops != new_ops) {
-      if (verbose && !comm.rank()) {
-        std::cout << "Pomerol: computing field operators with indices ";
+      if (verbose && !pMPI::rank(comm)) {
+        std::cout << "Pomerol: Computing field operators with indices ";
         bool comma = false;
         for (auto i : new_ops) {
           std::cout << (comma ? ", " : "") << i;
@@ -228,8 +144,8 @@ namespace pomerol2triqs {
         std::cout << std::endl;
       }
 
-      ops_container.reset(new Pomerol::FieldOperatorContainer(index_info, *states_class, *matrix_h));
-      ops_container->prepareAll(new_ops);
+      ops_container.reset(new Pomerol::FieldOperatorContainer(index_info, *hs, *states_class, *matrix_h));
+      ops_container->prepareAll(*hs);
       ops_container->computeAll();
 
       computed_ops = new_ops;

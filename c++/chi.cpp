@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
+ * Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,23 +31,23 @@ namespace pomerol2triqs {
 
     Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
     if (pom_i == -1)
-      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected index i = " << i;
+      TRIQS_RUNTIME_ERROR << "ensemble_average: Unexpected index i = " << i;
     Pomerol::ParticleIndex pom_j = lookup_pomerol_index(j);
     if (pom_j == -1)
-      TRIQS_RUNTIME_ERROR << "ensemble_average: unexpected index j = " << j;
+      TRIQS_RUNTIME_ERROR << "ensemble_average: Unexpected index j = " << j;
 
     if (!matrix_h)
-      TRIQS_RUNTIME_ERROR << "ensemble_average: no Hamiltonian has been diagonalized";
+      TRIQS_RUNTIME_ERROR << "ensemble_average: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
-    Pomerol::QuadraticOperator op(index_info, *states_class, *matrix_h, pom_i, pom_j);
-    op.prepare();
+    Pomerol::QuadraticOperator op(index_info, *hs, *states_class, *matrix_h, pom_i, pom_j);
+    op.prepare(*hs);
     op.compute();
 
-    Pomerol::EnsembleAverage EA(*states_class, *matrix_h, op, *rho);
-    EA.prepare();
+    Pomerol::EnsembleAverage EA(op, *rho);
+    EA.compute();
 
-    return EA.getResult();
+    return EA();
   }
 
   template <typename Mesh, typename Filler>
@@ -59,12 +59,12 @@ namespace pomerol2triqs {
                                                   gf_mesh<Mesh> const &mesh,
                                                   Filler filler) const {
     if (!states_class || !matrix_h || !rho)
-      TRIQS_RUNTIME_ERROR << "compute_chi: internal error!";
+      TRIQS_RUNTIME_ERROR << "compute_chi: Internal error!";
 
     auto checked_lookup = [&](indices_t const &i) {
       Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
       if (pom_i == -1)
-        TRIQS_RUNTIME_ERROR << "compute_chi: unexpected index " << i;
+        TRIQS_RUNTIME_ERROR << "compute_chi: Unexpected index " << i;
       return pom_i;
     };
 
@@ -73,11 +73,11 @@ namespace pomerol2triqs {
     Pomerol::ParticleIndex pom_i2 = checked_lookup(i2);
     Pomerol::ParticleIndex pom_j2 = checked_lookup(j2);
 
-    Pomerol::QuadraticOperator A(index_info, *states_class, *matrix_h, pom_i1, pom_j1);
-    Pomerol::QuadraticOperator B(index_info, *states_class, *matrix_h, pom_i2, pom_j2);
+    Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, pom_i1, pom_j1);
+    Pomerol::QuadraticOperator B(index_info, *hs, *states_class, *matrix_h, pom_i2, pom_j2);
 
-    A.prepare(); A.compute();
-    B.prepare(); B.compute();
+    A.prepare(*hs); A.compute();
+    B.prepare(*hs); B.compute();
 
     Pomerol::Susceptibility pom_chi(*states_class, *matrix_h, A, B, *rho);
     pom_chi.prepare();
@@ -95,7 +95,7 @@ namespace pomerol2triqs {
                                                 indices_t const &i2,
                                                 indices_t const &j2,
                                                 double beta, int n_tau, bool connected) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_tau: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_tau: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
     auto filler = [](gf_view<imtime, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
@@ -109,7 +109,7 @@ namespace pomerol2triqs {
                                                 indices_t const &i2,
                                                 indices_t const &j2,
                                                 double beta, int n_inu, bool connected) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_inu: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_inu: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
     auto filler = [](gf_view<imfreq, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {

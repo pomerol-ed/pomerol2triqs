@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2020 Igor Krivenko <igor.s.krivenko @ gmail.com>
+ * Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace pomerol2triqs {
   template <typename Mesh, typename Filler>
   block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const {
 
-    if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_gf: internal error!";
+    if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_gf: Internal error!";
 
     struct index_visitor {
       std::vector<std::string> indices;
@@ -56,7 +56,7 @@ namespace pomerol2triqs {
         for (int i2 : range(n)) {
           Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({bl.first, bl.second[i2]});
 
-          if (verbose && !comm.rank())
+          if (verbose && !pMPI::rank(comm))
             std::cout << "fill_gf: Filling GF component (" << bl.first << "," << bl.second[i1] << ")(" << bl.first << "," << bl.second[i2] << ")"
                       << std::endl;
           auto g_el = slice_target_to_scalar(g, i1, i2);
@@ -74,7 +74,7 @@ namespace pomerol2triqs {
   }
 
   block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const &gf_struct, double beta, int n_iw) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
 
@@ -85,7 +85,7 @@ namespace pomerol2triqs {
   }
 
   block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const &gf_struct, double beta, int n_tau) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
 
@@ -97,7 +97,7 @@ namespace pomerol2triqs {
 
   block_gf<refreq> pomerol_ed::G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
                                    double im_shift) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_w: no Hamiltonian has been diagonalized";
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_w: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
 

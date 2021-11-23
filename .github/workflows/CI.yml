@@ -56,6 +56,19 @@ jobs:
         python3-mako
         libnfft3-dev
 
+    - name: Install libcommute
+      env:
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+           git clone https://github.com/krivenko/libcommute libcommute
+           mkdir libcommute/build && pushd libcommute/build
+           cmake ..                                 \
+              -DCMAKE_INSTALL_PREFIX=$HOME/install  \
+              -DTESTS=OFF                           \
+              -DEXAMPLES=OFF
+           make install
+           popd
+
     - name: Build & install Pomerol
       env:
         CC: ${{ matrix.cc }}
@@ -63,10 +76,12 @@ jobs:
       run: |
         git clone https://github.com/aeantipov/pomerol
         mkdir pomerol/build && pushd pomerol/build
-        cmake ..                                 \
-          -DCMAKE_BUILD_TYPE=Debug               \
-          -DCMAKE_INSTALL_PREFIX=$HOME/install   \
-          -DTesting=OFF
+        cmake ..                                    \
+          -DCMAKE_BUILD_TYPE=Debug                  \
+          -DCMAKE_INSTALL_PREFIX=$HOME/install      \
+          -Dlibcommute_DIR=$HOME/install/lib/cmake  \
+          -DTesting=OFF                             \
+          -DDocumentation=OFF
         make -j2 install VERBOSE=1
         popd
 
