@@ -1,7 +1,7 @@
 pomerol2triqs
 =============
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3908394.svg)](https://doi.org/10.5281/zenodo.3908394)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5735413.svg)](https://doi.org/10.5281/zenodo.5735413)
 [![CI](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml/badge.svg)](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml)
 
 
