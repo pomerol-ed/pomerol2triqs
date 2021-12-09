@@ -17,8 +17,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - {os: ubuntu-18.04, cc: gcc-7, cxx: g++-7}
-          - {os: ubuntu-18.04, cc: clang-8, cxx: clang++-8}
+          - {os: ubuntu-20.04, cc: gcc-10, cxx: g++-10}
+          - {os: ubuntu-20.04, cc: clang-12, cxx: clang++-12}
+
 
     runs-on: ${{ matrix.os }}
 
@@ -31,9 +32,9 @@ jobs:
     - name: Install Ubuntu dependencies
       run: >
         sudo apt-get install
-        g++-7
-        clang-8
-        libgfortran3
+        g++-10
+        clang-12
+        libgfortran4
         gfortran
         libboost-all-dev
         libeigen3-dev
@@ -90,7 +91,7 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-        git clone https://github.com/TRIQS/triqs --branch 3.0.x
+        git clone https://github.com/TRIQS/triqs --branch 3.1.x
         mkdir triqs/build && pushd triqs/build
         cmake ..                                 \
           -DCMAKE_BUILD_TYPE=Debug               \
@@ -104,7 +105,7 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-        source $HOME/install/share/triqsvars.sh
+        source $HOME/install/share/triqs/triqsvars.sh
         mkdir build && pushd build
         cmake ..                                 \
           -DCMAKE_BUILD_TYPE=Debug               \
@@ -114,6 +115,6 @@ jobs:
 
     - name: Test pomerol2triqs
       run: |
-        source $HOME/install/share/triqsvars.sh
+        source $HOME/install/share/triqs/triqsvars.sh
         cd build
         ctest --output-on-failure

@@ -24,16 +24,26 @@ Notation for the two-particle Green's functions is adopted from the
 Installation
 ------------
 
-- Install the [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library, version 2.0 or newer
-  **(Pomerol 1.x is supported only by pomerol2triqs 0.5 and older)**.
-- Install the [TRIQS](http://triqs.github.io/triqs/3.0.x/install.html) library version 3.0.x.
-- `source <path_to_triqs_install_dir>/share/triqsvars.sh`
+- Install the [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library.
+- Install the [TRIQS](http://triqs.github.io/triqs/latest/install.html) library.
+- `source <path_to_triqs_install_dir>/share/triqs/triqsvars.sh`
 - `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
 - `cmake ../pomerol2triqs.git -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=<path_to_install_dir> -DPOMEROL_PATH=<path_to_pomerol_install_dir>`
 - `make`
 - `make test`
 - `make install`
+
+Pomerol and TRIQS version compatibility
+---------------------------------------
+
+| pomerol2triqs release | Pomerol version | TRIQS version |
+|-----------------------|-----------------|---------------|
+| v0.7                  | 2.0             | 3.1.x         |
+| v0.6                  | 2.0             | 3.0.x         |
+| v0.5                  | 1.3             | 3.0.x         |
+| v0.4                  | 1.3             | 2.2.x         |
+| v0.3                  | 1.3             | 2.1.x         |
 
 License
 -------

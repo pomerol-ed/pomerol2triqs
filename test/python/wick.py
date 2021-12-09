@@ -35,7 +35,7 @@ g2_n_iw = 5
 g2_n_inu = 5
 
 # GF structure
-gf_struct = [['up', [0]], ['dn', [0]]]
+gf_struct = [['up', 1], ['dn', 1]]
 
 # Conversion from TRIQS to Pomerol notation for operator indices
 index_converter = {}

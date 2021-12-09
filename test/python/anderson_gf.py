@@ -36,7 +36,7 @@ energy_window = (-5, 5)
 n_w = 1000
 
 # GF structure
-gf_struct = [['up', [0]], ['dn', [0]]]
+gf_struct = [['up', 1], ['dn', 1]]
 
 # Conversion from TRIQS to Pomerol notation for operator indices
 index_converter = {}

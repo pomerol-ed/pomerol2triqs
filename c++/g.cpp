@@ -26,39 +26,28 @@
 namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
-  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const {
+  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_gf: Internal error!";
-
-    struct index_visitor {
-      std::vector<std::string> indices;
-      void operator()(int i) { indices.push_back(std::to_string(i)); }
-      void operator()(std::string s) { indices.push_back(s); }
-    };
 
     std::vector<std::string> block_names;
     std::vector<gf<Mesh>> g_blocks;
 
     for (auto const &bl : gf_struct) {
       block_names.push_back(bl.first);
-      int n = bl.second.size();
+      int n = bl.second;
 
-      index_visitor iv;
-      for (auto &ind : bl.second) { visit(iv, ind); }
-      std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
-      triqs::utility::mini_vector<int, 2> target_shape{n, n};
-      g_blocks.push_back(gf<Mesh>{mesh, target_shape, indices});
+      g_blocks.push_back(gf<Mesh>{mesh, {n, n}});
 
       auto &g = g_blocks.back();
 
       for (int i1 : range(n)) {
-        Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({bl.first, bl.second[i1]});
+        Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({bl.first, i1});
         for (int i2 : range(n)) {
-          Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({bl.first, bl.second[i2]});
+          Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({bl.first, i2});
 
-          if (verbose && !pMPI::rank(comm))
-            std::cout << "fill_gf: Filling GF component (" << bl.first << "," << bl.second[i1] << ")(" << bl.first << "," << bl.second[i2] << ")"
-                      << std::endl;
+          if (verbose && !comm.rank())
+            std::cout << "fill_gf: Filling GF component (" << bl.first << "," << i1 << ")(" << bl.first << "," << i2 << ")" << std::endl;
           auto g_el = slice_target_to_scalar(g, i1, i2);
 
           Pomerol::GreensFunction pom_g(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
