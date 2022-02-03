@@ -21,7 +21,8 @@
 
 #include <boost/math/special_functions/bessel.hpp>
 #include <boost/math/constants/constants.hpp>
-#include <triqs/arrays.hpp>
+
+#include <nda/nda.hpp>
 
 ///////////////////////////////////////////////////////
 // Methods to compute two-particle Green's functions //
@@ -197,8 +198,8 @@ namespace pomerol2triqs {
           return +pom_g2(nup_n, W_n, nu_n);
       };
 
-      array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
-      array<bool, 2> llp_element_converged(p.n_l, p.n_l);
+      nda::array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
+      nda::array<bool, 2> llp_element_converged(p.n_l, p.n_l);
       int n_llp_elements_converged;
 
       long mesh_index = 0;
