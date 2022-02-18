@@ -1,13 +1,11 @@
-# Version number of the application
-set(POMEROL2TRIQS_VERSION "0.7")
-
 # Start configuration
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 cmake_policy(VERSION 3.8)
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
-project(pomerol2triqs CXX)
+
+project(pomerol2triqs VERSION 0.7 LANGUAGES CXX)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -46,9 +44,10 @@ message(STATUS "Found pomerol ${pomerol_VERSION}")
 # Find MPI
 find_package(MPI)
 
-# Get git hash
-triqs_get_git_hash_of_source_dir(POMEROL2TRIQS_GIT_HASH)
-message(STATUS "Git hash: ${POMEROL2TRIQS_GIT_HASH}")
+# Get the git hash & print status
+triqs_get_git_hash_of_source_dir(PROJECT_GIT_HASH)
+message(STATUS "${PROJECT_NAME} version : ${PROJECT_VERSION}")
+message(STATUS "${PROJECT_NAME} Git hash: ${PROJECT_GIT_HASH}")
 
 option(Tests "Enable Tests" ON)
 

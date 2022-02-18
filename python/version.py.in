@@ -19,12 +19,12 @@
 #
 ################################################################################
 
-version = "@POMEROL2TRIQS_VERSION@"
+version = "@PROJECT_VERSION@"
 triqs_hash = "@TRIQS_GIT_HASH@"
-pomerol2triqs_hash = "@POMEROL2TRIQS_GIT_HASH@"
+@PROJECT_NAME@_hash = "@PROJECT_GIT_HASH@"
 
 def show_version():
-  print "\nYou are using the pomerol2triqs solver version %s\n" % version
+  print("\nYou are using @PROJECT_NAME@ version %s\n"%version)
 
 def show_git_hash():
-  print "\nYou are using the pomerol2triqs solver git hash %s based on triqs git hash %s\n"%(pomerol2triqs_hash, triqs_hash)
+  print("\nYou are using @PROJECT_NAME@ git hash %s based on triqs git hash %s\n"%("@PROJECT_GIT_HASH@", triqs_hash))
