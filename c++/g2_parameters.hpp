@@ -75,4 +75,4 @@ namespace pomerol2triqs {
     g2_iw_l_lp_params_t() {}
     g2_iw_l_lp_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
-}
+} // namespace pomerol2triqs

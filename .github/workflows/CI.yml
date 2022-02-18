@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - {os: ubuntu-18.04, cc: gcc-7, cxx: g++-7}
-          - {os: ubuntu-18.04, cc: clang-8, cxx: clang++-8}
+          - {os: ubuntu-20.04, cc: gcc-10, cxx: g++-10}
+          - {os: ubuntu-20.04, cc: clang-13, cxx: clang++-13}
 
     runs-on: ${{ matrix.os }}
 
@@ -30,12 +30,14 @@ jobs:
 
     - name: Install Ubuntu dependencies
       run: >
+        sudo apt-get install lsb-release wget software-properties-common &&
+        wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh &&
+        sudo chmod +x /tmp/llvm.sh && sudo /tmp/llvm.sh 13 &&
         sudo apt-get install
-        g++-7
-        clang-8
-        libgfortran3
+        g++-10
+        clang-13
+        libgfortran4
         gfortran
-        libboost-all-dev
         libeigen3-dev
         openmpi-bin
         openmpi-common
@@ -55,6 +57,12 @@ jobs:
         python3-mpi4py
         python3-mako
         libnfft3-dev
+
+    - name: Download Boost (a C++20 compatible version)
+      run: |
+           wget -q https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2
+           tar -xf boost_1_78_0.tar.bz2
+           mv boost_1_78_0 boost
 
     - name: Install libcommute
       env:
@@ -76,11 +84,12 @@ jobs:
       run: |
         git clone https://github.com/aeantipov/pomerol
         mkdir pomerol/build && pushd pomerol/build
-        cmake ..                                    \
-          -DCMAKE_BUILD_TYPE=Debug                  \
-          -DCMAKE_INSTALL_PREFIX=$HOME/install      \
-          -Dlibcommute_DIR=$HOME/install/lib/cmake  \
-          -DTesting=OFF                             \
+        cmake ..                                         \
+          -DCMAKE_BUILD_TYPE=Debug                       \
+          -DCMAKE_INSTALL_PREFIX=$HOME/install           \
+          -DBoost_INCLUDE_DIR=$(readlink -f ../../boost) \
+          -Dlibcommute_DIR=$HOME/install/lib/cmake       \
+          -DTesting=OFF                                  \
           -DDocumentation=OFF
         make -j2 install VERBOSE=1
         popd
@@ -90,11 +99,12 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-        git clone https://github.com/TRIQS/triqs --branch 3.0.x
+        git clone https://github.com/TRIQS/triqs --branch 3.1.x
         mkdir triqs/build && pushd triqs/build
-        cmake ..                                 \
-          -DCMAKE_BUILD_TYPE=Debug               \
-          -DCMAKE_INSTALL_PREFIX=$HOME/install   \
+        cmake ..                                         \
+          -DCMAKE_BUILD_TYPE=Debug                       \
+          -DCMAKE_INSTALL_PREFIX=$HOME/install           \
+          -DBoost_INCLUDE_DIR=$(readlink -f ../../boost) \
           -DBuild_Tests=OFF
         make -j2 install VERBOSE=1
         popd
@@ -104,7 +114,7 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-        source $HOME/install/share/triqsvars.sh
+        source $HOME/install/share/triqs/triqsvars.sh
         mkdir build && pushd build
         cmake ..                                 \
           -DCMAKE_BUILD_TYPE=Debug               \
@@ -114,6 +124,7 @@ jobs:
 
     - name: Test pomerol2triqs
       run: |
-        source $HOME/install/share/triqsvars.sh
+        sudo sh -c 'echo -e "\nrmaps_base_oversubscribe = 1" >> /etc/openmpi/openmpi-mca-params.conf'
+        source $HOME/install/share/triqs/triqsvars.sh
         cd build
         ctest --output-on-failure

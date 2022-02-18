@@ -27,7 +27,8 @@ F2 = J*(14.0/(1.0 + 0.625))
 F4 = F2*0.625
 
 spin_names = ("up", "dn")
-orb_names = list(range(-L, L+1))
+num_orb = 2*L+1
+orb_names = list(range(num_orb))
 U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
 # Do not split H into blocks
@@ -45,12 +46,12 @@ energy_window = (-5, 5)
 n_w = 1000
 
 # GF structure
-gf_struct = set_operator_structure(spin_names, orb_names, False)
+gf_struct = set_operator_structure(spin_names, num_orb, False)
 
 mkind = get_mkind(False, None)
 # Conversion from TRIQS to Pomerol notation for operator indices
-index_converter = {mkind(sn, bn) : ("atom", bi, "down" if sn == "dn" else "up")
-                   for sn, (bi, bn) in product(spin_names, enumerate(orb_names))}
+index_converter = {mkind(sn, on) : ("atom", on, "down" if sn == "dn" else "up")
+                   for sn, on in product(spin_names, orb_names)}
 
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)

@@ -21,37 +21,34 @@
 
 namespace pomerol2triqs {
 
-  pomerol_ed::pomerol_ed(index_converter_t const &index_converter, bool verbose)
-     : verbose(verbose), index_converter(index_converter) {
-    for (auto const &ind : index_converter) {
-      index_info.addInfo(ind.second);
-    }
-    if (verbose && !pMPI::rank(comm)) {
+  pomerol_ed::pomerol_ed(index_converter_t const &index_converter, bool verbose) : verbose(verbose), index_converter(index_converter) {
+
+    if (!mpi::is_initialized()) TRIQS_RUNTIME_ERROR << "pomerol2triqs does not support running in the serial (no MPI) mode";
+
+    for (auto const &ind : index_converter) { index_info.addInfo(ind.second); }
+    if (verbose && !comm.rank()) {
       std::cout << "Pomerol: operator indices" << std::endl;
       std::cout << index_info << std::endl;
     }
   }
 
-  template<typename HExprType>
-  void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian) {
+  template <typename HExprType> void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian) {
     h_expr.reset(new h_expr_t(HExprType()));
 
     for (auto const &term : hamiltonian) {
       HExprType pom_term(static_cast<typename HExprType::scalar_type>(term.coef));
-      for(auto const& o : term.monomial) {
+      for (auto const &o : term.monomial) {
         auto it = index_converter.find(o.indices);
-        if (it == index_converter.end())
-          TRIQS_RUNTIME_ERROR << "diagonalize: Invalid Hamiltonian, unexpected operator indices " << o.indices;
+        if (it == index_converter.end()) TRIQS_RUNTIME_ERROR << "diagonalize: Invalid Hamiltonian, unexpected operator indices " << o.indices;
 
-        pom_term = pom_term * (o.dagger ?
-            Pomerol::Operators::c_dag(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)) :
-            Pomerol::Operators::c(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second))
-          );
+        pom_term = pom_term
+           * (o.dagger ? Pomerol::Operators::c_dag(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)) :
+                         Pomerol::Operators::c(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)));
       }
       std::get<HExprType>(*h_expr) += pom_term;
     }
 
-    if (verbose && !pMPI::rank(comm)) {
+    if (verbose && !comm.rank()) {
       std::cout << "Pomerol: Hamiltonian" << std::endl;
       std::cout << *h_expr << std::endl;
     }
@@ -60,10 +57,7 @@ namespace pomerol2triqs {
   void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian) {
     using namespace Pomerol::LatticePresets;
 
-    if(std::all_of(hamiltonian.cbegin(),
-                   hamiltonian.cend(),
-                   [](auto const& term) { return term.coef.is_real(); })
-    )
+    if (std::all_of(hamiltonian.cbegin(), hamiltonian.cend(), [](auto const &term) { return term.coef.is_real(); }))
       diagonalize_prepare_impl<RealExpr>(hamiltonian);
     else
       diagonalize_prepare_impl<ComplexExpr>(hamiltonian);
@@ -73,10 +67,8 @@ namespace pomerol2triqs {
     diagonalize_prepare(hamiltonian);
 
     // Create Hilbert space
-    std::visit([&](auto const& h) { hs.reset(new hilbert_space_t(index_info, h)); },
-               *h_expr);
-    if(!ignore_symmetries)
-      hs->compute();
+    std::visit([&](auto const &h) { hs.reset(new hilbert_space_t(index_info, h)); }, *h_expr);
+    if (!ignore_symmetries) hs->compute();
 
     // Classify many-body states
     states_class.reset(new Pomerol::StatesClassification());
@@ -84,12 +76,11 @@ namespace pomerol2triqs {
 
     // Matrix representation of the Hamiltonian
     matrix_h.reset(new Pomerol::Hamiltonian(*states_class));
-    std::visit([&](auto const& h) { matrix_h->prepare(h, *hs, comm); }, *h_expr);
-    matrix_h->compute(comm);
+    std::visit([&](auto const &h) { matrix_h->prepare(h, *hs, comm.get()); }, *h_expr);
+    matrix_h->compute(comm.get());
 
     // Get ground state energy
-    if (verbose && !pMPI::rank(comm))
-      std::cout << "Pomerol: Ground state energy is " << matrix_h->getGroundEnergy() << std::endl;
+    if (verbose && !comm.rank()) std::cout << "Pomerol: Ground state energy is " << matrix_h->getGroundEnergy() << std::endl;
 
     // Reset containers, we will compute them later if needed
     rho.release();
@@ -106,7 +97,7 @@ namespace pomerol2triqs {
   std::set<Pomerol::ParticleIndex> pomerol_ed::gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const {
     std::set<Pomerol::ParticleIndex> indices;
     for (auto const &b : gf_struct) {
-      for (auto const &i : b.second) {
+      for (auto const &i : range(b.second)) {
         auto pom_ind = lookup_pomerol_index({b.first, i});
         if (pom_ind == -1) TRIQS_RUNTIME_ERROR << "gf_struct_to_pomerol_indices: Unexpected GF index " << b.first << "," << i;
         indices.insert(pom_ind);
@@ -120,12 +111,11 @@ namespace pomerol2triqs {
     if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "compute_rho: Internal error!";
 
     if (!rho || rho->beta != beta) {
-      if (verbose && !pMPI::rank(comm))
-        std::cout << "Pomerol: Computing density matrix for \\beta = " << beta << std::endl;
+      if (verbose && !comm.rank()) std::cout << "Pomerol: Computing density matrix for \\beta = " << beta << std::endl;
       rho.reset(new Pomerol::DensityMatrix(*states_class, *matrix_h, beta));
       rho->prepare();
       rho->compute();
-      if(rho_threshold > 0) rho->truncateBlocks(rho_threshold, verbose);
+      if (rho_threshold > 0) rho->truncateBlocks(rho_threshold, verbose);
     }
   }
 
@@ -134,7 +124,7 @@ namespace pomerol2triqs {
 
     auto new_ops = gf_struct_to_pomerol_indices(gf_struct);
     if (!ops_container || computed_ops != new_ops) {
-      if (verbose && !pMPI::rank(comm)) {
+      if (verbose && !comm.rank()) {
         std::cout << "Pomerol: Computing field operators with indices ";
         bool comma = false;
         for (auto i : new_ops) {

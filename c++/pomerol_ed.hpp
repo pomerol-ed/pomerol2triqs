@@ -41,14 +41,13 @@ namespace pomerol2triqs {
   using many_body_op_t = triqs::operators::many_body_operator;
 
   using namespace triqs::gfs;
+  namespace mesh = triqs::mesh;
   using triqs::hilbert_space::gf_struct_t;
 
-  using indices_t         = triqs::hilbert_space::fundamental_operator_set::indices_t;
-  using pomerol_indices_t = std::tuple<std::string, unsigned short, Pomerol::LatticePresets::spin>;
-  using index_classification_t =
-    Pomerol::IndexClassification<std::string, unsigned short, Pomerol::LatticePresets::spin>;
-  using hilbert_space_t =
-    Pomerol::HilbertSpace<std::string, unsigned short, Pomerol::LatticePresets::spin>;
+  using indices_t              = triqs::hilbert_space::fundamental_operator_set::indices_t;
+  using pomerol_indices_t      = std::tuple<std::string, unsigned short, Pomerol::LatticePresets::spin>;
+  using index_classification_t = Pomerol::IndexClassification<std::string, unsigned short, Pomerol::LatticePresets::spin>;
+  using hilbert_space_t        = Pomerol::HilbertSpace<std::string, unsigned short, Pomerol::LatticePresets::spin>;
 
   static_assert(std::is_same<pomerol_indices_t, Pomerol::LatticePresets::RealExpr::index_types>::value);
   static_assert(std::is_same<pomerol_indices_t, Pomerol::LatticePresets::ComplexExpr::index_types>::value);
@@ -57,13 +56,13 @@ namespace pomerol2triqs {
   // cpp2py does not know how to convert the latter integer type.
   using index_converter_t = std::map<indices_t, std::tuple<std::string, unsigned int, Pomerol::LatticePresets::spin>>;
 
-  using w_nu_nup_t = cartesian_product<imfreq, imfreq, imfreq>;
-  using w_l_lp_t   = cartesian_product<imfreq, legendre, legendre>;
+  using w_nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq, mesh::imfreq>;
+  using w_l_lp_t   = mesh::prod<mesh::imfreq, mesh::legendre, mesh::legendre>;
 
   /// Main solver class of pomerol2triqs
   class pomerol_ed {
 
-    MPI_Comm comm = MPI_COMM_WORLD;
+    mpi::communicator comm;
 
     const bool verbose;
     index_converter_t index_converter;
@@ -82,29 +81,21 @@ namespace pomerol2triqs {
 
     Pomerol::ParticleIndex lookup_pomerol_index(indices_t const &i) const;
     std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const;
-    template<typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian);
+    template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian);
     void diagonalize_prepare(many_body_op_t const &hamiltonian);
 
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
-    template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, Filler filler) const;
-    template <typename Mesh, typename Filler> gf<Mesh, scalar_valued> compute_chi(indices_t const &i1,
-                                                                                  indices_t const &j1,
-                                                                                  indices_t const &i2,
-                                                                                  indices_t const &j2,
-                                                                                  bool connected,
-                                                                                  gf_mesh<Mesh> const &mesh,
-                                                                                  Filler filler) const;
+    template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const;
+    template <typename Mesh, typename Filler>
+    gf<Mesh, scalar_valued> compute_chi(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, bool connected,
+                                        Mesh const &mesh, Filler filler) const;
 
     template <typename Mesh, typename Filler>
-    block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct,
-                                                 gf_mesh<Mesh> const &mesh,
-                                                 block_order_t block_order,
-                                                 g2_blocks_t const &g2_blocks,
-                                                 Filler filler) const;
+    block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
+                                                 g2_blocks_t const &g2_blocks, Filler filler) const;
 
     public:
-
     /// Create a new solver object
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
 
@@ -115,13 +106,14 @@ namespace pomerol2triqs {
     std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta);
 
     /// Green's function in Matsubara frequencies
-    block_gf<imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);
+    block_gf<mesh::imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);
 
     /// Green's function in imaginary time
-    block_gf<imtime> G_tau(gf_struct_t const &gf_struct, double beta, int n_tau);
+    block_gf<mesh::imtime> G_tau(gf_struct_t const &gf_struct, double beta, int n_tau);
 
     /// Retarded Green's function on real energy axis
-    block_gf<refreq> G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w, double im_shift = 0);
+    block_gf<mesh::refreq> G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
+                               double im_shift = 0);
 
     /// Two-particle Green's function, Matsubara frequencies
     CPP2PY_ARG_AS_DICT
@@ -132,18 +124,12 @@ namespace pomerol2triqs {
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
 
     /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part
-    gf<imtime, scalar_valued> chi_tau(indices_t const &i1,
-                                      indices_t const &j1,
-                                      indices_t const &i2,
-                                      indices_t const &j2,
-                                      double beta, int n_tau, bool connected = false);
+    gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+                                            int n_tau, bool connected = false);
 
     /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies
-    gf<imfreq, scalar_valued> chi_inu(indices_t const &i1,
-                                      indices_t const &j1,
-                                      indices_t const &i2,
-                                      indices_t const &j2,
-                                      double beta, int n_inu, bool connected = false);
+    gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+                                            int n_inu, bool connected = false);
 
     /// Get truncation threshold for density matrix elements
     double get_rho_threshold() const { return rho_threshold; }
@@ -151,4 +137,4 @@ namespace pomerol2triqs {
     /// Set truncation threshold for density matrix elements
     void set_rho_threshold(double threshold) { rho_threshold = threshold; }
   };
-}
+} // namespace pomerol2triqs

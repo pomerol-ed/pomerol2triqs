@@ -21,7 +21,8 @@
 
 #include <boost/math/special_functions/bessel.hpp>
 #include <boost/math/constants/constants.hpp>
-#include <triqs/arrays.hpp>
+
+#include <nda/nda.hpp>
 
 ///////////////////////////////////////////////////////
 // Methods to compute two-particle Green's functions //
@@ -47,7 +48,7 @@ namespace pomerol2triqs {
   }
 
   template <typename Mesh, typename Filler>
-  auto pomerol_ed::compute_g2(gf_struct_t const &gf_struct, gf_mesh<Mesh> const &mesh, block_order_t block_order, g2_blocks_t const &g2_blocks,
+  auto pomerol_ed::compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order, g2_blocks_t const &g2_blocks,
                               Filler filler) const -> block2_gf<Mesh, tensor_valued<4>> {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_g2: Internal error!";
@@ -59,14 +60,14 @@ namespace pomerol2triqs {
 
     for (auto const &bl1 : gf_struct) {
       auto &A    = bl1.first;
-      int A_size = bl1.second.size();
+      int A_size = bl1.second;
       int s1     = A_size;
       block_names.push_back(A);
 
       std::vector<gf<Mesh, tensor_valued<4>>> gf_vec;
       for (auto const &bl2 : gf_struct) {
         auto &B    = bl2.first;
-        int B_size = bl2.second.size();
+        int B_size = bl2.second;
         int s3     = B_size;
 
         int s2 = block_order == AABB ? s1 : s3;
@@ -75,9 +76,6 @@ namespace pomerol2triqs {
         gf_vec.emplace_back(mesh, make_shape(s1, s2, s3, s4));
 
         if (compute_all_blocks || g2_blocks.count({A, B})) {
-          auto const &A_inner = bl1.second;
-          auto const &B_inner = bl2.second;
-
           auto &g2_block = gf_vec.back();
 
           for (int a : range(A_size))
@@ -85,7 +83,7 @@ namespace pomerol2triqs {
               for (int c : range(B_size))
                 for (int d : range(B_size)) {
 
-                  if (verbose && !pMPI::rank(comm)) {
+                  if (verbose && !comm.rank()) {
                     std::cout << "compute_g2: Filling G^2 element ";
                     if (block_order == AABB) {
                       std::cout << "(" << A << "," << a << ")";
@@ -103,16 +101,16 @@ namespace pomerol2triqs {
 
                   auto g2_el = block_order == AABB ? slice_target_to_scalar(g2_block, a, b, c, d) : slice_target_to_scalar(g2_block, a, d, c, b);
 
-                  Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({A, A_inner[b]});
-                  Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({B, B_inner[d]});
-                  Pomerol::ParticleIndex pom_i3 = lookup_pomerol_index({A, A_inner[a]});
-                  Pomerol::ParticleIndex pom_i4 = lookup_pomerol_index({B, B_inner[c]});
+                  Pomerol::ParticleIndex pom_i1 = lookup_pomerol_index({A, b});
+                  Pomerol::ParticleIndex pom_i2 = lookup_pomerol_index({B, d});
+                  Pomerol::ParticleIndex pom_i3 = lookup_pomerol_index({A, a});
+                  Pomerol::ParticleIndex pom_i4 = lookup_pomerol_index({B, c});
 
                   Pomerol::TwoParticleGF pom_g2(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
                                                 ops_container->getAnnihilationOperator(pom_i2), ops_container->getCreationOperator(pom_i3),
                                                 ops_container->getCreationOperator(pom_i4), *rho);
                   pom_g2.prepare();
-                  pom_g2.compute(false, {}, comm);
+                  pom_g2.compute(false, {}, comm.get());
 
                   filler(g2_el, pom_g2);
                 }
@@ -129,12 +127,12 @@ namespace pomerol2triqs {
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
 
-    if (verbose && !pMPI::rank(comm)) std::cout << "G2_iw_inu_inup: Filling output container" << std::endl;
+    if (verbose && !comm.rank()) std::cout << "G2_iw_inu_inup: Filling output container" << std::endl;
 
     auto filler = [&p, this](gf_view<w_nu_nup_t, scalar_valued> g2_el, auto const &pom_g2) {
       long mesh_index = 0;
       for (auto w_nu_nup : g2_el.mesh()) {
-        if ((mesh_index++) % pMPI::size(comm) != pMPI::rank(comm)) continue;
+        if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
         if (p.channel == AllFermionic) {
 
@@ -164,11 +162,11 @@ namespace pomerol2triqs {
       }
     };
 
-    gf_mesh<imfreq> mesh_b{p.beta, Boson, p.n_iw};
-    gf_mesh<imfreq> mesh_f{p.beta, Fermion, p.n_inu};
+    mesh::imfreq mesh_b{p.beta, Boson, p.n_iw};
+    mesh::imfreq mesh_f{p.beta, Fermion, p.n_inu};
 
-    gf_mesh<w_nu_nup_t> mesh_bff{mesh_b, mesh_f, mesh_f};
-    gf_mesh<w_nu_nup_t> mesh_fff{mesh_f, mesh_f, mesh_f};
+    w_nu_nup_t mesh_bff{mesh_b, mesh_f, mesh_f};
+    w_nu_nup_t mesh_fff{mesh_f, mesh_f, mesh_f};
 
     block2_gf<w_nu_nup_t, tensor_valued<4>> g2;
 
@@ -187,12 +185,11 @@ namespace pomerol2triqs {
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
 
-    gf_mesh<w_l_lp_t> mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}};
+    w_l_lp_t mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}};
 
-    if (verbose && !pMPI::rank(comm)) std::cout << "G2_iw_l_lp: Filling output container" << std::endl;
+    if (verbose && !comm.rank()) std::cout << "G2_iw_l_lp: Filling output container" << std::endl;
 
     auto filler = [&p, this](gf_view<w_l_lp_t, scalar_valued> g2_el, auto const &pom_g2) {
-
       auto get_g2_iw_inu_inup_val = [&p, &pom_g2](long w_m, long nu_n, long nup_n) {
         int W_n = p.channel == PH ? w_m + nu_n : w_m - nup_n - 1;
         if (p.block_order == AABB)
@@ -201,13 +198,13 @@ namespace pomerol2triqs {
           return +pom_g2(nup_n, W_n, nu_n);
       };
 
-      array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
-      array<bool, 2> llp_element_converged(p.n_l, p.n_l);
+      nda::array<std::complex<double>, 2> border_contrib(p.n_l, p.n_l);
+      nda::array<bool, 2> llp_element_converged(p.n_l, p.n_l);
       int n_llp_elements_converged;
 
       long mesh_index = 0;
       for (auto iw : std::get<0>(g2_el.mesh())) {
-        if((mesh_index++) % pMPI::size(comm) != pMPI::rank(comm)) continue;
+        if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
         int w_m = iw.index();
 
@@ -250,7 +247,7 @@ namespace pomerol2triqs {
     };
 
     auto g2 = compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
-    g2() = mpi::all_reduce(g2(), comm);
+    g2()    = mpi::all_reduce(g2(), comm);
 
     return g2;
   }
