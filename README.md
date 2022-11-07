@@ -13,10 +13,16 @@ Features
 --------
 
 * Diagonalization of finite fermionic models with Hamiltonians written in terms of second quantization operators.
-* Calculation of single-particle Green's functions: `G(\tau)`, `G(i\omega_n)`, `G(\omega)`.
-* Calculation of two-particle Green's functions: `G(\omega;\nu,\nu')` and `G(\omega;\ell,\ell')`.
-* Calculation of ensemble averages of quadratic operators, `\langle c^\dagger_i c_j \rangle`.
-* Calculation of dynamic susceptibilities, `\langle T c^\dagger_{i_1}(\tau) c_{j_1}(\tau) c^\dagger_{i_2}(0) c_{j_2}(0) \rangle`.
+* Calculation of single-particle Green's functions: $G(\tau)$, $G(i\omega_n)$, $G(\omega)$.
+* Calculation of two-particle Green's functions: $G(\omega;\nu,\nu')$ and $G(\omega;\ell,\ell')$.
+* Calculation of ensemble averages of quadratic operators, $\langle c^\dagger_i c_j \rangle$.
+* Calculation of dynamic susceptibilities $\langle \mathbb{T} c^\dagger_{i_1}(\tau) c_{j_1}(\tau) c^\dagger_{i_2}(0) c_{j_2}(0) \rangle$
+  and their Matsubara frequency representation.
+* Calculation of 3-point fermion-boson susceptibilities
+  $\langle \mathbb{T} c^\dagger_{i_1}(\tau) c_{j_1}(0) c^\dagger_{i_2}(\tau') c_{j_2}(0) \rangle$,
+  $\langle \mathbb{T} c^\dagger_{i_1}(\tau) c_{j_1}(\tau') c^\dagger_{i_2}(0) c_{j_2}(0) \rangle$,
+  $\langle \mathbb{T} c^\dagger_{i_1}(\tau) c_{j_1}(0) c^\dagger_{i_2}(0) c_{j_2}(\tau') \rangle$
+  in the Matsubara frequency representation.
 
 Notation for the two-particle Green's functions is adopted from the
 [PhD thesis of Lewin Boehnke](http://ediss.sub.uni-hamburg.de/volltexte/2015/7325/pdf/Dissertation.pdf).

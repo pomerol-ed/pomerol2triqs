@@ -33,7 +33,7 @@
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/hilbert_space/fundamental_operator_set.hpp>
 
-#include "g2_parameters.hpp"
+#include "parameters.hpp"
 
 namespace pomerol2triqs {
 
@@ -56,6 +56,7 @@ namespace pomerol2triqs {
   // cpp2py does not know how to convert the latter integer type.
   using index_converter_t = std::map<indices_t, std::tuple<std::string, unsigned int, Pomerol::LatticePresets::spin>>;
 
+  using nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq>;
   using w_nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq, mesh::imfreq>;
   using w_l_lp_t   = mesh::prod<mesh::imfreq, mesh::legendre, mesh::legendre>;
 
@@ -95,6 +96,10 @@ namespace pomerol2triqs {
     block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
                                                  g2_blocks_t const &g2_blocks, Filler filler) const;
 
+    template <typename Mesh, typename Filler>
+    block2_gf<Mesh, tensor_valued<4>> compute_chi3(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
+                                                   channel_t channel, chi3_blocks_t const &chi3_blocks, Filler filler) const;
+
     public:
     /// Create a new solver object
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
@@ -130,6 +135,10 @@ namespace pomerol2triqs {
     /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies
     gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
                                             int n_inu, bool connected = false);
+
+    /// 3-point fermion-boson susceptibility
+    CPP2PY_ARG_AS_DICT
+    block2_gf<nu_nup_t, tensor_valued<4>> chi3_inu_inup(chi3_inu_inup_params_t const& p);
 
     /// Get truncation threshold for density matrix elements
     double get_rho_threshold() const { return rho_threshold; }

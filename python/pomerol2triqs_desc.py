@@ -31,7 +31,7 @@ using namespace Pomerol::LatticePresets;
 
 module.add_enum("spin",          ['down', 'up'], "Pomerol::LatticePresets", "Spin projection")
 module.add_enum("block_order_t", ['AABB', 'ABBA'], "pomerol2triqs", """Order of block indices for Block2Gf objects""")
-module.add_enum("channel_t", ['PP', 'PH', 'AllFermionic'], "pomerol2triqs", """Channel in which Matsubara frequency representation is defined""")
+module.add_enum("channel_t", ['PP', 'PH', 'xPH', 'AllFermionic'], "pomerol2triqs", """Channel in which Matsubara frequency representation is defined""")
 
 # The class pomerol_ed
 c = class_(
@@ -104,6 +104,24 @@ c.add_method("""block2_gf<w_l_lp_t,tensor_valued<4>> G2_iw_l_lp (**pomerol2triqs
 | n_inu_sum      | int                          | 500                | Maximum number of positive Matsubara frequencies in summation.             |
 +----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
 | inu_sum_tol    | double                       | 1e-6               | Tolerance for Matsubara frequency summation.                               |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+""")
+
+c.add_method("""block2_gf<nu_nup_t,tensor_valued<4>> chi3_inu_inup (**pomerol2triqs::chi3_inu_inup_params_t)""",
+             doc = r"""3-point fermion-boson susceptibility, Matsubara frequencies
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| Parameter Name | Type                         | Default            | Documentation                                                              |
++================+==============================+====================+============================================================================+
+| gf_struct      | gf_struct_t                  |                    | Structure of \chi^3 blocks.                                                |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| beta           | double                       |                    | Inverse temperature                                                        |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| channel        | pomerol2triqs::channel_t     | PH                 | Channel in which Matsubara frequency representation is defined.            |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| block_order    | pomerol2triqs::block_order_t | AABB               | Order of block indices in the definition of \chi^3.                        |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| blocks         | chi3_blocks_t                | measure all blocks | List of block index pairs of \chi^3 to measure.                            |
++----------------+------------------------------+--------------------+----------------------------------------------------------------------------+
+| n_inu          | int                          | 30                 | Number of fermionic Matsubara frequencies                                  |
 +----------------+------------------------------+--------------------+----------------------------------------------------------------------------+""")
 
 c.add_method("""gf<imtime, scalar_valued> chi_tau(indices_t i1, indices_t j1, indices_t i2, indices_t j2, double beta, int n_tau, bool connected = false)""",
@@ -209,5 +227,42 @@ c.add_member(c_name = "inu_sum_tol",
 
 module.add_converter(c)
 
+# Converter for chi3_inu_inup_params_t
+c = converter_(
+        c_type = "pomerol2triqs::chi3_inu_inup_params_t",
+        doc = """Arguments of chi3_inu_inup()""",
+)
+c.add_member(c_name = "gf_struct",
+             c_type = "gf_struct_t",
+             initializer = """  """,
+             doc = """Structure of \\chi^3 blocks.""")
+
+c.add_member(c_name = "beta",
+             c_type = "double",
+             initializer = """  """,
+             doc = """Inverse temperature""")
+
+
+c.add_member(c_name = "channel",
+             c_type = "pomerol2triqs::channel_t",
+             initializer = """ PH """,
+             doc = """Channel in which Matsubara frequency representation is defined.""")
+
+c.add_member(c_name = "block_order",
+             c_type = "pomerol2triqs::block_order_t",
+             initializer = """ AABB """,
+             doc = """Order of block indices in the definition of \\chi^3.""")
+
+c.add_member(c_name = "blocks",
+             c_type = "chi3_blocks_t",
+             initializer = """ chi3_blocks_t{} """,
+             doc = """List of block index pairs of \\chi^3 to measure.\n     default: measure all blocks""")
+
+c.add_member(c_name = "n_inu",
+             c_type = "int",
+             initializer = """ 100 """,
+             doc = """Number of fermionic Matsubara frequencies.""")
+
+module.add_converter(c)
 
 module.generate_code()
