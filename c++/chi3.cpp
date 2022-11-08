@@ -95,7 +95,8 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                       Pomerol::ParticleIndex pom_Delta_i2 = block_order == AABB ? lookup_pomerol_index({B, d}) :
                                                                                   lookup_pomerol_index({A, b});
 
-                      Pomerol::QuadraticOperator Delta(index_info, *hs, *states_class, *matrix_h, pom_Delta_i1, pom_Delta_i2);
+                      Pomerol::QuadraticOperator Delta(index_info, *hs, *states_class, *matrix_h, pom_Delta_i1, pom_Delta_i2,
+                                                       {false, false});
                       Delta.prepare(*hs);
                       Delta.compute();
 
@@ -107,6 +108,7 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                       pom_chi3.compute(false, {}, comm.get());
 
                       filler(chi3_el, pom_chi3);
+                      break;
                     }
                     case PH: {
                       Pomerol::ParticleIndex pom_CX_i = lookup_pomerol_index({A, a});
@@ -128,6 +130,7 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                       pom_chi3.compute(false, {}, comm.get());
 
                       filler(chi3_el, pom_chi3);
+                      break;
                     }
                     case xPH: {
                       Pomerol::ParticleIndex pom_CX_i = lookup_pomerol_index({A, a});
@@ -149,6 +152,7 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                       pom_chi3.compute(false, {}, comm.get());
 
                       filler(chi3_el, pom_chi3);
+                      break;
                     }
                     default:
                       TRIQS_RUNTIME_ERROR << "compute_chi3: Internal error!";
@@ -156,6 +160,8 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                 }
         }
       }
+
+      gf_vecvec.emplace_back(std::move(gf_vec));
     }
 
     return make_block2_gf(block_names, block_names, std::move(gf_vecvec));
@@ -175,13 +181,13 @@ auto pomerol_ed::chi3_inu_inup(chi3_inu_inup_params_t const& p) -> block2_gf<nu_
     for (auto nu_nup : chi3_el.mesh()) {
       if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
-      int n1 = std::get<0>(nu_nup).index();
-      int n2 = std::get<1>(nu_nup).index();
+      auto w1 = std::complex<double>(std::get<0>(nu_nup));
+      auto w2 = std::complex<double>(std::get<1>(nu_nup));
 
       if(p.channel == xPH)
-        chi3_el[nu_nup] = -pom_chi3(n1, n2); // Extra minus sign from crossing-symmetry relation
+        chi3_el[nu_nup] = -pom_chi3(w1, w2); // Extra minus sign from crossing-symmetry relation
       else
-        chi3_el[nu_nup] = +pom_chi3(n1, n2);
+        chi3_el[nu_nup] = +pom_chi3(w1, w2);
     }
   };
 
