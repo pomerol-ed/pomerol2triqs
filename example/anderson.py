@@ -43,6 +43,11 @@ g2_n_l = 10
 # Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
+# Number of Matsubara frequencies for \chi^3 calculations
+chi3_n_inu = 10
+# Block index combinations for \chi^3 calculations
+chi3_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
+
 gf_struct = [('up', 1), ('dn', 1)]
 
 # Conversion from TRIQS to Pomerol notation for operator indices
@@ -140,6 +145,45 @@ G2_iw_inu_inup_pp_ABBA = ed.G2_iw_inu_inup(channel = "PP",
                                            n_inu = g2_n_inu,
                                            **common_g2_params)
 
+##########################
+# \chi^{(3)}(i\nu,i\nu') #
+##########################
+
+common_chi3_params = {'gf_struct' : gf_struct,
+                      'beta' : beta,
+                      'blocks' : chi3_blocks,
+                      'n_inu' : chi3_n_inu}
+
+# Compute \chi^{(3),pp}(i\nu,i\nu'), AABB block order
+chi3_inu_inup_pp_AABB = ed.chi3_inu_inup(channel = "PP",
+                                         block_order = "AABB",
+                                         **common_chi3_params)
+
+# Compute \chi^{(3),pp}(i\nu,i\nu'), ABBA block order
+chi3_inu_inup_pp_ABBA = ed.chi3_inu_inup(channel = "PP",
+                                         block_order = "ABBA",
+                                         **common_chi3_params)
+
+# Compute \chi^{(3),ph}(i\nu,i\nu'), AABB block order
+chi3_inu_inup_ph_AABB = ed.chi3_inu_inup(channel = "PH",
+                                         block_order = "AABB",
+                                         **common_chi3_params)
+
+# Compute \chi^{(3),ph}(i\nu,i\nu'), ABBA block order
+chi3_inu_inup_ph_ABBA = ed.chi3_inu_inup(channel = "PH",
+                                         block_order = "ABBA",
+                                         **common_chi3_params)
+
+# Compute \chi^{(3),xph}(i\nu,i\nu'), AABB block order
+chi3_inu_inup_xph_AABB = ed.chi3_inu_inup(channel = "xPH",
+                                          block_order = "AABB",
+                                          **common_chi3_params)
+
+# Compute \chi^{(3),xph}(i\nu,i\nu'), ABBA block order
+chi3_inu_inup_xph_ABBA = ed.chi3_inu_inup(channel = "xPH",
+                                          block_order = "ABBA",
+                                          **common_chi3_params)
+
 ################
 # Save results #
 ################
@@ -158,3 +202,9 @@ if mpi.is_master_node():
         ar['G2_iw_inu_inup_ph_ABBA'] = G2_iw_inu_inup_ph_ABBA
         ar['G2_iw_inu_inup_pp_AABB'] = G2_iw_inu_inup_pp_AABB
         ar['G2_iw_inu_inup_pp_ABBA'] = G2_iw_inu_inup_pp_ABBA
+        ar['chi3_inu_inup_pp_AABB'] = chi3_inu_inup_pp_AABB
+        ar['chi3_inu_inup_pp_ABBA'] = chi3_inu_inup_pp_ABBA
+        ar['chi3_inu_inup_ph_AABB'] = chi3_inu_inup_ph_AABB
+        ar['chi3_inu_inup_ph_ABBA'] = chi3_inu_inup_ph_ABBA
+        ar['chi3_inu_inup_xph_AABB'] = chi3_inu_inup_xph_AABB
+        ar['chi3_inu_inup_xph_ABBA'] = chi3_inu_inup_xph_ABBA
