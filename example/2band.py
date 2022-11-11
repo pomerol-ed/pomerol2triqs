@@ -196,32 +196,32 @@ common_chi3_params = {'gf_struct' : gf_struct,
                       'n_inu' : chi3_n_inu}
 
 # Compute \chi^{(3),pp}(i\nu,i\nu'), AABB block order
-chi3_inu_inup_pp_AABB = ed.chi3_inu_inup(channel = "PP",
+chi3_iw_inu_pp_AABB = ed.chi3_iw_inu(channel = "PP",
                                          block_order = "AABB",
                                          **common_chi3_params)
 
 # Compute \chi^{(3),pp}(i\nu,i\nu'), ABBA block order
-chi3_inu_inup_pp_ABBA = ed.chi3_inu_inup(channel = "PP",
+chi3_iw_inu_pp_ABBA = ed.chi3_iw_inu(channel = "PP",
                                          block_order = "ABBA",
                                          **common_chi3_params)
 
 # Compute \chi^{(3),ph}(i\nu,i\nu'), AABB block order
-chi3_inu_inup_ph_AABB = ed.chi3_inu_inup(channel = "PH",
+chi3_iw_inu_ph_AABB = ed.chi3_iw_inu(channel = "PH",
                                          block_order = "AABB",
                                          **common_chi3_params)
 
 # Compute \chi^{(3),ph}(i\nu,i\nu'), ABBA block order
-chi3_inu_inup_ph_ABBA = ed.chi3_inu_inup(channel = "PH",
+chi3_iw_inu_ph_ABBA = ed.chi3_iw_inu(channel = "PH",
                                          block_order = "ABBA",
                                          **common_chi3_params)
 
 # Compute \chi^{(3),xph}(i\nu,i\nu'), AABB block order
-chi3_inu_inup_xph_AABB = ed.chi3_inu_inup(channel = "xPH",
+chi3_iw_inu_xph_AABB = ed.chi3_iw_inu(channel = "xPH",
                                           block_order = "AABB",
                                           **common_chi3_params)
 
 # Compute \chi^{(3),xph}(i\nu,i\nu'), ABBA block order
-chi3_inu_inup_xph_ABBA = ed.chi3_inu_inup(channel = "xPH",
+chi3_iw_inu_xph_ABBA = ed.chi3_iw_inu(channel = "xPH",
                                           block_order = "ABBA",
                                           **common_chi3_params)
 
@@ -247,9 +247,9 @@ if mpi.is_master_node():
         ar['G2_iw_l_lp_ph_ABBA'] = G2_iw_l_lp_ph_ABBA
         ar['G2_iw_l_lp_pp_AABB'] = G2_iw_l_lp_pp_AABB
         ar['G2_iw_l_lp_pp_ABBA'] = G2_iw_l_lp_pp_ABBA
-        ar['chi3_inu_inup_pp_AABB'] = chi3_inu_inup_pp_AABB
-        ar['chi3_inu_inup_pp_ABBA'] = chi3_inu_inup_pp_ABBA
-        ar['chi3_inu_inup_ph_AABB'] = chi3_inu_inup_ph_AABB
-        ar['chi3_inu_inup_ph_ABBA'] = chi3_inu_inup_ph_ABBA
-        ar['chi3_inu_inup_xph_AABB'] = chi3_inu_inup_xph_AABB
-        ar['chi3_inu_inup_xph_ABBA'] = chi3_inu_inup_xph_ABBA
+        ar['chi3_iw_inu_pp_AABB'] = chi3_iw_inu_pp_AABB
+        ar['chi3_iw_inu_pp_ABBA'] = chi3_iw_inu_pp_ABBA
+        ar['chi3_iw_inu_ph_AABB'] = chi3_iw_inu_ph_AABB
+        ar['chi3_iw_inu_ph_ABBA'] = chi3_iw_inu_ph_ABBA
+        ar['chi3_iw_inu_xph_AABB'] = chi3_iw_inu_xph_AABB
+        ar['chi3_iw_inu_xph_ABBA'] = chi3_iw_inu_xph_ABBA

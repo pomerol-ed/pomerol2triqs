@@ -56,7 +56,7 @@ namespace pomerol2triqs {
   // cpp2py does not know how to convert the latter integer type.
   using index_converter_t = std::map<indices_t, std::tuple<std::string, unsigned int, Pomerol::LatticePresets::spin>>;
 
-  using nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq>;
+  using w_nu_t = mesh::prod<mesh::imfreq, mesh::imfreq>;
   using w_nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq, mesh::imfreq>;
   using w_l_lp_t   = mesh::prod<mesh::imfreq, mesh::legendre, mesh::legendre>;
 
@@ -90,7 +90,7 @@ namespace pomerol2triqs {
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const;
     template <typename Mesh, typename Filler>
     gf<Mesh, scalar_valued> compute_chi(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, bool connected,
-                                        Mesh const &mesh, Filler filler) const;
+                                        Mesh const &mesh, Filler filler, channel_t const &channel) const;
 
     template <typename Mesh, typename Filler>
     block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
@@ -130,15 +130,15 @@ namespace pomerol2triqs {
 
     /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part
     gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
-                                            int n_tau, bool connected = false);
+                                            int n_tau, bool connected = false, channel_t channel = PH);
 
     /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies
     gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
-                                            int n_inu, bool connected = false);
+                                            int n_inu, bool connected = false, channel_t channel = PH);
 
     /// 3-point fermion-boson susceptibility
     CPP2PY_ARG_AS_DICT
-    block2_gf<nu_nup_t, tensor_valued<4>> chi3_inu_inup(chi3_inu_inup_params_t const& p);
+    block2_gf<w_nu_t, tensor_valued<4>> chi3_iw_inu(chi3_iw_inu_params_t const& p);
 
     /// Get truncation threshold for density matrix elements
     double get_rho_threshold() const { return rho_threshold; }

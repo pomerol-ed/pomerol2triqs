@@ -121,31 +121,37 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
     return make_block2_gf(block_names, block_names, std::move(gf_vecvec));
 }
 
-auto pomerol_ed::chi3_inu_inup(chi3_inu_inup_params_t const& p) -> block2_gf<nu_nup_t, tensor_valued<4>> {
-  if(p.channel == AllFermionic) TRIQS_RUNTIME_ERROR << "chi3_inu_inup: AllFermionic channel is not supported";
+auto pomerol_ed::chi3_iw_inu(chi3_iw_inu_params_t const& p) -> block2_gf<w_nu_t, tensor_valued<4>> {
+  if(p.channel == AllFermionic) TRIQS_RUNTIME_ERROR << "chi3_iw_inu: AllFermionic channel is not supported";
 
-  if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi3_inu_inup: No Hamiltonian has been diagonalized";
+  if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi3_iw_inu: No Hamiltonian has been diagonalized";
   compute_rho(p.beta);
   compute_field_operators(p.gf_struct);
 
-  if (verbose && !comm.rank()) std::cout << "chi3_inu_inup: Filling output container" << std::endl;
+  if (verbose && !comm.rank()) std::cout << "chi3_iw_inu: Filling output container" << std::endl;
 
-  auto filler = [&p, this](gf_view<nu_nup_t, scalar_valued> chi3_el, auto const &pom_chi3) {
+  auto filler = [&p, this](gf_view<w_nu_t, scalar_valued> chi3_el, auto const &pom_chi3) {
     long mesh_index = 0;
-    for (auto nu_nup : chi3_el.mesh()) {
+    for (auto w_nu : chi3_el.mesh()) {
       if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
-      auto w1 = std::complex<double>(std::get<0>(nu_nup));
-      auto w2 = std::complex<double>(std::get<1>(nu_nup));
+      auto w1 = std::complex<double>(std::get<0>(w_nu));
+      auto w2 = std::complex<double>(std::get<1>(w_nu));
 
-      chi3_el[nu_nup] = pom_chi3(w1, w2);
+      if(p.channel == PP)
+        chi3_el[w_nu] = +pom_chi3(w2, w1 - w2);
+      else if(p.channel == PH)
+        chi3_el[w_nu] = +pom_chi3(w2, w1 + w2);
+      else if(p.channel == xPH)
+        chi3_el[w_nu] = -pom_chi3(w2, w1 + w2); // Extra minus sign from crossing-symmetry relation
     }
   };
 
+  mesh::imfreq mesh_b{p.beta, Boson, p.n_iw};
   mesh::imfreq mesh_f{p.beta, Fermion, p.n_inu};
-  nu_nup_t mesh_ff{mesh_f, mesh_f};
+  w_nu_t mesh_bf{mesh_b, mesh_f};
 
-  auto chi3 = compute_chi3<nu_nup_t>(p.gf_struct, mesh_ff, p.block_order, p.channel, p.blocks, filler);
+  auto chi3 = compute_chi3<w_nu_t>(p.gf_struct, mesh_bf, p.block_order, p.channel, p.blocks, filler);
 
   chi3() = mpi::all_reduce(chi3(), comm);
 

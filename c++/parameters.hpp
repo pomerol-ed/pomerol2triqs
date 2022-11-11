@@ -77,8 +77,8 @@ namespace pomerol2triqs {
     g2_iw_l_lp_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
 
-  /// Arguments of chi3_inu_inup()
-  struct chi3_inu_inup_params_t {
+  /// Arguments of chi3_iw_inu()
+  struct chi3_iw_inu_params_t {
 
     /// Structure of \chi^3 blocks.
     gf_struct_t gf_struct;
@@ -96,11 +96,14 @@ namespace pomerol2triqs {
     /// default: measure all blocks
     chi3_blocks_t blocks = chi3_blocks_t{};
 
+    /// Number of bosonic Matsubara frequencies.
+    int n_iw = 100;
+
     /// Number of fermionic Matsubara frequencies.
     int n_inu = 100;
 
-    chi3_inu_inup_params_t() {}
-    chi3_inu_inup_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
+    chi3_iw_inu_params_t() {}
+    chi3_iw_inu_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
 
 } // namespace pomerol2triqs

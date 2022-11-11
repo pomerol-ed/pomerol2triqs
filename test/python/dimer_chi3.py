@@ -50,16 +50,16 @@ ed.diagonalize(H)
 params = {'gf_struct': gf_struct, 'beta': beta, 'n_inu': n_inu}
 
 # Particle-particle channel
-chi3_pp_AABB = ed.chi3_inu_inup(**params, channel='PP', block_order='AABB')
-chi3_pp_ABBA = ed.chi3_inu_inup(**params, channel='PP', block_order='ABBA')
+chi3_pp_AABB = ed.chi3_iw_inu(**params, channel='PP', block_order='AABB')
+chi3_pp_ABBA = ed.chi3_iw_inu(**params, channel='PP', block_order='ABBA')
 
 # Particle-hole channel
-chi3_ph_AABB = ed.chi3_inu_inup(**params, channel='PH', block_order='AABB')
-chi3_ph_ABBA = ed.chi3_inu_inup(**params, channel='PH', block_order='ABBA')
+chi3_ph_AABB = ed.chi3_iw_inu(**params, channel='PH', block_order='AABB')
+chi3_ph_ABBA = ed.chi3_iw_inu(**params, channel='PH', block_order='ABBA')
 
 # Crossed particle-hole channel
-chi3_xph_AABB = ed.chi3_inu_inup(**params, channel='xPH', block_order='AABB')
-chi3_xph_ABBA = ed.chi3_inu_inup(**params, channel='xPH', block_order='ABBA')
+chi3_xph_AABB = ed.chi3_iw_inu(**params, channel='xPH', block_order='AABB')
+chi3_xph_ABBA = ed.chi3_iw_inu(**params, channel='xPH', block_order='ABBA')
 
 if mpi.is_master_node():
     with HDFArchive('dimer_chi3_np%i.out.h5' % mpi.size, 'w') as ar:
