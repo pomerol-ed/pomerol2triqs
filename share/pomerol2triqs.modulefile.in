@@ -7,7 +7,7 @@ set     version     @PROJECT_VERSION@
 set     root        @CMAKE_INSTALL_PREFIX@
 set     git_hash    @PROJECT_GIT_HASH@
 
-set     url         "https://github.com/krivenko/pomerol2triqs"
+set     url         "https://github.com/pomerol-ed/pomerol2triqs"
 set     description "Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library."
 
 module-whatis   "$description"

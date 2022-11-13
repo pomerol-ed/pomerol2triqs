@@ -2,7 +2,7 @@ pomerol2triqs
 =============
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5735413.svg)](https://doi.org/10.5281/zenodo.5735413)
-[![CI](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml/badge.svg)](https://github.com/krivenko/pomerol2triqs/actions/workflows/CI.yml)
+[![CI](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/CI.yml/badge.svg)](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/CI.yml)
 
 
 Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library.
@@ -27,7 +27,7 @@ Installation
 - Install the [Pomerol](http://aeantipov.github.io/pomerol/) exact diagonalization library.
 - Install the [TRIQS](http://triqs.github.io/triqs/latest/install.html) library.
 - `source <path_to_triqs_install_dir>/share/triqs/triqsvars.sh`
-- `git clone https://github.com/krivenko/pomerol2triqs.git pomerol2triqs.git`
+- `git clone https://github.com/pomerol-ed/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
 - `cmake ../pomerol2triqs.git -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=<path_to_install_dir> -DPOMEROL_PATH=<path_to_pomerol_install_dir>`
 - `make`
