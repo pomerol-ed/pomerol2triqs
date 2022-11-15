@@ -19,6 +19,7 @@
 
 #include "pomerol_ed.hpp"
 
+#include <array>
 #include <utility>
 
 /////////////////////////////////////////////////////////////
@@ -41,6 +42,8 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
 
     std::vector<std::vector<gf<Mesh, tensor_valued<4>>>> gf_vecvec;
     std::vector<std::string> block_names;
+
+    static const std::array<Pomerol::Channel, 3> pom_channels = {Pomerol::PP, Pomerol::PH, Pomerol::xPH};
 
     for (auto const &bl1 : gf_struct) {
       auto &A    = bl1.first;
@@ -86,77 +89,28 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                   auto chi3_el = block_order == AABB ? slice_target_to_scalar(chi3_block, a, b, c, d) :
                                                        slice_target_to_scalar(chi3_block, a, d, c, b);
 
-                  switch(channel) {
-                    case PP: {
-                      Pomerol::ParticleIndex pom_CX1_i = lookup_pomerol_index({A, a});
-                      Pomerol::ParticleIndex pom_CX3_i = lookup_pomerol_index({B, c});
-                      Pomerol::ParticleIndex pom_Delta_i1 = block_order == AABB ? lookup_pomerol_index({A, b}) :
-                                                                                  lookup_pomerol_index({B, d});
-                      Pomerol::ParticleIndex pom_Delta_i2 = block_order == AABB ? lookup_pomerol_index({B, d}) :
-                                                                                  lookup_pomerol_index({A, b});
+                  Pomerol::ParticleIndex pom_CX1_i = lookup_pomerol_index({A, a});
+                  Pomerol::ParticleIndex pom_C2_i = block_order == AABB ? lookup_pomerol_index({A, b}) :
+                                                                          lookup_pomerol_index({B, d});
+                  Pomerol::ParticleIndex pom_CX3_i = lookup_pomerol_index({B, c});
+                  Pomerol::ParticleIndex pom_C4_i = block_order == AABB ? lookup_pomerol_index({B, d}) :
+                                                                          lookup_pomerol_index({A, b});
 
-                      Pomerol::QuadraticOperator Delta(index_info, *hs, *states_class, *matrix_h, pom_Delta_i1, pom_Delta_i2,
-                                                       {false, false});
-                      Delta.prepare(*hs);
-                      Delta.compute();
+                  Pomerol::Channel pom_channel = pom_channels[int(channel)];
 
-                      Pomerol::ThreePointSusceptibility pom_chi3(*states_class, *matrix_h,
-                                                                 ops_container->getCreationOperator(pom_CX1_i),
-                                                                 ops_container->getCreationOperator(pom_CX3_i),
-                                                                 Delta, *rho);
-                      pom_chi3.prepare();
-                      pom_chi3.compute(false, {}, comm.get());
+                  Pomerol::ThreePointSusceptibility pom_chi3(pom_channel,
+                                                             *states_class,
+                                                             *matrix_h,
+                                                             ops_container->getCreationOperator(pom_CX1_i),
+                                                             ops_container->getAnnihilationOperator(pom_C2_i),
+                                                             ops_container->getCreationOperator(pom_CX3_i),
+                                                             ops_container->getAnnihilationOperator(pom_C4_i),
+                                                             *rho);
 
-                      filler(chi3_el, pom_chi3);
-                      break;
-                    }
-                    case PH: {
-                      Pomerol::ParticleIndex pom_CX_i = lookup_pomerol_index({A, a});
-                      Pomerol::ParticleIndex pom_C_i = block_order == AABB ? lookup_pomerol_index({A, b}) :
-                                                                             lookup_pomerol_index({B, d});
-                      Pomerol::ParticleIndex pom_N_i1 = lookup_pomerol_index({B, c});
-                      Pomerol::ParticleIndex pom_N_i2 = block_order == AABB ? lookup_pomerol_index({B, d}) :
-                                                                              lookup_pomerol_index({A, b});
+                  pom_chi3.prepare();
+                  pom_chi3.compute(false, {}, comm.get());
 
-                      Pomerol::QuadraticOperator N(index_info, *hs, *states_class, *matrix_h, pom_N_i1, pom_N_i2);
-                      N.prepare(*hs);
-                      N.compute();
-
-                      Pomerol::ThreePointSusceptibility pom_chi3(*states_class, *matrix_h,
-                                                                 ops_container->getCreationOperator(pom_CX_i),
-                                                                 ops_container->getAnnihilationOperator(pom_C_i),
-                                                                 N, *rho);
-                      pom_chi3.prepare();
-                      pom_chi3.compute(false, {}, comm.get());
-
-                      filler(chi3_el, pom_chi3);
-                      break;
-                    }
-                    case xPH: {
-                      Pomerol::ParticleIndex pom_CX_i = lookup_pomerol_index({A, a});
-                      Pomerol::ParticleIndex pom_C_i = block_order == AABB ? lookup_pomerol_index({B, d}) :
-                                                                             lookup_pomerol_index({A, b});
-                      Pomerol::ParticleIndex pom_N_i1 = lookup_pomerol_index({B, c});
-                      Pomerol::ParticleIndex pom_N_i2 = block_order == AABB ? lookup_pomerol_index({A, b}) :
-                                                                              lookup_pomerol_index({B, d});
-
-                      Pomerol::QuadraticOperator N(index_info, *hs, *states_class, *matrix_h, pom_N_i1, pom_N_i2);
-                      N.prepare(*hs);
-                      N.compute();
-
-                      Pomerol::ThreePointSusceptibility pom_chi3(*states_class, *matrix_h,
-                                                                 ops_container->getCreationOperator(pom_CX_i),
-                                                                 ops_container->getAnnihilationOperator(pom_C_i),
-                                                                 N, *rho);
-                      pom_chi3.prepare();
-                      pom_chi3.compute(false, {}, comm.get());
-
-                      filler(chi3_el, pom_chi3);
-                      break;
-                    }
-                    default:
-                      TRIQS_RUNTIME_ERROR << "compute_chi3: Internal error!";
-                  }
+                  filler(chi3_el, pom_chi3);
                 }
         }
       }
@@ -184,10 +138,7 @@ auto pomerol_ed::chi3_inu_inup(chi3_inu_inup_params_t const& p) -> block2_gf<nu_
       auto w1 = std::complex<double>(std::get<0>(nu_nup));
       auto w2 = std::complex<double>(std::get<1>(nu_nup));
 
-      if(p.channel == xPH)
-        chi3_el[nu_nup] = -pom_chi3(w1, w2); // Extra minus sign from crossing-symmetry relation
-      else
-        chi3_el[nu_nup] = +pom_chi3(w1, w2);
+      chi3_el[nu_nup] = pom_chi3(w1, w2);
     }
   };
 

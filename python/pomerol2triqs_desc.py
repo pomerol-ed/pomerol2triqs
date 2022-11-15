@@ -25,7 +25,6 @@ module.add_preamble("""
 #include <triqs/cpp2py_converters/operators_real_complex.hpp>
 
 using namespace pomerol2triqs;
-using namespace Pomerol;
 using namespace Pomerol::LatticePresets;
 """)
 

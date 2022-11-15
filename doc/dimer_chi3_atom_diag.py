@@ -26,13 +26,22 @@ fops = [(sn, a) for sn, a in product(spin_names, atoms)]
 # Number of Matsubara frequencies for susceptibility calculation
 n_inu = 2
 
-def make_block2_gf():
-  mesh = MeshImFreq(beta=beta, S="Fermion", n_iw=n_inu)
-  print(mesh)
-  block = Gf(mesh=MeshProduct(mesh, mesh), target_shape=(len(atoms),)*4)
-  return Block2Gf(spin_names, spin_names,
-                  [[deepcopy(block), deepcopy(block)],
-                   [deepcopy(block), deepcopy(block)]])
+# Perform computation for both atoms in the 'up' block and only for the 0-th
+# atom in the 'down' block.
+bs = {"up": 2, "dn": 2}
+def make_block2_gf(AABB):
+    mesh = MeshImFreq(beta=beta, S="Fermion", n_iw=n_inu)
+    print(mesh)
+    blocks = []
+    for sp1 in spin_names:
+        blocks.append([])
+        for sp2 in spin_names:
+            if AABB:
+                shape = (bs[sp1], bs[sp1], bs[sp2], bs[sp2])
+            else:
+                shape = (bs[sp1], bs[sp2], bs[sp2], bs[sp1])
+            blocks[-1].append(Gf(mesh=MeshProduct(mesh, mesh), target_shape=shape))
+    return Block2Gf(spin_names, spin_names, blocks)
 
 # Hamiltonian
 H = sum(e * n(s, a) for (a, e), s in product(zip(atoms, eps), spin_names))
@@ -81,31 +90,37 @@ def chi3_ph(x1p, x1, x2p, x2, w1, w2):
 
 # \chi^{(3)}_{xph}
 def chi3_xph(x1p, x1, x2p, x2, w1, w2):
-    # Crossing symmetry relation
-    return -chi3_ph(x1p, x2, x2p, x1, w1, w2)
+    barN = -ad.cdag_matrix(fops.index(x2p), 0) @ ad.c_matrix(fops.index(x1), 0)
+    Cdag = ad.cdag_matrix(fops.index(x1p), 0)
+    C = ad.c_matrix(fops.index(x1), 0)
+    res = 0
+    for i, j, k in product(range(ad.get_subspace_dim(0)), repeat=3):
+        res += -f(i, j, k, w1, -w2) * Cdag[i, j] * C[j, k] * barN[k, i]
+        res += f(i, j, k, -w2, w1) * C[i, j] * Cdag[j, k] * barN[k, i]
+    return res
 
-def make_chi3(f, ABBA):
-    chi3 = make_block2_gf()
+def make_chi3(f, AABB):
+    print("AABB =", AABB)
+    chi3 = make_block2_gf(AABB)
     for sp1, sp2 in product(spin_names, spin_names):
-        print(sp1, sp2)
         block = chi3[sp1, sp2]
-        for a1, a2, a3, a4 in product(atoms, repeat=4):
-            print(a1, a2, a3, a4)
-            if ABBA:
-                indices = [(sp1, a1), (sp2, a2), (sp2, a3), (sp1, a4)]
-            else:
+        for a1, a2, a3, a4 in product(*map(range, block.target_shape)):
+            if AABB:
                 indices = [(sp1, a1), (sp1, a2), (sp2, a3), (sp2, a4)]
+            else:
+                indices = [(sp1, a1), (sp2, a2), (sp2, a3), (sp1, a4)]
+            print(indices)
             for w1, w2 in block.mesh:
                 print(w1, w2)
                 block[a1, a2, a3, a4][w1, w2] = f(*indices, w1.imag, w2.imag)
     return chi3
 
-chi3_pp_AABB = make_chi3(chi3_pp, False)
-chi3_pp_ABBA = make_chi3(chi3_pp, True)
-chi3_ph_AABB = make_chi3(chi3_ph, False)
-chi3_ph_ABBA = make_chi3(chi3_ph, True)
-chi3_xph_AABB = make_chi3(chi3_xph, False)
-chi3_xph_ABBA = make_chi3(chi3_xph, True)
+chi3_pp_AABB = make_chi3(chi3_pp, True)
+chi3_pp_ABBA = make_chi3(chi3_pp, False)
+chi3_ph_AABB = make_chi3(chi3_ph, True)
+chi3_ph_ABBA = make_chi3(chi3_ph, False)
+chi3_xph_AABB = make_chi3(chi3_xph, True)
+chi3_xph_ABBA = make_chi3(chi3_xph, False)
 
 with HDFArchive('dimer_chi3.ref.h5', 'w') as ar:
     ar['H'] = H
