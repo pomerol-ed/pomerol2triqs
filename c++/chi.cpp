@@ -125,15 +125,15 @@ namespace pomerol2triqs {
     return compute_chi<imtime>(i, j, k, l, connected, {beta, Boson, n_tau}, filler, channel);
   }
 
-  gf<imfreq, scalar_valued> pomerol_ed::chi_inu(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                                int n_inu, bool connected, channel_t channel) {
-    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_inu: No Hamiltonian has been diagonalized";
+  gf<imfreq, scalar_valued> pomerol_ed::chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                                int n_iw, bool connected, channel_t channel) {
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_iw: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
     auto filler = [](gf_view<imfreq, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
       for (auto inu : chi.mesh()) chi[inu] = pom_chi(std::complex<double>(inu));
     };
-    return compute_chi<imfreq>(i, j, k, l, connected, {beta, Boson, n_inu}, filler, channel);
+    return compute_chi<imfreq>(i, j, k, l, connected, {beta, Boson, n_iw}, filler, channel);
   }
 
 } // namespace pomerol2triqs

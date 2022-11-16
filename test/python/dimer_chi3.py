@@ -21,7 +21,7 @@ spin_names = ("up", "dn")
 atoms = (0, 1)
 
 # Number of Matsubara frequencies for susceptibility calculation
-n_inu = 10
+n_iw = 10
 
 # Block structure of \chi^3
 gf_struct = [['up', 2], ['dn', 2]]

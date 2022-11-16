@@ -59,11 +59,11 @@ assert abs(S_m) < 1e-10
 # < S_+ ; S_- >
 
 # Number of Matsubara frequencies for susceptibility calculation
-n_inu = 200
+n_iw = 200
 
-chi_up_up = ed.chi_inu(('up',0), ('up',0), ('up',0), ('up',0), beta, n_inu, True)
-chi_up_dn = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_inu, True)
-chi_Sp_Sm = ed.chi_inu(('up',0), ('dn',0), ('dn',0), ('up',0), beta, n_inu, True)
+chi_up_up = ed.chi_iw(('up',0), ('up',0), ('up',0), ('up',0), beta, n_iw, True)
+chi_up_dn = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
+chi_Sp_Sm = ed.chi_iw(('up',0), ('dn',0), ('dn',0), ('up',0), beta, n_iw, True)
 
 for inu in chi_up_up.mesh:
   zero_freq = abs(complex(inu)) < 1e-10

@@ -133,8 +133,8 @@ namespace pomerol2triqs {
                                             int n_tau, bool connected = false, channel_t channel = PH);
 
     /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part in Matsubara frequencies
-    gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                            int n_inu, bool connected = false, channel_t channel = PH);
+    gf<mesh::imfreq, scalar_valued> chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                            int n_iw, bool connected = false, channel_t channel = PH);
 
     /// 3-point fermion-boson susceptibility
     CPP2PY_ARG_AS_DICT
