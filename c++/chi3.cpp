@@ -139,11 +139,11 @@ auto pomerol_ed::chi3_iw_inu(chi3_iw_inu_params_t const& p) -> block2_gf<w_nu_t,
       auto w2 = std::complex<double>(std::get<1>(w_nu));
 
       if(p.channel == PP)
-        chi3_el[w_nu] = +pom_chi3(w2, w1 - w2);
+        chi3_el[w_nu] = pom_chi3(w2, w1 - w2);
       else if(p.channel == PH)
-        chi3_el[w_nu] = +pom_chi3(w2, w1 + w2);
+        chi3_el[w_nu] = pom_chi3(w2, w1 + w2);
       else if(p.channel == xPH)
-        chi3_el[w_nu] = -pom_chi3(w2, w1 + w2); // Extra minus sign from crossing-symmetry relation
+        chi3_el[w_nu] = pom_chi3(w2, w1 + w2);
     }
   };
 

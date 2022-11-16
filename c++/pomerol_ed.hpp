@@ -89,7 +89,7 @@ namespace pomerol2triqs {
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const;
     template <typename Mesh, typename Filler>
-    gf<Mesh, scalar_valued> compute_chi(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, bool connected,
+    gf<Mesh, scalar_valued> compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
                                         Mesh const &mesh, Filler filler, channel_t const &channel) const;
 
     template <typename Mesh, typename Filler>
@@ -128,12 +128,12 @@ namespace pomerol2triqs {
     CPP2PY_ARG_AS_DICT
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
 
-    /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part
-    gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+    /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part
+    gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
                                             int n_tau, bool connected = false, channel_t channel = PH);
 
-    /// Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies
-    gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+    /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part in Matsubara frequencies
+    gf<mesh::imfreq, scalar_valued> chi_inu(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
                                             int n_inu, bool connected = false, channel_t channel = PH);
 
     /// 3-point fermion-boson susceptibility

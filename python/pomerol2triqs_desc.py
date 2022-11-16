@@ -110,10 +110,10 @@ c.add_method("""block2_gf<pomerol2triqs::w_l_lp_t, tensor_valued<4>> G2_iw_l_lp 
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
-c.add_method("""gf<mesh::imtime, triqs::gfs::scalar_valued> chi_tau (pomerol2triqs::indices_t i1, pomerol2triqs::indices_t j1, pomerol2triqs::indices_t i2, pomerol2triqs::indices_t j2, double beta, int n_tau, bool connected = false, channel_t channel = PH)""",
+c.add_method("""gf<mesh::imtime, triqs::gfs::scalar_valued> chi_tau (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_tau, bool connected = false, channel_t channel = PH)""",
              doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part""")
 
-c.add_method("""gf<mesh::imfreq, triqs::gfs::scalar_valued> chi_inu (pomerol2triqs::indices_t i1, pomerol2triqs::indices_t j1, pomerol2triqs::indices_t i2, pomerol2triqs::indices_t j2, double beta, int n_inu, bool connected = false, channel_t channel = PH)""",
+c.add_method("""gf<mesh::imfreq, triqs::gfs::scalar_valued> chi_inu (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_inu, bool connected = false, channel_t channel = PH)""",
              doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies""")
 
 c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (**pomerol2triqs::chi3_iw_inu_params_t)""",

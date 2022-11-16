@@ -46,7 +46,7 @@ namespace pomerol2triqs {
   }
 
   template <typename Mesh, typename Filler>
-  gf<Mesh, scalar_valued> pomerol_ed::compute_chi(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, bool connected,
+  gf<Mesh, scalar_valued> pomerol_ed::compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
                                                   Mesh const &mesh, Filler filler, channel_t const &channel) const {
     if (!states_class || !matrix_h || !rho) TRIQS_RUNTIME_ERROR << "compute_chi: Internal error!";
 
@@ -56,25 +56,46 @@ namespace pomerol2triqs {
       return pom_i;
     };
 
-    Pomerol::ParticleIndex pom_i1 = checked_lookup(i1);
-    Pomerol::ParticleIndex pom_j1 = checked_lookup(j1);
-    Pomerol::ParticleIndex pom_i2 = checked_lookup(i2);
-    Pomerol::ParticleIndex pom_j2 = checked_lookup(j2);
+    Pomerol::ParticleIndex pom_i = checked_lookup(i);
+    Pomerol::ParticleIndex pom_j = checked_lookup(j);
+    Pomerol::ParticleIndex pom_k = checked_lookup(k);
+    Pomerol::ParticleIndex pom_l = checked_lookup(l);
 
-    std::tuple<bool, bool> dag1;
-    std::tuple<bool, bool> dag2;
+    std::tuple<bool, bool> adag;
+    std::tuple<bool, bool> bdag;
+    Pomerol::ParticleIndex a1;
+    Pomerol::ParticleIndex a2;
+    Pomerol::ParticleIndex b1;
+    Pomerol::ParticleIndex b2;
+    double sign = 1.0;
 
     if(channel == PP){
-      dag1 = {true, true};
-      dag2 = {false, false};
-    }
-    else if(channel == PH || channel == xPH){
-      dag1 = {true, false};
-      dag2 = {true, false};
+      adag = {true, true};
+      bdag = {false, false};
+      a1 = pom_i;
+      a2 = pom_k;
+      b1 = pom_j;
+      b2 = pom_l;
+      sign *= -1.0;
+    } else if(channel == PH){
+      adag = {true, false};
+      bdag = {true, false};
+      a1 = pom_i;
+      a2 = pom_j;
+      b1 = pom_k;
+      b2 = pom_l;
+    } else if(channel == xPH){
+      adag = {true, false};
+      bdag = {true, false};
+      a1 = pom_i;
+      a2 = pom_l;
+      b1 = pom_k;
+      b2 = pom_j;
+      sign *= -1.0;
     }
 
-    Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, pom_i1, pom_j1, dag1);
-    Pomerol::QuadraticOperator B(index_info, *hs, *states_class, *matrix_h, pom_i2, pom_j2, dag2);
+    Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, a1, a2, adag);
+    Pomerol::QuadraticOperator B(index_info, *hs, *states_class, *matrix_h, b1, b2, bdag);
 
     A.prepare(*hs);
     A.compute();
@@ -88,11 +109,12 @@ namespace pomerol2triqs {
 
     gf<Mesh, scalar_valued> chi(mesh);
     filler(chi, pom_chi);
+    chi *= sign;
 
     return chi;
   }
 
-  gf<imtime, scalar_valued> pomerol_ed::chi_tau(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+  gf<imtime, scalar_valued> pomerol_ed::chi_tau(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
                                                 int n_tau, bool connected, channel_t channel) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_tau: No Hamiltonian has been diagonalized";
     compute_rho(beta);
@@ -100,10 +122,10 @@ namespace pomerol2triqs {
     auto filler = [](gf_view<imtime, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
       for (auto tau : chi.mesh()) chi[tau] = pom_chi.of_tau(double(tau));
     };
-    return compute_chi<imtime>(i1, j1, i2, j2, connected, {beta, Boson, n_tau}, filler, channel);
+    return compute_chi<imtime>(i, j, k, l, connected, {beta, Boson, n_tau}, filler, channel);
   }
 
-  gf<imfreq, scalar_valued> pomerol_ed::chi_inu(indices_t const &i1, indices_t const &j1, indices_t const &i2, indices_t const &j2, double beta,
+  gf<imfreq, scalar_valued> pomerol_ed::chi_inu(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
                                                 int n_inu, bool connected, channel_t channel) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_inu: No Hamiltonian has been diagonalized";
     compute_rho(beta);
@@ -111,7 +133,7 @@ namespace pomerol2triqs {
     auto filler = [](gf_view<imfreq, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
       for (auto inu : chi.mesh()) chi[inu] = pom_chi(std::complex<double>(inu));
     };
-    return compute_chi<imfreq>(i1, j1, i2, j2, connected, {beta, Boson, n_inu}, filler, channel);
+    return compute_chi<imfreq>(i, j, k, l, connected, {beta, Boson, n_inu}, filler, channel);
   }
 
 } // namespace pomerol2triqs
