@@ -140,12 +140,10 @@ c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
-c.add_method("""void set_rho_threshold (double threshold)""",
-             doc = r"""Set truncation threshold for density matrix elements""")
-
 c.add_property(name = "rho_threshold",
                getter = cfunction("double get_rho_threshold ()"),
-               doc = r"""Get truncation threshold for density matrix elements""")
+               setter = cfunction("void set_rho_threshold (double threshold)"),
+               doc = r"""Truncation threshold for density matrix elements""")
 
 module.add_class(c)
 
