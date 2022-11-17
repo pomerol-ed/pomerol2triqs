@@ -90,7 +90,7 @@ namespace pomerol2triqs {
     template <typename Mesh, typename Filler> block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const;
     template <typename Mesh, typename Filler>
     gf<Mesh, scalar_valued> compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
-                                        Mesh const &mesh, Filler filler, channel_t const &channel) const;
+                                        Mesh const &mesh, Filler filler, channel_t channel) const;
 
     template <typename Mesh, typename Filler>
     block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,

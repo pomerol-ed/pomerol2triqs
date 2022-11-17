@@ -135,15 +135,13 @@ auto pomerol_ed::chi3_iw_inu(chi3_iw_inu_params_t const& p) -> block2_gf<w_nu_t,
     for (auto w_nu : chi3_el.mesh()) {
       if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
-      auto w1 = std::complex<double>(std::get<0>(w_nu));
-      auto w2 = std::complex<double>(std::get<1>(w_nu));
+      auto w = std::complex<double>(std::get<0>(w_nu));
+      auto nu = std::complex<double>(std::get<1>(w_nu));
 
       if(p.channel == PP)
-        chi3_el[w_nu] = pom_chi3(w2, w1 - w2);
-      else if(p.channel == PH)
-        chi3_el[w_nu] = pom_chi3(w2, w1 + w2);
-      else if(p.channel == xPH)
-        chi3_el[w_nu] = pom_chi3(w2, w1 + w2);
+        chi3_el[w_nu] = pom_chi3(nu, w - nu);
+      else // PH and xPH
+        chi3_el[w_nu] = pom_chi3(nu, w + nu);
     }
   };
 

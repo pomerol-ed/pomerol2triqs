@@ -47,7 +47,7 @@ namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
   gf<Mesh, scalar_valued> pomerol_ed::compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
-                                                  Mesh const &mesh, Filler filler, channel_t const &channel) const {
+                                                  Mesh const &mesh, Filler filler, channel_t channel) const {
     if (!states_class || !matrix_h || !rho) TRIQS_RUNTIME_ERROR << "compute_chi: Internal error!";
 
     auto checked_lookup = [&](indices_t const &i) {
@@ -63,35 +63,38 @@ namespace pomerol2triqs {
 
     std::tuple<bool, bool> adag;
     std::tuple<bool, bool> bdag;
-    Pomerol::ParticleIndex a1;
-    Pomerol::ParticleIndex a2;
-    Pomerol::ParticleIndex b1;
-    Pomerol::ParticleIndex b2;
-    double sign = 1.0;
+    Pomerol::ParticleIndex a1, a2;
+    Pomerol::ParticleIndex b1, b2;
+    double sign;
 
-    if(channel == PP){
-      adag = {true, true};
-      bdag = {false, false};
-      a1 = pom_i;
-      a2 = pom_k;
-      b1 = pom_j;
-      b2 = pom_l;
-      sign *= -1.0;
-    } else if(channel == PH){
-      adag = {true, false};
-      bdag = {true, false};
-      a1 = pom_i;
-      a2 = pom_j;
-      b1 = pom_k;
-      b2 = pom_l;
-    } else if(channel == xPH){
-      adag = {true, false};
-      bdag = {true, false};
-      a1 = pom_i;
-      a2 = pom_l;
-      b1 = pom_k;
-      b2 = pom_j;
-      sign *= -1.0;
+    switch(channel) {
+      case PP:
+        adag = {true, true};
+        bdag = {false, false};
+        a1 = pom_i;
+        a2 = pom_k;
+        b1 = pom_j;
+        b2 = pom_l;
+        sign = -1.0;
+        break;
+      case PH:
+        adag = {true, false};
+        bdag = {true, false};
+        a1 = pom_i;
+        a2 = pom_j;
+        b1 = pom_k;
+        b2 = pom_l;
+        sign = 1.0;
+        break;
+      case xPH:
+        adag = {true, false};
+        bdag = {true, false};
+        a1 = pom_i;
+        a2 = pom_l;
+        b1 = pom_k;
+        b2 = pom_j;
+        sign = -1.0;
+        break;
     }
 
     Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, a1, a2, adag);

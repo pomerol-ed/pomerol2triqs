@@ -10,7 +10,7 @@ namespace pomerol2triqs {
   /// Channel in which Matsubara frequency representation is defined
   enum channel_t { PP, PH, xPH, AllFermionic };
 
-  using g2_blocks_t = std::set<std::pair<std::string, std::string>>;
+  using g2_blocks_t   = std::set<std::pair<std::string, std::string>>;
   using chi3_blocks_t = std::set<std::pair<std::string, std::string>>;
 
   /// Arguments of G2_iw_inu_inup()
