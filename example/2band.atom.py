@@ -41,7 +41,9 @@ g2_n_l = 10
 # Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
-# Number of Matsubara frequencies for \chi^3 calculations
+# Number of bosonic Matsubara frequencies for \chi^3 calculations
+chi3_n_iw = 10
+# Number of fermionic Matsubara frequencies for \chi^3 calculations
 chi3_n_inu = 10
 # Block index combinations for \chi^3 calculations
 chi3_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
@@ -160,44 +162,45 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
                                    n_l = g2_n_l,
                                    **common_g2_params)
 
-##########################
-# \chi^{(3)}(i\nu,i\nu') #
-##########################
+############################
+# \chi^{(3)}(i\omega,i\nu) #
+############################
 
 common_chi3_params = {'gf_struct' : gf_struct,
                       'beta' : beta,
                       'blocks' : chi3_blocks,
+                      'n_iw' : chi3_n_iw,
                       'n_inu' : chi3_n_inu}
 
-# Compute \chi^{(3),pp}(i\nu,i\nu'), AABB block order
+# Compute \chi^{(3),pp}(i\omega,i\nu), AABB block order
 chi3_iw_inu_pp_AABB = ed.chi3_iw_inu(channel = "PP",
-                                         block_order = "AABB",
-                                         **common_chi3_params)
+                                     block_order = "AABB",
+                                     **common_chi3_params)
 
-# Compute \chi^{(3),pp}(i\nu,i\nu'), ABBA block order
+# Compute \chi^{(3),pp}(i\omega,i\nu), ABBA block order
 chi3_iw_inu_pp_ABBA = ed.chi3_iw_inu(channel = "PP",
-                                         block_order = "ABBA",
-                                         **common_chi3_params)
+                                     block_order = "ABBA",
+                                     **common_chi3_params)
 
-# Compute \chi^{(3),ph}(i\nu,i\nu'), AABB block order
+# Compute \chi^{(3),ph}(i\omega,i\nu), AABB block order
 chi3_iw_inu_ph_AABB = ed.chi3_iw_inu(channel = "PH",
-                                         block_order = "AABB",
-                                         **common_chi3_params)
+                                     block_order = "AABB",
+                                     **common_chi3_params)
 
-# Compute \chi^{(3),ph}(i\nu,i\nu'), ABBA block order
+# Compute \chi^{(3),ph}(i\omega,i\nu), ABBA block order
 chi3_iw_inu_ph_ABBA = ed.chi3_iw_inu(channel = "PH",
-                                         block_order = "ABBA",
-                                         **common_chi3_params)
+                                     block_order = "ABBA",
+                                     **common_chi3_params)
 
-# Compute \chi^{(3),xph}(i\nu,i\nu'), AABB block order
+# Compute \chi^{(3),xph}(i\omega,i\nu), AABB block order
 chi3_iw_inu_xph_AABB = ed.chi3_iw_inu(channel = "xPH",
-                                          block_order = "AABB",
-                                          **common_chi3_params)
+                                      block_order = "AABB",
+                                      **common_chi3_params)
 
-# Compute \chi^{(3),xph}(i\nu,i\nu'), ABBA block order
+# Compute \chi^{(3),xph}(i\omega,i\nu), ABBA block order
 chi3_iw_inu_xph_ABBA = ed.chi3_iw_inu(channel = "xPH",
-                                          block_order = "ABBA",
-                                          **common_chi3_params)
+                                      block_order = "ABBA",
+                                      **common_chi3_params)
 
 ################
 # Save results #
