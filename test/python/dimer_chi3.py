@@ -20,8 +20,10 @@ h_field = 0.05          # Magnetic field
 spin_names = ("up", "dn")
 atoms = (0, 1)
 
-# Number of Matsubara frequencies for susceptibility calculation
+# Number of bosonic Matsubara frequencies for susceptibility calculation
 n_iw = 10
+# Number of fermionic Matsubara frequencies for susceptibility calculation
+n_inu = 10
 
 # Block structure of \chi^3
 gf_struct = [['up', 2], ['dn', 2]]
@@ -47,7 +49,7 @@ ed.diagonalize(H)
 # Compute \chi^3 #
 ##################
 
-params = {'gf_struct': gf_struct, 'beta': beta, 'n_inu': n_inu}
+params = {'gf_struct': gf_struct, 'beta': beta, 'n_iw': n_iw, 'n_inu': n_inu}
 
 # Particle-particle channel
 chi3_pp_AABB = ed.chi3_iw_inu(**params, channel='PP', block_order='AABB')
