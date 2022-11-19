@@ -5,7 +5,7 @@ if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-project(pomerol2triqs VERSION 0.7 LANGUAGES CXX)
+project(pomerol2triqs VERSION 0.8 LANGUAGES CXX)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -38,7 +38,7 @@ if(PythonSupport AND NOT TRIQS_WITH_PYTHON_SUPPORT)
 endif()
 
 # Load Pomerol
-find_package(pomerol 2.0 CONFIG REQUIRED)
+find_package(pomerol 2.1 CONFIG REQUIRED)
 message(STATUS "Found pomerol ${pomerol_VERSION}")
 
 # Find MPI

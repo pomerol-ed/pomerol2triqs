@@ -1,4 +1,4 @@
-add_library(pomerol2triqs_c pomerol_ed.cpp g.cpp g2.cpp chi.cpp)
+add_library(pomerol2triqs_c pomerol_ed.cpp g.cpp g2.cpp chi.cpp chi3.cpp)
 
 target_link_libraries(pomerol2triqs_c PUBLIC triqs pomerol::pomerol)
 target_compile_options(pomerol2triqs_c PRIVATE
@@ -9,4 +9,4 @@ target_compile_options(pomerol2triqs_c PRIVATE
 install(TARGETS pomerol2triqs_c DESTINATION lib EXPORT pomerol2triqs-targets)
 install(EXPORT pomerol2triqs-targets DESTINATION share/cmake)
 
-install(FILES pomerol_ed.hpp g2_parameters.hpp DESTINATION include/pomerol2triqs)
+install(FILES pomerol_ed.hpp parameters.hpp DESTINATION include/pomerol2triqs)

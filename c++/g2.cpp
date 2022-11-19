@@ -1,7 +1,7 @@
 /**
  * pomerol2triqs
  *
- * Copyright (C) 2017-2021 Igor Krivenko <igor.s.krivenko @ gmail.com>
+ * Copyright (C) 2017-2022 Igor Krivenko <igor.s.krivenko @ gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,6 +123,8 @@ namespace pomerol2triqs {
   }
 
   auto pomerol_ed::G2_iw_inu_inup(g2_iw_inu_inup_params_t const &p) -> block2_gf<w_nu_nup_t, tensor_valued<4>> {
+    if(p.channel == xPH) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: Crossed particle-hole channel is not supported";
+
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_inu_inup: No Hamiltonian has been diagonalized";
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
@@ -181,6 +183,8 @@ namespace pomerol2triqs {
   }
 
   auto pomerol_ed::G2_iw_l_lp(g2_iw_l_lp_params_t const &p) -> block2_gf<w_l_lp_t, tensor_valued<4>> {
+    if(p.channel == xPH) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: Crossed particle-hole channel is not supported";
+
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "G2_iw_l_lp: No Hamiltonian has been diagonalized";
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);

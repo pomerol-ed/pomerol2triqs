@@ -14,6 +14,8 @@ foreach(t anderson_gf slater_gf wick chi)
 endforeach()
 
 # Multiple MPI ranks tests
-foreach(numproc 1 2 4)
-  add_mpi_test(anderson_g2_matsubara anderson_g2_matsubara.py ${numproc})
+foreach(t anderson_g2_matsubara dimer_chi3)
+  foreach(numproc 1 2 4)
+    add_mpi_test(${t} ${t}.py ${numproc})
+  endforeach()
 endforeach()

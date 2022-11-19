@@ -41,6 +41,13 @@ g2_n_l = 10
 # Block index combinations for G^2 calculations
 g2_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
 
+# Number of bosonic Matsubara frequencies for \chi^3 calculations
+chi3_n_iw = 10
+# Number of fermionic Matsubara frequencies for \chi^3 calculations
+chi3_n_inu = 10
+# Block index combinations for \chi^3 calculations
+chi3_blocks = set([("up", "up"), ("up", "dn"), ("dn", "up")])
+
 gf_struct = [("up", num_orb), ("dn", num_orb)]
 print("Block structure of single-particle Green's functions:", gf_struct)
 
@@ -82,13 +89,13 @@ G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
 chi_tau = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau)
 
 # Compute \chi(i\nu)
-chi_inu = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw)
+chi_iw = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw)
 
 # Compute \chi_c(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)> - <n_{up,0}><n_{dn,0}>
 chi_tau_c = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True)
 
 # Compute \chi_c(i\nu)
-chi_inu_c = ed.chi_inu(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
+chi_iw_c = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
 
 ###########
 # G^{(2)} #
@@ -155,6 +162,46 @@ G2_iw_l_lp_pp_ABBA = ed.G2_iw_l_lp(channel = "PP",
                                    n_l = g2_n_l,
                                    **common_g2_params)
 
+############################
+# \chi^{(3)}(i\omega,i\nu) #
+############################
+
+common_chi3_params = {'gf_struct' : gf_struct,
+                      'beta' : beta,
+                      'blocks' : chi3_blocks,
+                      'n_iw' : chi3_n_iw,
+                      'n_inu' : chi3_n_inu}
+
+# Compute \chi^{(3),pp}(i\omega,i\nu), AABB block order
+chi3_iw_inu_pp_AABB = ed.chi3_iw_inu(channel = "PP",
+                                     block_order = "AABB",
+                                     **common_chi3_params)
+
+# Compute \chi^{(3),pp}(i\omega,i\nu), ABBA block order
+chi3_iw_inu_pp_ABBA = ed.chi3_iw_inu(channel = "PP",
+                                     block_order = "ABBA",
+                                     **common_chi3_params)
+
+# Compute \chi^{(3),ph}(i\omega,i\nu), AABB block order
+chi3_iw_inu_ph_AABB = ed.chi3_iw_inu(channel = "PH",
+                                     block_order = "AABB",
+                                     **common_chi3_params)
+
+# Compute \chi^{(3),ph}(i\omega,i\nu), ABBA block order
+chi3_iw_inu_ph_ABBA = ed.chi3_iw_inu(channel = "PH",
+                                     block_order = "ABBA",
+                                     **common_chi3_params)
+
+# Compute \chi^{(3),xph}(i\omega,i\nu), AABB block order
+chi3_iw_inu_xph_AABB = ed.chi3_iw_inu(channel = "xPH",
+                                      block_order = "AABB",
+                                      **common_chi3_params)
+
+# Compute \chi^{(3),xph}(i\omega,i\nu), ABBA block order
+chi3_iw_inu_xph_ABBA = ed.chi3_iw_inu(channel = "xPH",
+                                      block_order = "ABBA",
+                                      **common_chi3_params)
+
 ################
 # Save results #
 ################
@@ -166,9 +213,9 @@ if mpi.is_master_node():
         ar['G_tau'] = G_tau
         ar['G_w'] = G_w
         ar['chi_tau'] = chi_tau
-        ar['chi_inu'] = chi_inu
+        ar['chi_iw'] = chi_iw
         ar['chi_tau_c'] = chi_tau_c
-        ar['chi_inu_c'] = chi_inu_c
+        ar['chi_iw_c'] = chi_iw_c
         ar['G2_iw_inu_inup_ph_AABB'] = G2_iw_inu_inup_ph_AABB
         ar['G2_iw_inu_inup_ph_ABBA'] = G2_iw_inu_inup_ph_ABBA
         ar['G2_iw_inu_inup_pp_AABB'] = G2_iw_inu_inup_pp_AABB
@@ -177,3 +224,9 @@ if mpi.is_master_node():
         ar['G2_iw_l_lp_ph_ABBA'] = G2_iw_l_lp_ph_ABBA
         ar['G2_iw_l_lp_pp_AABB'] = G2_iw_l_lp_pp_AABB
         ar['G2_iw_l_lp_pp_ABBA'] = G2_iw_l_lp_pp_ABBA
+        ar['chi3_iw_inu_pp_AABB'] = chi3_iw_inu_pp_AABB
+        ar['chi3_iw_inu_pp_ABBA'] = chi3_iw_inu_pp_ABBA
+        ar['chi3_iw_inu_ph_AABB'] = chi3_iw_inu_ph_AABB
+        ar['chi3_iw_inu_ph_ABBA'] = chi3_iw_inu_ph_ABBA
+        ar['chi3_iw_inu_xph_AABB'] = chi3_iw_inu_xph_AABB
+        ar['chi3_iw_inu_xph_ABBA'] = chi3_iw_inu_xph_ABBA

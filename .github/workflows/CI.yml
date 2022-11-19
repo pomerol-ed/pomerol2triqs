@@ -82,7 +82,7 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-        git clone https://github.com/aeantipov/pomerol
+        git clone https://github.com/pomerol-ed/pomerol
         mkdir pomerol/build && pushd pomerol/build
         cmake ..                                         \
           -DCMAKE_BUILD_TYPE=Debug                       \
