@@ -45,22 +45,16 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
 
     static const std::array<Pomerol::Channel, 3> pom_channels = {Pomerol::PP, Pomerol::PH, Pomerol::xPH};
 
-    for (auto const &bl1 : gf_struct) {
-      auto &A    = bl1.first;
-      int A_size = bl1.second;
-      int s1     = A_size;
+    for (auto const &[A, A_size] : gf_struct) {
       block_names.push_back(A);
 
       std::vector<gf<Mesh, tensor_valued<4>>> gf_vec;
-      for (auto const &bl2 : gf_struct) {
-        auto &B    = bl2.first;
-        int B_size = bl2.second;
-        int s3     = B_size;
+      for (auto const &[B, B_size] : gf_struct) {
 
-        int s2 = block_order == AABB ? s1 : s3;
-        int s4 = block_order == AABB ? s3 : s1;
+        int s2 = block_order == AABB ? A_size : B_size;
+        int s4 = block_order == AABB ? B_size : A_size;
 
-        gf_vec.emplace_back(mesh, make_shape(s1, s2, s3, s4));
+        gf_vec.emplace_back(mesh, make_shape(A_size, s2, B_size, s4));
 
         if (compute_all_blocks || chi3_blocks.count({A, B})) {
           auto &chi3_block = gf_vec.back();
@@ -132,16 +126,13 @@ auto pomerol_ed::chi3_iw_inu(chi3_iw_inu_params_t const& p) -> block2_gf<w_nu_t,
 
   auto filler = [&p, this](gf_view<w_nu_t, scalar_valued> chi3_el, auto const &pom_chi3) {
     long mesh_index = 0;
-    for (auto w_nu : chi3_el.mesh()) {
+    for (auto [w, nu] : chi3_el.mesh()) {
       if ((mesh_index++) % comm.size() != comm.rank()) continue;
 
-      auto w = std::complex<double>(std::get<0>(w_nu));
-      auto nu = std::complex<double>(std::get<1>(w_nu));
-
       if(p.channel == PP)
-        chi3_el[w_nu] = pom_chi3(nu, w - nu);
+        chi3_el[w, nu] = pom_chi3(nu, w - nu);
       else // PH and xPH
-        chi3_el[w_nu] = pom_chi3(nu, w + nu);
+        chi3_el[w, nu] = pom_chi3(nu, w + nu);
     }
   };
 

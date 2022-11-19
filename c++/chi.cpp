@@ -95,6 +95,8 @@ namespace pomerol2triqs {
         b2 = pom_j;
         sign = -1.0;
         break;
+      default:
+        TRIQS_RUNTIME_ERROR << "compute_chi: AllFermionic channel is not supported";
     }
 
     Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, a1, a2, adag);
