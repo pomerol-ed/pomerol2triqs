@@ -36,6 +36,8 @@ Installation
 - Install the [Pomerol](http://pomerol-ed.github.io/pomerol/) exact diagonalization library.
 - Install the [TRIQS](http://triqs.github.io/triqs/latest/install.html) library.
 - `source <path_to_triqs_install_dir>/share/triqs/triqsvars.sh`
+  (skip this step if TRIQS has been installed in a system location, e.g. `/usr`
+  or `/usr/local` on Linux).
 - `git clone https://github.com/pomerol-ed/pomerol2triqs.git pomerol2triqs.git`
 - `mkdir pomerol2triqs.build && cd pomerol2triqs.build`
 - `cmake ../pomerol2triqs.git -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=<path_to_install_dir> -DPOMEROL_PATH=<path_to_pomerol_install_dir>`
