@@ -2,7 +2,7 @@ from h5 import HDFArchive
 from triqs.gf import *
 from triqs.operators import *
 from triqs.operators.util.op_struct import set_operator_structure, get_mkind
-from triqs.operators.util.U_matrix import U_matrix
+from triqs.operators.util.U_matrix import U_matrix_slater
 from triqs.operators.util.hamiltonians import h_int_slater
 from triqs.operators.util.observables import N_op, S_op, L_op
 from triqs.utility import mpi
@@ -29,7 +29,7 @@ F4 = F2*0.625
 spin_names = ("up", "dn")
 num_orb = 2*L+1
 orb_names = list(range(num_orb))
-U_mat = U_matrix(L, radial_integrals = [F0,F2,F4], basis='spherical')
+U_mat = U_matrix_slater(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
 # Do not split H into blocks
 ignore_symmetries = False
