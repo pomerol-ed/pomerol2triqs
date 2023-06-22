@@ -189,7 +189,7 @@ namespace pomerol2triqs {
     compute_rho(p.beta);
     compute_field_operators(p.gf_struct);
 
-    w_l_lp_t mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}, {p.beta, Fermion, static_cast<size_t>(p.n_l)}};
+    w_l_lp_t mesh{{p.beta, Boson, p.n_iw}, {p.beta, Fermion, p.n_l}, {p.beta, Fermion, p.n_l}};
 
     if (verbose && !comm.rank()) std::cout << "G2_iw_l_lp: Filling output container" << std::endl;
 
@@ -227,8 +227,11 @@ namespace pomerol2triqs {
             auto iw_val_3 = get_g2_iw_inu_inup_val(w_m, n - 1, r);
             auto iw_val_4 = get_g2_iw_inu_inup_val(w_m, n, -r - 1);
 
-            for (auto l : std::get<1>(g2_el.mesh()))
-              for (auto lp : std::get<2>(g2_el.mesh())) {
+            for (auto l_mp : std::get<1>(g2_el.mesh()))
+              for (auto lp_mp : std::get<2>(g2_el.mesh())) {
+                auto l  = l_mp.index();
+                auto lp = lp_mp.index();
+
                 if (llp_element_converged(l, lp)) continue;
 
                 using std::conj;
@@ -238,7 +241,7 @@ namespace pomerol2triqs {
                 val += t_bar(2 * (n - 1) + w_m + 1, l) * iw_val_3 * conj(t_bar(2 * r + w_m + 1, lp));
                 val += t_bar(2 * n + w_m + 1, l) * iw_val_4 * conj(t_bar(2 * (-r - 1) + w_m + 1, lp));
 
-                g2_el[{iw, l, lp}] += val;
+                g2_el[iw, l_mp, lp_mp] += val;
                 border_contrib(l, lp) += val;
                 if (std::abs(border_contrib(l, lp)) < p.inu_sum_tol) {
                   llp_element_converged(l, lp) = true;
