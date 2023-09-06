@@ -18,11 +18,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-20.04, cc: gcc-10, cxx: g++-10}
-          - {os: ubuntu-20.04, cc: clang-13, cxx: clang++-13}
-          - {os: macos-11, cc: gcc-11, cxx: g++-11}
-          - {os: macos-11, cc: /usr/local/opt/llvm/bin/clang,
-                           cxx: /usr/local/opt/llvm/bin/clang++}
+          - {os: ubuntu-22.04, cc: gcc-12, cxx: g++-12}
+          - {os: ubuntu-22.04, cc: clang-15, cxx: clang++-15}
+          - {os: macos-11, cc: gcc-12, cxx: g++-12}
+          - {os: macos-11, cc: /usr/local/opt/llvm@16/bin/clang,
+                           cxx: /usr/local/opt/llvm@16/bin/clang++}
 
     runs-on: ${{ matrix.os }}
 
@@ -34,12 +34,11 @@ jobs:
       run: >
            sudo apt-get update &&
            sudo apt-get install lsb-release wget software-properties-common &&
-           wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh &&
-           sudo chmod +x /tmp/llvm.sh && sudo /tmp/llvm.sh 13 &&
            sudo apt-get install
-           g++-10
-           clang-13
-           libgfortran4
+           g++-12
+           clang-15
+           libomp-15-dev
+           libgfortran5
            gfortran
            libeigen3-dev
            openmpi-bin
@@ -63,14 +62,22 @@ jobs:
     - name: Install Homebrew dependencies
       if: startsWith(matrix.os, 'macos')
       run: |
-           brew install gcc@11 llvm eigen fftw hdf5 open-mpi openblas
+           brew install llvm@16 libomp eigen fftw hdf5 open-mpi
            pip3 install mako numpy scipy mpi4py
 
+    - name: Cache Boost (a C++20 compatible version)
+      id: cache-boost
+      uses: actions/cache@v3
+      with:
+        path: ~/boost
+        key: boost-1.82
+
     - name: Download Boost (a C++20 compatible version)
+      if: ${{ steps.cache-boost.outputs.cache-hit != 'true' }}
       run: |
-           wget -q https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2
-           tar -xf boost_1_78_0.tar.bz2
-           mv boost_1_78_0 $HOME/boost
+           wget -q https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
+           tar -xf boost_1_82_0.tar.bz2
+           mv boost_1_82_0 $HOME/boost
 
     - name: Install libcommute
       env:
@@ -107,7 +114,7 @@ jobs:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: |
-           git clone https://github.com/TRIQS/triqs --branch 3.1.x
+           git clone https://github.com/TRIQS/triqs --branch 3.2.x
            mkdir triqs/build && pushd triqs/build
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
