@@ -11,7 +11,7 @@ project(pomerol2triqs VERSION 0.9 LANGUAGES CXX)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Load TRIQS
-find_package(TRIQS 3.1.0 REQUIRED)
+find_package(TRIQS 3.2.0 REQUIRED)
 
 # Append TRIQS installed files to the cmake load path
 list(APPEND CMAKE_MODULE_PATH ${TRIQS_ROOT}/share/cmake)
