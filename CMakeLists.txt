@@ -5,7 +5,7 @@ if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-project(pomerol2triqs VERSION 0.8 LANGUAGES CXX)
+project(pomerol2triqs VERSION 0.9 LANGUAGES CXX)
 
 # We use shared libraries
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
