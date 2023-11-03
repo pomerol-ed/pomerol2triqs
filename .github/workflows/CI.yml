@@ -37,6 +37,8 @@ jobs:
            sudo apt-get install
            g++-12
            clang-15
+           libc++-15-dev
+           libc++abi-15-dev
            libomp-15-dev
            libgfortran5
            gfortran
@@ -78,6 +80,10 @@ jobs:
            wget -q https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
            tar -xf boost_1_82_0.tar.bz2
            mv boost_1_82_0 $HOME/boost
+
+    - name: Force use of libc++
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cxx, 'clang')
+      run: echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
     - name: Install libcommute
       env:
