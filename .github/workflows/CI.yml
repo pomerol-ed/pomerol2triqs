@@ -20,9 +20,9 @@ jobs:
         include:
           - {os: ubuntu-22.04, cc: gcc-12, cxx: g++-12}
           - {os: ubuntu-22.04, cc: clang-15, cxx: clang++-15}
-          - {os: macos-11, cc: gcc-12, cxx: g++-12}
-          - {os: macos-11, cc: /usr/local/opt/llvm@16/bin/clang,
-                           cxx: /usr/local/opt/llvm@16/bin/clang++}
+          - {os: macos-12, cc: gcc-12, cxx: g++-12}
+          - {os: macos-12, cc: /usr/local/opt/llvm@17/bin/clang,
+                           cxx: /usr/local/opt/llvm@17/bin/clang++}
 
     runs-on: ${{ matrix.os }}
 
@@ -64,7 +64,7 @@ jobs:
     - name: Install Homebrew dependencies
       if: startsWith(matrix.os, 'macos')
       run: |
-           brew install llvm@16 libomp eigen fftw hdf5 open-mpi
+           brew install llvm@17 libomp eigen fftw hdf5 open-mpi
            pip3 install mako numpy scipy mpi4py
 
     - name: Cache Boost (a C++20 compatible version)
