@@ -151,7 +151,7 @@ jobs:
           sudo sh -c 'echo -e "\nrmaps_base_oversubscribe = 1" >> \
             /etc/openmpi/openmpi-mca-params.conf'
         else
-          echo -e "\nrmaps_base_oversubscribe = 1" >> \
+          echo -e "\nrmaps_default_mapping_policy = :oversubscribe" >> \
             /usr/local/etc/openmpi-mca-params.conf
         fi
         source $HOME/install/share/triqs/triqsvars.sh
