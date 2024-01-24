@@ -139,7 +139,8 @@ jobs:
            mkdir build && pushd build
            cmake ..                                 \
              -DCMAKE_BUILD_TYPE=Debug               \
-             -DCMAKE_INSTALL_PREFIX=$HOME/install
+             -DCMAKE_INSTALL_PREFIX=$HOME/install   \
+             -DBoost_INCLUDE_DIR=$HOME/boost
            make -j2 install VERBOSE=1
            popd
 
