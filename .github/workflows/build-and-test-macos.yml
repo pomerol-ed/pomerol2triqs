@@ -1,4 +1,4 @@
-name: CI
+name: Build and test (macOS)
 
 on:
   push:
@@ -12,64 +12,31 @@ on:
     - cron: '0 0 * * 0'
 
 jobs:
-  build:
-
+  build-and-test:
+    runs-on: macos-12
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {os: ubuntu-22.04, cc: gcc-12, cxx: g++-12}
-          - {os: ubuntu-22.04, cc: clang-15, cxx: clang++-15}
-          - {os: macos-12, cc: gcc-12, cxx: g++-12}
-          - {os: macos-12, cc: /usr/local/opt/llvm@17/bin/clang,
-                           cxx: /usr/local/opt/llvm@17/bin/clang++}
-
-    runs-on: ${{ matrix.os }}
+        compiler:
+          - {name: gcc-12, cc: gcc-12, cxx: g++-12}
+          - {name: clang-17, cc: /usr/local/opt/llvm@17/bin/clang,
+                             cxx: /usr/local/opt/llvm@17/bin/clang++}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: Install Ubuntu dependencies
-      if: startsWith(matrix.os, 'ubuntu')
-      run: >
-           sudo apt-get update &&
-           sudo apt-get install lsb-release wget software-properties-common &&
-           sudo apt-get install
-           g++-12
-           clang-15
-           libc++-15-dev
-           libc++abi-15-dev
-           libomp-15-dev
-           libgfortran5
-           gfortran
-           libeigen3-dev
-           openmpi-bin
-           openmpi-common
-           openmpi-doc
-           libopenmpi-dev
-           libblas-dev
-           liblapack-dev
-           libfftw3-dev
-           libgmp-dev
-           hdf5-tools
-           libhdf5-dev
-           python3-dev
-           python3-numpy
-           python3-scipy
-           python3-matplotlib
-           ipython3
-           python3-mpi4py
-           python3-mako
-
-    - name: Install Homebrew dependencies
-      if: startsWith(matrix.os, 'macos')
+    - name: Install dependencies
       run: |
-           brew install llvm@17 libomp eigen fftw hdf5 open-mpi
+           brew install llvm@17 eigen fftw hdf5 open-mpi
            pip3 install mako numpy scipy mpi4py
+
+    - name: Set OpenMP_ROOT for Clang
+      if: startsWith(matrix.compiler.name, 'clang')
+      run: echo "OpenMP_ROOT=$(brew --prefix libomp)" >> $GITHUB_ENV
 
     - name: Cache Boost (a C++20 compatible version)
       id: cache-boost
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/boost
         key: boost-1.82
@@ -81,13 +48,9 @@ jobs:
            tar -xf boost_1_82_0.tar.bz2
            mv boost_1_82_0 $HOME/boost
 
-    - name: Force use of libc++
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cxx, 'clang')
-      run: echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
-
     - name: Install libcommute
       env:
-        CXX: ${{ matrix.cxx }}
+        CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/krivenko/libcommute libcommute
            mkdir libcommute/build && pushd libcommute/build
@@ -100,8 +63,8 @@ jobs:
 
     - name: Build & install Pomerol
       env:
-        CC: ${{ matrix.cc }}
-        CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/pomerol-ed/pomerol
            mkdir pomerol/build && pushd pomerol/build
@@ -117,8 +80,8 @@ jobs:
 
     - name: Build & install TRIQS
       env:
-        CC: ${{ matrix.cc }}
-        CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/TRIQS/triqs --branch 3.2.x
            mkdir triqs/build && pushd triqs/build
@@ -132,8 +95,8 @@ jobs:
 
     - name: Build pomerol2triqs
       env:
-        CC: ${{ matrix.cc }}
-        CXX: ${{ matrix.cxx }}
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
       run: |
            source $HOME/install/share/triqs/triqsvars.sh
            mkdir build && pushd build
@@ -148,14 +111,9 @@ jobs:
       env:
         TMPDIR: "/tmp"
       run: |
-        if [[ "${{ matrix.os }}" == ubuntu* ]]; then
-          sudo sh -c 'echo -e "\nrmaps_base_oversubscribe = 1" >> \
-            /etc/openmpi/openmpi-mca-params.conf'
-        else
-          mkdir -p $HOME/.prte
-          echo -e "\nrmaps_default_mapping_policy = :oversubscribe" >> \
-            $HOME/.prte/mca-params.conf
-        fi
+        mkdir -p $HOME/.prte
+        echo -e "\nrmaps_default_mapping_policy = :oversubscribe" >> \
+          $HOME/.prte/mca-params.conf
         source $HOME/install/share/triqs/triqsvars.sh
         cd build
         ctest --output-on-failure

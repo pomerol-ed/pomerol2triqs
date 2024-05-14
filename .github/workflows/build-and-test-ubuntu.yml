@@ -1,0 +1,143 @@
+name: Build and test (Ubuntu)
+
+on:
+  push:
+    branches:
+      - master
+      - ci
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+          - {name: gcc-12, cc: gcc-12, cxx: g++-12}
+          - {name: clang-15, cc: clang-15, cxx: clang++-15}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: >
+           sudo apt-get update &&
+           sudo apt-get install lsb-release wget software-properties-common &&
+           sudo apt-get install
+           g++-12
+           clang-15
+           libc++-15-dev
+           libc++abi-15-dev
+           libomp-15-dev
+           libgfortran5
+           gfortran
+           libeigen3-dev
+           openmpi-bin
+           openmpi-common
+           openmpi-doc
+           libopenmpi-dev
+           libblas-dev
+           liblapack-dev
+           libfftw3-dev
+           libgmp-dev
+           hdf5-tools
+           libhdf5-dev
+           python3-dev
+           python3-numpy
+           python3-scipy
+           python3-matplotlib
+           ipython3
+           python3-mpi4py
+           python3-mako
+
+    - name: Cache Boost (a C++20 compatible version)
+      id: cache-boost
+      uses: actions/cache@v4
+      with:
+        path: ~/boost
+        key: boost-1.82
+
+    - name: Download Boost (a C++20 compatible version)
+      if: ${{ steps.cache-boost.outputs.cache-hit != 'true' }}
+      run: |
+           wget -q https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
+           tar -xf boost_1_82_0.tar.bz2
+           mv boost_1_82_0 $HOME/boost
+
+    - name: Force use of libc++
+      if: startsWith(matrix.compiler.name, 'clang')
+      run: echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
+
+    - name: Install libcommute
+      env:
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+           git clone https://github.com/krivenko/libcommute libcommute
+           mkdir libcommute/build && pushd libcommute/build
+           cmake ..                                 \
+              -DCMAKE_INSTALL_PREFIX=$HOME/install  \
+              -DTESTS=OFF                           \
+              -DEXAMPLES=OFF
+           make install
+           popd
+
+    - name: Build & install Pomerol
+      env:
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+           git clone https://github.com/pomerol-ed/pomerol
+           mkdir pomerol/build && pushd pomerol/build
+           cmake ..                                         \
+             -DCMAKE_BUILD_TYPE=Debug                       \
+             -DCMAKE_INSTALL_PREFIX=$HOME/install           \
+             -DBoost_INCLUDE_DIR=$HOME/boost                \
+             -Dlibcommute_DIR=$HOME/install/lib/cmake       \
+             -DTesting=OFF                                  \
+             -DDocumentation=OFF
+           make -j2 install VERBOSE=1
+           popd
+
+    - name: Build & install TRIQS
+      env:
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+           git clone https://github.com/TRIQS/triqs --branch 3.2.x
+           mkdir triqs/build && pushd triqs/build
+           cmake ..                                         \
+             -DCMAKE_BUILD_TYPE=Debug                       \
+             -DCMAKE_INSTALL_PREFIX=$HOME/install           \
+             -DBoost_INCLUDE_DIR=$HOME/boost                \
+             -DBuild_Tests=OFF
+           make -j2 install VERBOSE=1
+           popd
+
+    - name: Build pomerol2triqs
+      env:
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
+      run: |
+           source $HOME/install/share/triqs/triqsvars.sh
+           mkdir build && pushd build
+           cmake ..                                 \
+             -DCMAKE_BUILD_TYPE=Debug               \
+             -DCMAKE_INSTALL_PREFIX=$HOME/install   \
+             -DBoost_INCLUDE_DIR=$HOME/boost
+           make -j2 install VERBOSE=1
+           popd
+
+    - name: Test pomerol2triqs
+      env:
+        TMPDIR: "/tmp"
+      run: |
+        sudo sh -c 'echo -e "\nrmaps_base_oversubscribe = 1" >> \
+          /etc/openmpi/openmpi-mca-params.conf'
+        source $HOME/install/share/triqs/triqsvars.sh
+        cd build
+        ctest --output-on-failure
