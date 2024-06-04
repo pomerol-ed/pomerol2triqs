@@ -27,8 +27,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-           brew install llvm@17 eigen fftw hdf5 open-mpi
-           pip3 install mako numpy scipy mpi4py
+           brew install llvm@17 eigen fftw hdf5 open-mpi numpy scipy mpi4py
+           pip install --user mako
 
     - name: Set OpenMP_ROOT for Clang
       if: startsWith(matrix.compiler.name, 'clang')
@@ -83,7 +83,7 @@ jobs:
         CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
-           git clone https://github.com/TRIQS/triqs --branch 3.2.x
+           git clone https://github.com/TRIQS/triqs --branch 3.3.x
            mkdir triqs/build && pushd triqs/build
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
