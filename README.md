@@ -64,7 +64,7 @@ Pomerol and TRIQS version compatibility
 License
 -------
 
-Copyright (C) 2017-2024 Igor Krivenko <igor.s.krivenko @ gmail.com>
+Copyright (C) 2017-2024 Igor Krivenko <iskrivenko [at] proton [dot] me>
 
 With contributions from
 
