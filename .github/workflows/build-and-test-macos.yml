@@ -27,7 +27,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-           brew install llvm@17 eigen fftw hdf5 open-mpi numpy scipy mpi4py
+           brew install llvm@17 libomp eigen fftw hdf5 open-mpi numpy scipy mpi4py
            pip install --user mako
 
     - name: Set OpenMP_ROOT for Clang
