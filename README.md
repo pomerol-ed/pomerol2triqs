@@ -53,6 +53,7 @@ Pomerol and TRIQS version compatibility
 
 | pomerol2triqs release | Pomerol version | TRIQS version |
 |-----------------------|-----------------|---------------|
+| v0.10                 | 2.2             | 3.2.x, 3.3.x  |
 | v0.9                  | 2.1             | 3.2.x, 3.3.x  |
 | v0.8                  | 2.1             | 3.1.x         |
 | v0.7                  | 2.0             | 3.1.x         |
