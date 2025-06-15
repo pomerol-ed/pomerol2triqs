@@ -108,8 +108,9 @@ namespace pomerol2triqs {
     /// Diagonalize Hamiltonian optionally employing its symmetries
     void diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries = false);
 
-    /// Compute the ensemble average of c^+_i c_j
-    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta);
+    /// Compute the ensemble average of O_i O_j, where O = c or c^+
+    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta,
+                                          std::tuple<bool, bool> const& dagger = {true, false});
 
     /// Green's function in Matsubara frequencies
     block_gf<mesh::imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);

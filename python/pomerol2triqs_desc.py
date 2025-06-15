@@ -47,8 +47,8 @@ c.add_constructor("""(pomerol2triqs::index_converter_t index_converter, bool ver
 c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = r"""Diagonalize Hamiltonian optionally employing its symmetries""")
 
-c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, double beta)""",
-             doc = r"""Compute the ensemble average of c^+_i c_j""")
+c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, double beta, std::tuple<bool, bool> dagger = {true, false})""",
+             doc = r"""Compute the ensemble average of O_i O_j, where O = c or c^+""")
 
 c.add_method("""block_gf<mesh::imfreq> G_iw (triqs::gfs::gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = r"""Green's function in Matsubara frequencies""")

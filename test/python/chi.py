@@ -53,6 +53,9 @@ assert abs(n_dn - n_dn_ref) < 1e-10
 assert abs(S_p) < 1e-10
 assert abs(S_m) < 1e-10
 
+assert abs(ed.ensemble_average(('up', 0), ('dn', 0), beta, (False, True))) < 1e-10
+assert abs(ed.ensemble_average(('dn', 0), ('up', 0), beta, (False, True))) < 1e-10
+
 # Compute 3 susceptibilities
 # < n_up ; n_up >
 # < n_up ; n_dn >
