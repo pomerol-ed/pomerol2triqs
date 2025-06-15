@@ -28,7 +28,6 @@ F4 = F2*0.625
 
 spin_names = ("up", "dn")
 num_orb = 2*L+1
-orb_names = list(range(num_orb))
 U_mat = U_matrix_slater(L, radial_integrals = [F0,F2,F4], basis='spherical')
 
 # Do not split H into blocks
@@ -51,22 +50,22 @@ gf_struct = set_operator_structure(spin_names, num_orb, False)
 mkind = get_mkind(False, None)
 # Conversion from TRIQS to Pomerol notation for operator indices
 index_converter = {mkind(sn, on) : ("atom", on, "down" if sn == "dn" else "up")
-                   for sn, on in product(spin_names, orb_names)}
+                   for sn, on in product(spin_names, range(num_orb))}
 
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
 
 # Hamiltonian
-H = h_int_slater(spin_names, orb_names, U_mat, False)
+H = h_int_slater(spin_names, num_orb, U_mat, False)
 
 # Number of particles
-N = N_op(spin_names, orb_names, False)
+N = N_op(spin_names, num_orb, False)
 
 # z-component of spin
-Sz = S_op('z', spin_names, orb_names, False)
+Sz = S_op('z', spin_names, num_orb, False)
 
 # z-component of angular momentum
-Lz = L_op('z', spin_names, orb_names, off_diag = False, basis = 'spherical')
+Lz = L_op('z', spin_names, num_orb, off_diag = False, basis = 'spherical')
 
 # Double check that we are actually using integrals of motion
 h_comm = lambda op: H*op - op*H
