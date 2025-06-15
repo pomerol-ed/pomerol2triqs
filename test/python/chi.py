@@ -42,11 +42,13 @@ w = np.array([1.0,
 Z = np.sum(w)
 w /= Z
 n_up_ref, n_dn_ref = complex(w[1] + w[3]), complex(w[2] + w[3])
+n_up_n_dn_ref = complex(w[3])
 
 n_up = ed.ensemble_average(('up', 0), ('up', 0), beta)
 n_dn = ed.ensemble_average(('dn', 0), ('dn', 0), beta)
 S_p = ed.ensemble_average(('up', 0), ('dn', 0), beta)
 S_m = ed.ensemble_average(('dn', 0), ('up', 0), beta)
+n_up_n_dn = ed.ensemble_average(('up', 0), ('dn', 0), ('dn', 0), ('up', 0), beta)
 
 assert abs(n_up - n_up_ref) < 1e-10
 assert abs(n_dn - n_dn_ref) < 1e-10
@@ -55,6 +57,8 @@ assert abs(S_m) < 1e-10
 
 assert abs(ed.ensemble_average(('up', 0), ('dn', 0), beta, (False, True))) < 1e-10
 assert abs(ed.ensemble_average(('dn', 0), ('up', 0), beta, (False, True))) < 1e-10
+
+assert abs(n_up_n_dn - n_up_n_dn_ref) < 1e-10
 
 # Compute 3 susceptibilities
 # < n_up ; n_up >

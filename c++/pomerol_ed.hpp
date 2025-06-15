@@ -112,6 +112,10 @@ namespace pomerol2triqs {
     std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta,
                                           std::tuple<bool, bool> const& dagger = {true, false});
 
+    /// Compute the ensemble average of O_i O_j O_k O_l, where O = c or c^+
+    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                          std::tuple<bool, bool, bool, bool> const& dagger = {true, true, false, false});
+
     /// Green's function in Matsubara frequencies
     block_gf<mesh::imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw);
 

@@ -27,7 +27,6 @@ namespace pomerol2triqs {
 
   std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j,
                                                     double beta, std::tuple<bool, bool> const& dagger) {
-
     Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
     if (pom_i == -1) TRIQS_RUNTIME_ERROR << "ensemble_average: Unexpected index i = " << i;
     Pomerol::ParticleIndex pom_j = lookup_pomerol_index(j);
@@ -37,6 +36,32 @@ namespace pomerol2triqs {
     compute_rho(beta);
 
     Pomerol::QuadraticOperator op(index_info, *hs, *states_class, *matrix_h, pom_i, pom_j, dagger);
+    op.prepare(*hs);
+    op.compute();
+
+    Pomerol::EnsembleAverage EA(op, *rho);
+    EA.compute();
+
+    return EA();
+  }
+
+  std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l,
+                                                    double beta, std::tuple<bool, bool, bool, bool> const& dagger) {
+    auto checked_lookup = [&](indices_t const &i, std::string const & i_name) {
+      Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
+      if (pom_i == -1) TRIQS_RUNTIME_ERROR << "compute_chi: Unexpected index " << i_name << " = " << i;
+      return pom_i;
+    };
+
+    Pomerol::ParticleIndex pom_i = checked_lookup(i, "i");
+    Pomerol::ParticleIndex pom_j = checked_lookup(j, "j");
+    Pomerol::ParticleIndex pom_k = checked_lookup(k, "k");
+    Pomerol::ParticleIndex pom_l = checked_lookup(l, "l");
+
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "ensemble_average: No Hamiltonian has been diagonalized";
+    compute_rho(beta);
+
+    Pomerol::QuarticOperator op(index_info, *hs, *states_class, *matrix_h, pom_i, pom_j, pom_k, pom_l, dagger);
     op.prepare(*hs);
     op.compute();
 

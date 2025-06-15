@@ -50,6 +50,9 @@ c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, boo
 c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, double beta, std::tuple<bool, bool> dagger = {true, false})""",
              doc = r"""Compute the ensemble average of O_i O_j, where O = c or c^+""")
 
+c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, std::tuple<bool, bool, bool, bool> dagger = {true, true, false, false})""",
+             doc = r"""Compute the ensemble average of O_i O_j O_k O_l, where O = c or c^+""")
+
 c.add_method("""block_gf<mesh::imfreq> G_iw (triqs::gfs::gf_struct_t gf_struct, double beta, int n_iw)""",
              doc = r"""Green's function in Matsubara frequencies""")
 
