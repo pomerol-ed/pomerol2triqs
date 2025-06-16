@@ -136,7 +136,7 @@ namespace pomerol2triqs {
 
       ops_container.reset(new Pomerol::FieldOperatorContainer(index_info, *hs, *states_class, *matrix_h));
       ops_container->prepareAll(*hs);
-      ops_container->computeAll();
+      ops_container->computeAll(ops_melem_tol);
 
       computed_ops = new_ops;
     }

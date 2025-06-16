@@ -71,6 +71,7 @@ namespace pomerol2triqs {
     index_classification_t index_info;
 
     double rho_threshold = 0;
+    double ops_melem_tol = 1e-8;
 
     using h_expr_t = std::variant<Pomerol::LatticePresets::RealExpr, Pomerol::LatticePresets::ComplexExpr>;
     std::unique_ptr<h_expr_t> h_expr;
@@ -145,6 +146,12 @@ namespace pomerol2triqs {
     /// 3-point fermion-boson susceptibility
     CPP2PY_ARG_AS_DICT
     block2_gf<w_nu_t, tensor_valued<4>> chi3_iw_inu(chi3_iw_inu_params_t const& p);
+
+    /// Get tolerance for matrix elements of creation/annihilation operators
+    double get_ops_melem_tol() const { return ops_melem_tol; }
+
+    /// Set tolerance for matrix elements of creation/annihilation operators
+    void set_ops_melem_tol(double tolerance) { ops_melem_tol = tolerance; }
 
     /// Get truncation threshold for density matrix elements
     double get_rho_threshold() const { return rho_threshold; }

@@ -37,7 +37,7 @@ namespace pomerol2triqs {
 
     Pomerol::QuadraticOperator op(index_info, *hs, *states_class, *matrix_h, pom_i, pom_j, dagger);
     op.prepare(*hs);
-    op.compute();
+    op.compute(ops_melem_tol);
 
     Pomerol::EnsembleAverage EA(op, *rho);
     EA.compute();
@@ -63,7 +63,7 @@ namespace pomerol2triqs {
 
     Pomerol::QuarticOperator op(index_info, *hs, *states_class, *matrix_h, pom_i, pom_j, pom_k, pom_l, dagger);
     op.prepare(*hs);
-    op.compute();
+    op.compute(ops_melem_tol);
 
     Pomerol::EnsembleAverage EA(op, *rho);
     EA.compute();
@@ -129,9 +129,9 @@ namespace pomerol2triqs {
     Pomerol::QuadraticOperator B(index_info, *hs, *states_class, *matrix_h, b1, b2, bdag);
 
     A.prepare(*hs);
-    A.compute();
+    A.compute(ops_melem_tol);
     B.prepare(*hs);
-    B.compute();
+    B.compute(ops_melem_tol);
 
     Pomerol::Susceptibility pom_chi(*states_class, *matrix_h, A, B, *rho);
     pom_chi.prepare();

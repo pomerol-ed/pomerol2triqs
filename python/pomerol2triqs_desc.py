@@ -144,6 +144,11 @@ c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
+c.add_property(name = "ops_melem_tol",
+               getter = cfunction("double get_ops_melem_tol ()"),
+               setter = cfunction("void set_ops_melem_tol (double tolerance)"),
+               doc = r"""Tolerance for matrix elements of creation/annihilation operators""")
+
 c.add_property(name = "rho_threshold",
                getter = cfunction("double get_rho_threshold ()"),
                setter = cfunction("void set_rho_threshold (double threshold)"),
