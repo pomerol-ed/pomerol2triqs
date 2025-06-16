@@ -49,7 +49,7 @@ namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
   auto pomerol_ed::compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order, g2_blocks_t const &g2_blocks,
-                              Filler filler) const -> block2_gf<Mesh, tensor_valued<4>> {
+                              Filler filler, double pole_res, double coeff_tol) const -> block2_gf<Mesh, tensor_valued<4>> {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_g2: Internal error!";
 
@@ -109,6 +109,8 @@ namespace pomerol2triqs {
                   Pomerol::TwoParticleGF pom_g2(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
                                                 ops_container->getAnnihilationOperator(pom_i2), ops_container->getCreationOperator(pom_i3),
                                                 ops_container->getCreationOperator(pom_i4), *rho);
+                  pom_g2.PoleResolution = pole_res;
+                  pom_g2.CoefficientTolerance = coeff_tol;
                   pom_g2.prepare();
                   pom_g2.compute(false, {}, comm.get());
 
@@ -173,9 +175,9 @@ namespace pomerol2triqs {
     block2_gf<w_nu_nup_t, tensor_valued<4>> g2;
 
     if (p.channel == AllFermionic)
-      g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh_fff, p.block_order, p.blocks, filler);
+      g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh_fff, p.block_order, p.blocks, filler, p.pole_res, p.coeff_tol);
     else
-      g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh_bff, p.block_order, p.blocks, filler);
+      g2 = compute_g2<w_nu_nup_t>(p.gf_struct, mesh_bff, p.block_order, p.blocks, filler, p.pole_res, p.coeff_tol);
 
     g2() = mpi::all_reduce(g2(), comm);
 
@@ -253,7 +255,7 @@ namespace pomerol2triqs {
       }
     };
 
-    auto g2 = compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler);
+    auto g2 = compute_g2<w_l_lp_t>(p.gf_struct, mesh, p.block_order, p.blocks, filler, p.pole_res, p.coeff_tol);
     g2()    = mpi::all_reduce(g2(), comm);
 
     return g2;

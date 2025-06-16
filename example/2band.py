@@ -97,31 +97,36 @@ H_hyb = sum(        V[o1,o2]  * c_dag("B_" + sn, o1) * c(sn, o2) +
 H = H_loc + H_hyb + H_bath
 
 # Diagonalize H
+ed.ops_melem_tol = 1e-8
 ed.diagonalize(H)
 
 # Compute occupations
 occ = [ed.ensemble_average(i, i, beta).real for i in product(spin_names, orb_names)]
 
 # Compute G(i\omega)
-G_iw = ed.G_iw(gf_struct, beta, n_iw)
+G_iw = ed.G_iw(gf_struct, beta, n_iw, pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute G(\tau)
-G_tau = ed.G_tau(gf_struct, beta, n_tau)
+G_tau = ed.G_tau(gf_struct, beta, n_tau, pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute G(\omega)
-G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01)
+G_w = ed.G_w(gf_struct, beta, energy_window, n_w, 0.01, pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute \chi(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)>
-chi_tau = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau)
+chi_tau = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau,
+                     pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute \chi(i\nu)
-chi_iw = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw)
+chi_iw = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw,
+                   pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute \chi_c(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)> - <n_{up,0}><n_{dn,0}>
-chi_tau_c = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True)
+chi_tau_c = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True,
+                       pole_res=1e-8, coeff_tol=1e-8)
 
 # Compute \chi_c(i\nu)
-chi_iw_c = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
+chi_iw_c = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True,
+                     pole_res=1e-8, coeff_tol=1e-8)
 
 ###########
 # G^{(2)} #
@@ -130,7 +135,9 @@ chi_iw_c = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
 common_g2_params = {'gf_struct' : gf_struct,
                     'beta' : beta,
                     'blocks' : g2_blocks,
-                    'n_iw' : g2_n_iw}
+                    'n_iw' : g2_n_iw,
+                    'pole_res' : 1e-8,
+                    'coeff_tol' : 1e-16}
 
 ###############################
 # G^{(2)}(i\omega;i\nu,i\nu') #
@@ -196,12 +203,14 @@ common_chi3_params = {'gf_struct' : gf_struct,
                       'beta' : beta,
                       'blocks' : chi3_blocks,
                       'n_iw' : chi3_n_iw,
-                      'n_inu' : chi3_n_inu}
+                      'n_inu' : chi3_n_inu,
+                      'pole_res' : 1e-8,
+                      'coeff_tol' : 1e-16}
 
 # Compute \chi^{(3),pp}(i\omega,i\nu), AABB block order
 chi3_iw_inu_pp_AABB = ed.chi3_iw_inu(channel = "PP",
-                                         block_order = "AABB",
-                                         **common_chi3_params)
+                                     block_order = "AABB",
+                                     **common_chi3_params)
 
 # Compute \chi^{(3),pp}(i\omega,i\nu), ABBA block order
 chi3_iw_inu_pp_ABBA = ed.chi3_iw_inu(channel = "PP",

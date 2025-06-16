@@ -38,6 +38,12 @@ namespace pomerol2triqs {
     /// Number of fermionic Matsubara frequencies.
     int n_inu = 30;
 
+    /// Lehmann representation: Maximal distance between energy poles to be consider coinciding.
+    double pole_res = 1e-8;
+
+    /// Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.
+    double coeff_tol = 1e-16;
+
     g2_iw_inu_inup_params_t() {}
     g2_iw_inu_inup_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
@@ -73,6 +79,12 @@ namespace pomerol2triqs {
     /// Tolerance for Matsubara frequency summation.
     double inu_sum_tol = 1e-6;
 
+    /// Lehmann representation: Maximal distance between energy poles to be consider coinciding.
+    double pole_res = 1e-8;
+
+    /// Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.
+    double coeff_tol = 1e-16;
+
     g2_iw_l_lp_params_t() {}
     g2_iw_l_lp_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}
   };
@@ -101,6 +113,12 @@ namespace pomerol2triqs {
 
     /// Number of fermionic Matsubara frequencies.
     int n_inu = 100;
+
+    /// Lehmann representation: Maximal distance between energy poles to be consider coinciding.
+    double pole_res = 1e-8;
+
+    /// Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.
+    double coeff_tol = 1e-16;
 
     chi3_iw_inu_params_t() {}
     chi3_iw_inu_params_t(gf_struct_t const &gf_struct, double beta) : gf_struct(gf_struct), beta(beta) {}

@@ -34,7 +34,8 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                               block_order_t block_order,
                               channel_t channel,
                               chi3_blocks_t const &chi3_blocks,
-                              Filler filler) const -> block2_gf<Mesh, tensor_valued<4>> {
+                              Filler filler,
+                              double pole_res, double coeff_tol) const -> block2_gf<Mesh, tensor_valued<4>> {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_chi3: Internal error!";
 
@@ -101,6 +102,8 @@ auto pomerol_ed::compute_chi3(gf_struct_t const &gf_struct,
                                                              ops_container->getAnnihilationOperator(pom_C4_i),
                                                              *rho);
 
+                  pom_chi3.PoleResolution = pole_res;
+                  pom_chi3.CoefficientTolerance = coeff_tol;
                   pom_chi3.prepare();
                   pom_chi3.compute(false, {}, comm.get());
 
@@ -140,7 +143,8 @@ auto pomerol_ed::chi3_iw_inu(chi3_iw_inu_params_t const& p) -> block2_gf<w_nu_t,
   mesh::imfreq mesh_f{p.beta, Fermion, p.n_inu};
   w_nu_t mesh_bf{mesh_b, mesh_f};
 
-  auto chi3 = compute_chi3<w_nu_t>(p.gf_struct, mesh_bf, p.block_order, p.channel, p.blocks, filler);
+  auto chi3 = compute_chi3<w_nu_t>(p.gf_struct, mesh_bf, p.block_order, p.channel, p.blocks, filler,
+                                   p.pole_res, p.coeff_tol);
 
   chi3() = mpi::all_reduce(chi3(), comm);
 

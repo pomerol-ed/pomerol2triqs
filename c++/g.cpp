@@ -26,7 +26,7 @@
 namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
-  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler) const {
+  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, double pole_res, double coeff_tol) const {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_gf: Internal error!";
 
@@ -52,6 +52,8 @@ namespace pomerol2triqs {
 
           Pomerol::GreensFunction pom_g(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
                                         ops_container->getCreationOperator(pom_i2), *rho);
+          pom_g.PoleResolution = pole_res;
+          pom_g.CoefficientTolerance = coeff_tol;
           pom_g.prepare();
           pom_g.compute();
 
@@ -62,7 +64,7 @@ namespace pomerol2triqs {
     return make_block_gf(block_names, std::move(g_blocks));
   }
 
-  block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const &gf_struct, double beta, int n_iw) {
+  block_gf<imfreq> pomerol_ed::G_iw(gf_struct_t const &gf_struct, double beta, int n_iw, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_iw: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
@@ -70,10 +72,10 @@ namespace pomerol2triqs {
     auto filler = [](gf_view<imfreq, scalar_valued> g_el, Pomerol::GreensFunction const &pom_g) {
       for (auto iw : g_el.mesh()) g_el[iw] = pom_g(std::complex<double>(iw));
     };
-    return compute_gf<imfreq>(gf_struct, {beta, Fermion, n_iw}, filler);
+    return compute_gf<imfreq>(gf_struct, {beta, Fermion, n_iw}, filler, pole_res, coeff_tol);
   }
 
-  block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const &gf_struct, double beta, int n_tau) {
+  block_gf<imtime> pomerol_ed::G_tau(gf_struct_t const &gf_struct, double beta, int n_tau, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_tau: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
@@ -81,11 +83,11 @@ namespace pomerol2triqs {
     auto filler = [](gf_view<imtime, scalar_valued> g_el, Pomerol::GreensFunction const &pom_g) {
       for (auto tau : g_el.mesh()) g_el[tau] = pom_g.of_tau(tau);
     };
-    return compute_gf<imtime>(gf_struct, {beta, Fermion, n_tau}, filler);
+    return compute_gf<imtime>(gf_struct, {beta, Fermion, n_tau}, filler, pole_res, coeff_tol);
   }
 
   block_gf<refreq> pomerol_ed::G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
-                                   double im_shift) {
+                                   double im_shift, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "G_w: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);
@@ -93,7 +95,7 @@ namespace pomerol2triqs {
     auto filler = [im_shift](gf_view<refreq, scalar_valued> g_el, Pomerol::GreensFunction const &pom_g) {
       for (auto w : g_el.mesh()) g_el[w] = pom_g(double(w) + 1i * im_shift);
     };
-    return compute_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler);
+    return compute_gf<refreq>(gf_struct, {energy_window.first, energy_window.second, n_w}, filler, pole_res, coeff_tol);
   }
 
 } // namespace pomerol2triqs

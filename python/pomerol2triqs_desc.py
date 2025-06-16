@@ -53,13 +53,13 @@ c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t 
 c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, std::tuple<bool, bool, bool, bool> dagger = {true, true, false, false})""",
              doc = r"""Compute the ensemble average of O_i O_j O_k O_l, where O = c or c^+""")
 
-c.add_method("""block_gf<mesh::imfreq> G_iw (triqs::gfs::gf_struct_t gf_struct, double beta, int n_iw)""",
+c.add_method("""block_gf<mesh::imfreq> G_iw (triqs::gfs::gf_struct_t gf_struct, double beta, int n_iw, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Green's function in Matsubara frequencies""")
 
-c.add_method("""block_gf<mesh::imtime> G_tau (triqs::gfs::gf_struct_t gf_struct, double beta, int n_tau)""",
+c.add_method("""block_gf<mesh::imtime> G_tau (triqs::gfs::gf_struct_t gf_struct, double beta, int n_tau, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Green's function in imaginary time""")
 
-c.add_method("""block_gf<mesh::refreq> G_w (triqs::gfs::gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0)""",
+c.add_method("""block_gf<mesh::refreq> G_w (triqs::gfs::gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Retarded Green's function on real energy axis""")
 
 c.add_method("""block2_gf<pomerol2triqs::w_nu_nup_t, tensor_valued<4>> G2_iw_inu_inup (**pomerol2triqs::g2_iw_inu_inup_params_t)""",
@@ -83,6 +83,12 @@ c.add_method("""block2_gf<pomerol2triqs::w_nu_nup_t, tensor_valued<4>> G2_iw_inu
 | n_iw           | int                          | 30                 | Number of bosonic Matsubara frequencies.                         |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | n_inu          | int                          | 30                 | Number of fermionic Matsubara frequencies.                       |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| pole_res       | double                       | 1e-8               | Lehmann representation: Maximal distance between energy poles to |
+|                |                              |                    | to be consider coinciding.                                       |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| coeff_tol      | double                       | 1e-16              | Lehmann representation: Maximal magnitude of a term coefficient  |
+|                |                              |                    | to be considered negligible.                                     |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
@@ -112,12 +118,18 @@ c.add_method("""block2_gf<pomerol2triqs::w_l_lp_t, tensor_valued<4>> G2_iw_l_lp 
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | inu_sum_tol    | double                       | 1e-6               | Tolerance for Matsubara frequency summation.                     |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| pole_res       | double                       | 1e-8               | Lehmann representation: Maximal distance between energy poles to |
+|                |                              |                    | to be consider coinciding.                                       |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| coeff_tol      | double                       | 1e-16              | Lehmann representation: Maximal magnitude of a term coefficient  |
+|                |                              |                    | to be considered negligible.                                     |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
-c.add_method("""gf<mesh::imtime, triqs::gfs::scalar_valued> chi_tau (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_tau, bool connected = false, channel_t channel = PH)""",
+c.add_method("""gf<mesh::imtime, triqs::gfs::scalar_valued> chi_tau (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_tau, bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part""")
 
-c.add_method("""gf<mesh::imfreq, triqs::gfs::scalar_valued> chi_iw (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_iw, bool connected = false, channel_t channel = PH)""",
+c.add_method("""gf<mesh::imfreq, triqs::gfs::scalar_valued> chi_iw (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_iw, bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies""")
 
 c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (**pomerol2triqs::chi3_iw_inu_params_t)""",
@@ -141,6 +153,12 @@ c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (
 | n_iw           | int                          | 100                | Number of bosonic Matsubara frequencies.                         |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 | n_inu          | int                          | 100                | Number of fermionic Matsubara frequencies.                       |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| pole_res       | double                       | 1e-8               | Lehmann representation: Maximal distance between energy poles to |
+|                |                              |                    | to be consider coinciding.                                       |
++----------------+------------------------------+--------------------+------------------------------------------------------------------+
+| coeff_tol      | double                       | 1e-16              | Lehmann representation: Maximal magnitude of a term coefficient  |
+|                |                              |                    | to be considered negligible.                                     |
 +----------------+------------------------------+--------------------+------------------------------------------------------------------+
 """)
 
@@ -198,6 +216,16 @@ c.add_member(c_name = "n_inu",
              initializer = """ 30 """,
              doc = r"""Number of fermionic Matsubara frequencies.""")
 
+c.add_member(c_name = "pole_res",
+             c_type = "double",
+             initializer = """ 1e-8 """,
+             doc = r"""Lehmann representation: Maximal distance between energy poles to be consider coinciding.""")
+
+c.add_member(c_name = "coeff_tol",
+             c_type = "double",
+             initializer = """ 1e-16 """,
+             doc = r"""Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.""")
+
 module.add_converter(c)
 
 # Converter for g2_iw_l_lp_params_t
@@ -251,6 +279,16 @@ c.add_member(c_name = "inu_sum_tol",
              initializer = """ 1e-6 """,
              doc = r"""Tolerance for Matsubara frequency summation.""")
 
+c.add_member(c_name = "pole_res",
+             c_type = "double",
+             initializer = """ 1e-8 """,
+             doc = r"""Lehmann representation: Maximal distance between energy poles to be consider coinciding.""")
+
+c.add_member(c_name = "coeff_tol",
+             c_type = "double",
+             initializer = """ 1e-16 """,
+             doc = r"""Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.""")
+
 module.add_converter(c)
 
 # Converter for chi3_iw_inu_params_t
@@ -293,6 +331,16 @@ c.add_member(c_name = "n_inu",
              c_type = "int",
              initializer = """ 100 """,
              doc = r"""Number of fermionic Matsubara frequencies.""")
+
+c.add_member(c_name = "pole_res",
+             c_type = "double",
+             initializer = """ 1e-8 """,
+             doc = r"""Lehmann representation: Maximal distance between energy poles to be consider coinciding.""")
+
+c.add_member(c_name = "coeff_tol",
+             c_type = "double",
+             initializer = """ 1e-16 """,
+             doc = r"""Lehmann representation: Maximal magnitude of a term coefficient to be considered negligible.""")
 
 module.add_converter(c)
 
