@@ -62,6 +62,15 @@ c.add_method("""block_gf<mesh::imtime> G_tau (triqs::gfs::gf_struct_t gf_struct,
 c.add_method("""block_gf<mesh::refreq> G_w (triqs::gfs::gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Retarded Green's function on real energy axis""")
 
+c.add_method("""block_gf<mesh::imfreq> F_iw (triqs::gfs::gf_struct_t gf_struct, double beta, int n_iw, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
+             doc = r"""Anomalous Green's function in Matsubara frequencies""")
+
+c.add_method("""block_gf<mesh::imtime> F_tau (triqs::gfs::gf_struct_t gf_struct, double beta, int n_tau, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
+             doc = r"""Anomalous Green's function in imaginary time""")
+
+c.add_method("""block_gf<mesh::refreq> F_w (triqs::gfs::gf_struct_t gf_struct, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
+             doc = r"""Anomalous Green's function on real energy axis""")
+
 c.add_method("""block2_gf<pomerol2triqs::w_nu_nup_t, tensor_valued<4>> G2_iw_inu_inup (**pomerol2triqs::g2_iw_inu_inup_params_t)""",
              doc = r"""Two-particle Green's function, Matsubara frequencies
 

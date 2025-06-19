@@ -9,7 +9,7 @@ macro(add_mpi_test basename filename numproc)
 endmacro()
 
 # Single MPI rank tests
-foreach(t anderson_gf slater_gf wick chi)
+foreach(t anderson_gf slater_gf wick chi anomalous)
   add_mpi_test(${t} ${t}.py 1)
 endforeach()
 

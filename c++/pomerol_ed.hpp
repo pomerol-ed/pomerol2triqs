@@ -90,7 +90,8 @@ namespace pomerol2triqs {
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler>
-    block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, double pole_res, double coeff_tol) const;
+    block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, bool anomalous,
+                              double pole_res, double coeff_tol) const;
     template <typename Mesh, typename Filler>
     gf<Mesh, scalar_valued> compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
                                         Mesh const &mesh, Filler filler, channel_t channel, double pole_res, double coeff_tol) const;
@@ -128,6 +129,16 @@ namespace pomerol2triqs {
 
     /// Retarded Green's function on real energy axis
     block_gf<mesh::refreq> G_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
+                               double im_shift = 0, double pole_res = 1e-8, double coeff_tol = 1e-8);
+
+    /// Anomalous Green's function in Matsubara frequencies
+    block_gf<mesh::imfreq> F_iw(gf_struct_t const &gf_struct, double beta, int n_iw, double pole_res = 1e-8, double coeff_tol = 1e-8);
+
+    /// Anomalous Green's function in imaginary time
+    block_gf<mesh::imtime> F_tau(gf_struct_t const &gf_struct, double beta, int n_tau, double pole_res = 1e-8, double coeff_tol = 1e-8);
+
+    /// Anomalous Green's function on real energy axis
+    block_gf<mesh::refreq> F_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
                                double im_shift = 0, double pole_res = 1e-8, double coeff_tol = 1e-8);
 
     /// Two-particle Green's function, Matsubara frequencies
