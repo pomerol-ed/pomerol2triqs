@@ -159,6 +159,12 @@ namespace pomerol2triqs {
                                            int n_iw, bool connected = false, channel_t channel = PH,
                                            double pole_res = 1e-8, double coeff_tol = 1e-8);
 
+    /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part on real energy axis
+    gf<mesh::refreq, scalar_valued> chi_w(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                          std::pair<double, double> const &energy_window, int n_w, double im_shift = 0,
+                                          bool connected = false, channel_t channel = PH,
+                                          double pole_res = 1e-8, double coeff_tol = 1e-8);
+
     /// 3-point fermion-boson susceptibility
     CPP2PY_ARG_AS_DICT
     block2_gf<w_nu_t, tensor_valued<4>> chi3_iw_inu(chi3_iw_inu_params_t const& p);

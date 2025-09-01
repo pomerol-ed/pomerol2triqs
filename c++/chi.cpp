@@ -19,6 +19,8 @@
 
 #include "pomerol_ed.hpp"
 
+#include <limits>
+
 //////////////////////////////////////////////////////////////////////////////////
 // Methods to compute averages and correlation functions of quadratic operators //
 //////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +172,24 @@ namespace pomerol2triqs {
       for (auto inu : chi.mesh()) chi[inu] = pom_chi(std::complex<double>(inu));
     };
     return compute_chi<imfreq>(i, j, k, l, connected, {beta, Boson, n_iw}, filler, channel, pole_res, coeff_tol);
+  }
+
+  gf<refreq, scalar_valued> pomerol_ed::chi_w(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                              std::pair<double, double> const &energy_window, int n_w, double im_shift,
+                                              bool connected, channel_t channel,
+                                              double pole_res, double coeff_tol) {
+    if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_w: No Hamiltonian has been diagonalized";
+    compute_rho(beta);
+
+    auto filler = [im_shift](gf_view<refreq, scalar_valued> chi, Pomerol::Susceptibility const &pom_chi) {
+      for (auto w : chi.mesh()) {
+        auto w_val = std::complex<double>(w);
+        // The imaginary shift is not applied to w = 0 so that the result at this special point
+        // coincides with that at the zero Matsubara frequency
+        chi[w] = (std::abs(std::real(w_val)) <= std::numeric_limits<double>::epsilon()) ? pom_chi(.0) : pom_chi(w_val + 1i * im_shift);
+      }
+    };
+    return compute_chi<refreq>(i, j, k, l, connected, {energy_window, n_w}, filler, channel, pole_res, coeff_tol);
   }
 
 } // namespace pomerol2triqs

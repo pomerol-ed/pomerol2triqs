@@ -91,11 +91,17 @@ chi_tau = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau)
 # Compute \chi(i\nu)
 chi_iw = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw)
 
+# Compute \chi(\omega)
+chi_w = ed.chi_w(('up',0), ('up',0), ('dn',0), ('dn',0), beta, energy_window, n_w, 0.01)
+
 # Compute \chi_c(\tau) = <n_{up,0}(\tau) n_{dn,0}(0)> - <n_{up,0}><n_{dn,0}>
 chi_tau_c = ed.chi_tau(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_tau, True)
 
 # Compute \chi_c(i\nu)
 chi_iw_c = ed.chi_iw(('up',0), ('up',0), ('dn',0), ('dn',0), beta, n_iw, True)
+
+# Compute \chi_c(\omega)
+chi_w_c = ed.chi_w(('up',0), ('up',0), ('dn',0), ('dn',0), beta, energy_window, n_w, 0.01, True)
 
 ###########
 # G^{(2)} #
@@ -214,8 +220,10 @@ if mpi.is_master_node():
         ar['G_w'] = G_w
         ar['chi_tau'] = chi_tau
         ar['chi_iw'] = chi_iw
+        ar['chi_w'] = chi_w
         ar['chi_tau_c'] = chi_tau_c
         ar['chi_iw_c'] = chi_iw_c
+        ar['chi_w_c'] = chi_w_c
         ar['G2_iw_inu_inup_ph_AABB'] = G2_iw_inu_inup_ph_AABB
         ar['G2_iw_inu_inup_ph_ABBA'] = G2_iw_inu_inup_ph_ABBA
         ar['G2_iw_inu_inup_pp_AABB'] = G2_iw_inu_inup_pp_AABB

@@ -87,6 +87,33 @@ for inu in chi_up_up.mesh:
     chi_Sp_Sm_ref = -(w[1] - w[2]) / (inu - 2*h_field)
   assert abs(chi_Sp_Sm[inu] - chi_Sp_Sm_ref) < 1e-10
 
+# Parameters of real frequency mesh for susceptibility calculation
+energy_window = (-2.0, 2.0)
+n_w = 200
+im_shift = 0.01
+
+chi_up_up = ed.chi_w(('up',0), ('up',0), ('up',0), ('up',0),
+                     beta, energy_window, n_w, im_shift, True)
+chi_up_dn = ed.chi_w(('up',0), ('up',0), ('dn',0), ('dn',0),
+                     beta, energy_window, n_w, im_shift, True)
+chi_Sp_Sm = ed.chi_w(('up',0), ('dn',0), ('dn',0), ('up',0),
+                     beta, energy_window, n_w, im_shift, True)
+
+for omega in chi_up_up.mesh:
+  zero_freq = abs(complex(omega)) < 1e-10
+
+  chi_up_up_ref = (w[1] + w[3]) * (1 - w[1] - w[3]) * beta if zero_freq else 0
+  assert abs(chi_up_up[omega] - chi_up_up_ref) < 1e-10
+
+  chi_up_dn_ref = (w[3] - (w[1] + w[3]) * (w[2] + w[3])) * beta if zero_freq else 0
+  assert abs(chi_up_dn[omega] - chi_up_dn_ref) < 1e-10
+
+  if h_field == 0:
+    chi_Sp_Sm_ref = w[1] * beta if zero_freq else 0
+  else:
+    chi_Sp_Sm_ref = -(w[1] - w[2]) / (omega + 1j * im_shift - 2*h_field)
+  assert abs(chi_Sp_Sm[omega] - chi_Sp_Sm_ref) < 1e-10
+
 # Number of time slices for susceptibility calculation
 n_tau = 200
 

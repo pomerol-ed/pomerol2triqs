@@ -141,6 +141,9 @@ c.add_method("""gf<mesh::imtime, triqs::gfs::scalar_valued> chi_tau (pomerol2tri
 c.add_method("""gf<mesh::imfreq, triqs::gfs::scalar_valued> chi_iw (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, int n_iw, bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
              doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part in Matsubara frequencies""")
 
+c.add_method("""gf<mesh::refreq, triqs::gfs::scalar_valued> chi_w (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, pomerol2triqs::indices_t k, pomerol2triqs::indices_t l, double beta, std::pair<double, double> energy_window, int n_w, double im_shift = 0, bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8)""",
+             doc = r"""Dynamical susceptibility <T c^+_{i_1}(\tau) c_{j_1}(\tau) c^+_{i_2}(0) c_{j_2}(0)> or its connected part on real energy axis""")
+
 c.add_method("""block2_gf<pomerol2triqs::w_nu_t, tensor_valued<4>> chi3_iw_inu (**pomerol2triqs::chi3_iw_inu_params_t)""",
              doc = r"""3-point fermion-boson susceptibility
 
