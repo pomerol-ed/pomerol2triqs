@@ -17,13 +17,16 @@ Features
 
 * Diagonalization of finite fermionic models with Hamiltonians written in terms of second quantization operators.
 * Calculation of single-particle Green's functions: $G(\tau)$, $G(i\omega_n)$, $G(\omega)$.
+* Calculation of anomalous single-particle Green's functions: $F(\tau)$, $F(i\omega_n)$, $F(\omega)$.
 * Calculation of two-particle Green's functions: $G(\omega;\nu,\nu')$ and $G(\omega;\ell,\ell')$.
-* Calculation of ensemble averages of quadratic operators, $\langle c^\dagger_i c_j \rangle$.
+* Calculation of ensemble averages of quadratic operators $\langle O_i O_j \rangle$ and
+  quartic operators $\langle O_i O_j O_k O_l \rangle$, where each of $O_i, O_j, O_k, O_l$ is either
+  a creation or annihilation operator of fermions.
 * Calculation of dynamic susceptibilities
   $\langle \mathbb{T} c^\dagger_i(\tau) c_j(0^+) c^\dagger_k(\tau) c_l(0) \rangle$,
   $\langle \mathbb{T} c^\dagger_i(\tau) c_j(\tau) c^\dagger_k(0^+) c_l(0) \rangle$,
   $\langle \mathbb{T} c^\dagger_i(\tau) c_j(0) c^\dagger_k(0^+) c_l(\tau) \rangle$
-  in the Matsubara frequency representation.
+  in the imaginary time, Matsubara frequency, or real frequency representation.
 * Calculation of 3-point fermion-boson susceptibilities
   $\langle \mathbb{T} c^\dagger_i(\tau) c_j(0^+) c^\dagger_k(\tau') c_l(0) \rangle$,
   $\langle \mathbb{T} c^\dagger_i(\tau) c_j(\tau') c^\dagger_k(0^+) c_l(0) \rangle$,
