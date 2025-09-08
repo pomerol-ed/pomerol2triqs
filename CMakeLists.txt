@@ -38,7 +38,7 @@ if(PythonSupport AND NOT TRIQS_WITH_PYTHON_SUPPORT)
 endif()
 
 # Load Pomerol
-find_package(pomerol 2.1 CONFIG REQUIRED)
+find_package(pomerol 2.2 CONFIG REQUIRED)
 message(STATUS "Found pomerol ${pomerol_VERSION}")
 
 # Find MPI
