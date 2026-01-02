@@ -13,30 +13,26 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         compiler:
-          - {name: gcc-12, cc: gcc-12, cxx: g++-12}
-          - {name: clang-15, cc: clang-15, cxx: clang++-15}
+          - {name: "gcc", cc: "gcc-14", cxx: "g++-14"}
+          - {name: "clang", cc: "clang", cxx: "clang++"}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install dependencies
       run: >
            sudo apt-get update &&
            sudo apt-get install lsb-release wget software-properties-common &&
            sudo apt-get install
-           g++-12
-           clang-15
-           libc++-15-dev
-           libc++abi-15-dev
-           libomp-15-dev
-           libgfortran5
-           gfortran
+           libboost-dev
            libeigen3-dev
+           libomp5
+           libomp-dev
            openmpi-bin
            openmpi-common
            openmpi-doc
@@ -54,24 +50,6 @@ jobs:
            ipython3
            python3-mpi4py
            python3-mako
-
-    - name: Cache Boost (a C++20 compatible version)
-      id: cache-boost
-      uses: actions/cache@v4
-      with:
-        path: ~/boost
-        key: boost-1.82
-
-    - name: Download Boost (a C++20 compatible version)
-      if: ${{ steps.cache-boost.outputs.cache-hit != 'true' }}
-      run: |
-           wget -q https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.bz2
-           tar -xf boost_1_82_0.tar.bz2
-           mv boost_1_82_0 $HOME/boost
-
-    - name: Force use of libc++
-      if: startsWith(matrix.compiler.name, 'clang')
-      run: echo "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV
 
     - name: Install libcommute
       env:
@@ -96,7 +74,7 @@ jobs:
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
              -DCMAKE_INSTALL_PREFIX=$HOME/install           \
-             -DBoost_INCLUDE_DIR=$HOME/boost                \
+             -DUSE_OPENMP=ON                                \
              -Dlibcommute_DIR=$HOME/install/lib/cmake       \
              -DTesting=OFF                                  \
              -DDocumentation=OFF
@@ -113,7 +91,6 @@ jobs:
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
              -DCMAKE_INSTALL_PREFIX=$HOME/install           \
-             -DBoost_INCLUDE_DIR=$HOME/boost                \
              -DBuild_Tests=OFF
            make -j2 install VERBOSE=1
            popd
@@ -127,8 +104,7 @@ jobs:
            mkdir build && pushd build
            cmake ..                                 \
              -DCMAKE_BUILD_TYPE=Debug               \
-             -DCMAKE_INSTALL_PREFIX=$HOME/install   \
-             -DBoost_INCLUDE_DIR=$HOME/boost
+             -DCMAKE_INSTALL_PREFIX=$HOME/install
            make -j2 install VERBOSE=1
            popd
 

@@ -13,40 +13,29 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: macos-13
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         compiler:
-          - {name: gcc-12, cc: gcc-12, cxx: g++-12}
-          - {name: clang-17, cc: /usr/local/opt/llvm@17/bin/clang,
-                             cxx: /usr/local/opt/llvm@17/bin/clang++}
+          - { name: "gcc", cc: "gcc-15", cxx: "g++-15" }
+          - { name: "clang", cxx: "/opt/homebrew/opt/llvm/bin/clang++" }
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install dependencies
       run: |
-           brew install llvm@17 libomp eigen fftw hdf5 open-mpi numpy scipy mpi4py
+           brew install llvm libomp open-mpi boost eigen@3 fftw hdf5 \
+                        numpy scipy mpi4py
            pip install --user mako
 
-    - name: Set OpenMP_ROOT for Clang
+    - name: Set LDFLAGS for Clang
       if: startsWith(matrix.compiler.name, 'clang')
-      run: echo "OpenMP_ROOT=$(brew --prefix libomp)" >> $GITHUB_ENV
-
-    - name: Cache Boost (a C++20 compatible version)
-      id: cache-boost
-      uses: actions/cache@v4
-      with:
-        path: ~/boost
-        key: boost-1.82
-
-    - name: Download Boost (a C++20 compatible version)
-      if: ${{ steps.cache-boost.outputs.cache-hit != 'true' }}
       run: |
-           wget -q https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.bz2
-           tar -xf boost_1_82_0.tar.bz2
-           mv boost_1_82_0 $HOME/boost
+           LDFLAGS="-L/opt/homebrew/opt/llvm/lib/c++ \
+                    -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
+           echo "LDFLAGS=${LDFLAGS}" >> $GITHUB_ENV
 
     - name: Install libcommute
       env:
@@ -65,13 +54,14 @@ jobs:
       env:
         CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
+        EIGEN_ROOT: /opt/homebrew/opt/eigen@3
       run: |
            git clone https://github.com/pomerol-ed/pomerol
            mkdir pomerol/build && pushd pomerol/build
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
              -DCMAKE_INSTALL_PREFIX=$HOME/install           \
-             -DBoost_INCLUDE_DIR=$HOME/boost                \
+             -DUSE_OPENMP=ON                                \
              -Dlibcommute_DIR=$HOME/install/lib/cmake       \
              -DTesting=OFF                                  \
              -DDocumentation=OFF
@@ -88,7 +78,6 @@ jobs:
            cmake ..                                         \
              -DCMAKE_BUILD_TYPE=Debug                       \
              -DCMAKE_INSTALL_PREFIX=$HOME/install           \
-             -DBoost_INCLUDE_DIR=$HOME/boost                \
              -DBuild_Tests=OFF
            make -j2 install VERBOSE=1
            popd
@@ -102,8 +91,7 @@ jobs:
            mkdir build && pushd build
            cmake ..                                 \
              -DCMAKE_BUILD_TYPE=Debug               \
-             -DCMAKE_INSTALL_PREFIX=$HOME/install   \
-             -DBoost_INCLUDE_DIR=$HOME/boost
+             -DCMAKE_INSTALL_PREFIX=$HOME/install
            make -j2 install VERBOSE=1
            popd
 
