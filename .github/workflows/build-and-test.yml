@@ -24,8 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - {name: "gcc", cc: "gcc-14", cxx: "g++-14"}
-          - {name: "clang", cc: "clang", cxx: "clang++"}
+          - { name: "gcc", cxx: "g++-14" }
+          - { name: "clang", cxx: "clang++" }
 
     steps:
     - uses: actions/checkout@v6
@@ -72,7 +72,6 @@ jobs:
 
     - name: Build & install Pomerol
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/pomerol-ed/pomerol
@@ -89,7 +88,6 @@ jobs:
 
     - name: Build & install TRIQS
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/TRIQS/triqs --branch 3.3.x
@@ -103,7 +101,6 @@ jobs:
 
     - name: Build pomerol2triqs
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
            source $HOME/install/share/triqs/triqsvars.sh
@@ -130,13 +127,18 @@ jobs:
 
   macos:
     name: macOS
-    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - "macos-latest"
+          # macos-15-intel is probably the last supported macOS x86-64 runner
+          # https://github.com/actions/runner-images/issues/13074
+          - "macos-15-intel"
         compiler:
-          - { name: "gcc", cc: "gcc-15", cxx: "g++-15" }
-          - { name: "clang", cxx: "/opt/homebrew/opt/llvm/bin/clang++" }
+          - { name: "gcc", cxx: "g++-15" }
+          - { name: "clang", cxx: "clang++" }
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v6
@@ -149,11 +151,12 @@ jobs:
            echo "EIGEN_ROOT=$(brew --prefix eigen@3)" >> $GITHUB_ENV
            pip install --user mako
 
-    - name: Set LDFLAGS for Clang
-      if: startsWith(matrix.compiler.name, 'clang')
+    - name: Set PATH and LDFLAGS for Clang
+      if: matrix.compiler.name == 'clang'
       run: |
-           LDFLAGS="-L/opt/homebrew/opt/llvm/lib/c++ \
-                    -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
+           PREFIX="$(brew --prefix llvm)"
+           echo "PATH=${PREFIX}/bin:${PATH}" >> $GITHUB_ENV
+           LDFLAGS="-L${PREFIX}/lib/c++ -L${PREFIX}/lib/unwind -lunwind"
            echo "LDFLAGS=${LDFLAGS}" >> $GITHUB_ENV
 
     - name: Install libcommute
@@ -171,9 +174,7 @@ jobs:
 
     - name: Build & install Pomerol
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
-        EIGEN_ROOT: /opt/homebrew/opt/eigen@3
       run: |
            git clone https://github.com/pomerol-ed/pomerol
            mkdir pomerol/build && pushd pomerol/build
@@ -189,7 +190,6 @@ jobs:
 
     - name: Build & install TRIQS
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
            git clone https://github.com/TRIQS/triqs --branch 3.3.x
@@ -203,7 +203,6 @@ jobs:
 
     - name: Build pomerol2triqs
       env:
-        CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
       run: |
            source $HOME/install/share/triqs/triqsvars.sh
