@@ -2,11 +2,8 @@ pomerol2triqs
 =============
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5735413.svg)](https://doi.org/10.5281/zenodo.5735413)
-[![CI (Ubuntu)](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test-ubuntu.yml/badge.svg)](
-https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test-ubuntu.yml)
-[![CI (macOS)](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test-macos.yml/badge.svg)](
-https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test-macos.yml)
-
+[![Build and test](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test.yml/badge.svg)](
+https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test.yml)
 
 Quick and dirty TRIQS wrapper around the Pomerol exact diagonalization library.
 
