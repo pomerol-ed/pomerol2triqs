@@ -214,6 +214,11 @@ jobs:
     - name: Test pomerol2triqs
       env:
         TMPDIR: "/tmp"
+        # Homebrew's openblas version 0.3.31_1 and newer is linked to libomp.
+        # This seems to cause a SEGFAULT in the threaded version of GEMM.
+        # C.f. https://github.com/Homebrew/homebrew-core/pull/265549
+        KMP_DUPLICATE_LIB_OK: "TRUE"
+        OMP_NUM_THREADS: 1
       run: |
         mkdir -p $HOME/.prte
         echo -e "\nrmaps_default_mapping_policy = :oversubscribe" >> \
