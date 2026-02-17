@@ -107,6 +107,18 @@ H = H_loc + H_hyb + H_bath
 # Diagonalize H
 ed.diagonalize(H)
 
+# Dimension of the full Hilbert space
+print(f"{ed.full_hilbert_space_dim=}")
+
+# Number of invariant subspaces
+print(f"{ed.n_subspaces=}")
+
+# Dimensions of invariant subspaces
+print(f"{ed.subspace_dims=}")
+
+# Lists of Fock states for all invariant subspaces
+print(f"{ed.fock_states=}")
+
 # Compute occupations
 occ = [ed.ensemble_average((s, 0), (s, 0), beta).real for s in spin_names]
 

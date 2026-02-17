@@ -20,6 +20,7 @@
 
 #include <triqs/utility/first_include.hpp>
 
+#include <cstdint>
 #include <utility>
 #include <vector>
 #include <memory>
@@ -112,6 +113,24 @@ namespace pomerol2triqs {
 
     /// Diagonalize Hamiltonian optionally employing its symmetries
     void diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries = false);
+
+    /// Dimension of the full Hilbert space
+    std::uint64_t get_full_hilbert_space_dim() const;
+
+    /// Number of invariant subspaces
+    std::uint64_t get_n_subspaces() const;
+
+    /// Dimensions of invariant subspaces
+    std::vector<std::uint64_t> get_subspace_dims() const;
+
+    /// Dimension of an invariant subspace
+    std::uint64_t get_subspace_dim(std::uint64_t sp) const;
+
+    /// Lists of Fock states for all invariant subspaces
+    std::vector<std::vector<std::uint64_t>> get_fock_states() const;
+
+    /// List of Fock states for an invariant subspace
+    std::vector<std::uint64_t> get_subspace_fock_states(std::uint64_t sp) const;
 
     /// Compute the ensemble average of O_i O_j, where O = c or c^+
     std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta,

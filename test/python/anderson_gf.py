@@ -88,6 +88,33 @@ H = H_loc + H_hyb + H_bath
 # Diagonalize H
 ed.diagonalize(H)
 
+# Structure of the Hilbert space
+assert ed.full_hilbert_space_dim == 64
+assert ed.n_subspaces == 16
+fock_states_ref = frozenset([
+    frozenset([0]),                                     # N_dn = 0, N_up = 0
+    frozenset([1, 4, 16]),                              # N_dn = 1, N_up = 0
+    frozenset([2, 8, 32]),                              # N_dn = 0, N_up = 1
+    frozenset([5, 17, 20]),                             # N_dn = 2, N_up = 0
+    frozenset([10, 34, 40]),                            # N_dn = 0, N_up = 2
+    frozenset([3, 6, 9, 12, 18, 24, 33, 36, 48]),       # N_dn = 1, N_up = 1
+    frozenset([21]),                                    # N_dn = 3, N_up = 0
+    frozenset([42]),                                    # N_dn = 0, N_up = 3
+    frozenset([7, 13, 19, 22, 25, 28, 37, 49, 52]),     # N_dn = 2, N_up = 1
+    frozenset([11, 14, 26, 35, 38, 41, 44, 50, 56]),    # N_dn = 1, N_up = 2
+    frozenset([23, 29, 53]),                            # N_dn = 3, N_up = 1
+    frozenset([43, 46, 58]),                            # N_dn = 1, N_up = 3
+    frozenset([15, 27, 30, 39, 45, 51, 54, 57, 60]),    # N_dn = 2, N_up = 2
+    frozenset([47, 59, 62]),                            # N_dn = 2, N_up = 3
+    frozenset([31, 55, 61]),                            # N_dn = 3, N_up = 2
+    frozenset([63])                                     # N_dn = 3, N_up = 3
+])
+
+assert sorted(ed.subspace_dims) == sorted(map(len, fock_states_ref))
+assert sorted(ed.subspace_dim(sp) for sp in range(16)) == sorted(map(len, fock_states_ref))
+assert frozenset(frozenset(s) for s in ed.fock_states) == fock_states_ref
+assert frozenset(frozenset(ed.subspace_fock_states(sp)) for sp in range(16)) == fock_states_ref
+
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
 

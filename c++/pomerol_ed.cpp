@@ -142,4 +142,49 @@ namespace pomerol2triqs {
     }
   }
 
+  std::uint64_t pomerol_ed::get_full_hilbert_space_dim() const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_full_hilbert_space_dim: No Hamiltonian has been diagonalized";
+    return states_class->getNumberOfStates();
+  }
+
+  std::uint64_t pomerol_ed::get_n_subspaces() const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_n_subspaces: No Hamiltonian has been diagonalized";
+    return states_class->getNumberOfBlocks();
+  }
+
+  std::vector<std::uint64_t> pomerol_ed::get_subspace_dims() const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_subspace_dims: No Hamiltonian has been diagonalized";
+    auto n_subspaces = states_class->getNumberOfBlocks();
+    std::vector<std::uint64_t> dims(n_subspaces);
+    for (auto sp : range(n_subspaces))
+      dims[sp] = states_class->getBlockSize(sp);
+    return dims;
+  }
+
+  std::uint64_t pomerol_ed::get_subspace_dim(std::uint64_t sp) const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_subspace_dim: No Hamiltonian has been diagonalized";
+    return states_class->getBlockSize(sp);
+  }
+
+  std::vector<std::vector<std::uint64_t>> pomerol_ed::get_fock_states() const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_fock_states: No Hamiltonian has been diagonalized";
+    auto n_subspaces = states_class->getNumberOfBlocks();
+    std::vector<std::vector<std::uint64_t>> fock_states;
+    fock_states.reserve(n_subspaces);
+    for (auto sp : range(n_subspaces))
+      fock_states.emplace_back(std::move(states_class->getFockStates(sp)));
+    return fock_states;
+  }
+
+  std::vector<std::uint64_t> pomerol_ed::get_subspace_fock_states(std::uint64_t sp) const {
+    if (!states_class || !matrix_h)
+      TRIQS_RUNTIME_ERROR << "get_subspace_fock_states: No Hamiltonian has been diagonalized";
+    return states_class->getFockStates(sp);
+  }
+
 } // namespace pomerol2triqs

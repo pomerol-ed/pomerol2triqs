@@ -44,6 +44,32 @@ c = class_(
 
 c.add_constructor("""(pomerol2triqs::index_converter_t index_converter, bool verbose = false)""", doc = r"""Create a new solver object""")
 
+c.add_property(name = "full_hilbert_space_dim",
+               getter = cfunction("std::uint64_t get_full_hilbert_space_dim ()"),
+               doc = r"""Dimension of the full Hilbert space""")
+
+c.add_property(name = "n_subspaces",
+               getter = cfunction("std::uint64_t get_n_subspaces ()"),
+               doc = r"""Number of invariant subspaces""")
+
+c.add_property(name = "subspace_dims",
+               getter = cfunction("std::vector<std::uint64_t> get_subspace_dims ()"),
+               doc = r"""Dimensions of invariant subspaces""")
+
+c.add_property(name = "fock_states",
+               getter = cfunction("std::vector<std::vector<std::uint64_t>> get_fock_states ()"),
+               doc = r"""Lists of Fock states for all invariant subspaces""")
+
+c.add_method(name = "subspace_dim",
+             c_name = "subspace_dim",
+             signature = """std::uint64_t get_subspace_dim (std::uint64_t sp)""",
+             doc = r"""Dimension of an invariant subspace""")
+
+c.add_method(name = "subspace_fock_states",
+             c_name = "subspace_fock_states",
+             signature = """std::vector<std::uint64_t> get_subspace_fock_states (std::uint64_t sp)""",
+             doc = r"""List of Fock states for an invariant subspace""")
+
 c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = r"""Diagonalize Hamiltonian optionally employing its symmetries""")
 
