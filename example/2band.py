@@ -133,6 +133,13 @@ print(f"{ed.subspace_dims=}")
 # Lists of Fock states for all invariant subspaces
 print(f"{ed.fock_states=}")
 
+# Vector of all eigenvalues of the Hamiltonian, grouped by invariant subspace
+energies = ed.energies
+
+# Unitary matrices that transform from Fock states to eigenstates
+# one per invariant subspace
+unitary_matrices = ed.unitary_matrices
+
 # Compute occupations
 occ = [ed.ensemble_average(i, i, beta).real for i in product(spin_names, orb_names)]
 
@@ -284,6 +291,8 @@ chi3_iw_inu_xph_ABBA = ed.chi3_iw_inu(channel = "xPH",
 
 if mpi.is_master_node():
     with HDFArchive('2band.h5', 'w') as ar:
+        ar['energies'] = energies
+        ar['unitary_matrices'] = unitary_matrices
         ar['occ'] = occ
         ar['G_iw'] = G_iw
         ar['G_tau'] = G_tau

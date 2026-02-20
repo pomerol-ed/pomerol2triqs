@@ -30,6 +30,7 @@
 #include <variant>
 
 #include <pomerol.hpp>
+#include <nda/nda.hpp>
 #include <triqs/gfs.hpp>
 #include <triqs/mesh.hpp>
 #include <triqs/operators/many_body_operator.hpp>
@@ -75,6 +76,7 @@ namespace pomerol2triqs {
     double ops_melem_tol = 1e-8;
 
     using h_expr_t = std::variant<Pomerol::LatticePresets::RealExpr, Pomerol::LatticePresets::ComplexExpr>;
+    using rc_matrix_t = std::variant<nda::matrix<double>, nda::matrix<dcomplex>>;
     std::unique_ptr<h_expr_t> h_expr;
     std::unique_ptr<hilbert_space_t> hs;
     std::unique_ptr<Pomerol::StatesClassification> states_class;
@@ -131,6 +133,18 @@ namespace pomerol2triqs {
 
     /// List of Fock states for an invariant subspace
     std::vector<std::uint64_t> get_subspace_fock_states(std::uint64_t sp) const;
+
+    /// Vector of all energies, grouped by invariant subspace
+    std::vector<nda::vector<double>> get_energies() const;
+
+    /// Vector of energies within an invariant subspace
+    nda::vector<double> get_subspace_energies(std::uint64_t sp) const;
+
+    /// Unitary matrices that transform from Fock states to eigenstates, one per invariant subspace
+    std::vector<rc_matrix_t> get_unitary_matrices() const;
+
+    /// Unitary matrix that transforms from Fock states to eigenstates within an invariant subspace
+    rc_matrix_t get_subspace_unitary_matrix(std::uint64_t sp) const;
 
     /// Compute the ensemble average of O_i O_j, where O = c or c^+
     std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta,

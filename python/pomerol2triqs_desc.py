@@ -73,6 +73,22 @@ c.add_method(name = "subspace_fock_states",
 c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
              doc = r"""Diagonalize Hamiltonian optionally employing its symmetries""")
 
+c.add_property(name = "energies",
+               getter = cfunction("std::vector<nda::vector<double>> get_energies ()"),
+               doc = r"""Vector of all energies, grouped by invariant subspace""")
+
+c.add_method(name = "subspace_energies",
+             signature = """nda::vector<double> get_subspace_energies (std::uint64_t sp)""",
+             doc = r"""Vector of energies within an invariant subspace""")
+
+c.add_property(name = "unitary_matrices",
+               getter = cfunction("std::vector<std::variant<nda::matrix<double>, nda::matrix<dcomplex>>> get_unitary_matrices ()"),
+               doc = r"""Unitary matrices that transform from Fock states to eigenstates, one per invariant subspace""")
+
+c.add_method(name = "subspace_unitary_matrix",
+             signature = """std::variant<nda::matrix<double>, nda::matrix<dcomplex>> get_subspace_unitary_matrix (std::uint64_t sp)""",
+             doc = r"""Unitary matrix that transform from Fock states to eigenstates within an invariant subspace""")
+
 c.add_method("""std::complex<double> ensemble_average (pomerol2triqs::indices_t i, pomerol2triqs::indices_t j, double beta, std::tuple<bool, bool> dagger = {true, false})""",
              doc = r"""Compute the ensemble average of O_i O_j, where O = c or c^+""")
 

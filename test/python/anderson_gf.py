@@ -115,6 +115,10 @@ assert sorted(ed.subspace_dim(sp) for sp in range(16)) == sorted(map(len, fock_s
 assert frozenset(frozenset(s) for s in ed.fock_states) == fock_states_ref
 assert frozenset(frozenset(ed.subspace_fock_states(sp)) for sp in range(16)) == fock_states_ref
 
+# Eigensystem
+assert all((ed.subspace_energies(sp) == ed.energies[sp]).all() for sp in range(16))
+assert all((ed.subspace_unitary_matrix(sp) == ed.unitary_matrices[sp]).all() for sp in range(16))
+
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)
 
