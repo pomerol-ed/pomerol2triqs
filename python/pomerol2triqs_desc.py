@@ -44,6 +44,11 @@ c = class_(
 
 c.add_constructor("""(pomerol2triqs::index_converter_t index_converter, bool verbose = false)""", doc = r"""Create a new solver object""")
 
+c.add_method(name = "pomerol_index",
+             c_name = "lookup_pomerol_index",
+             signature = """unsigned int lookup_pomerol_index (indices_t indices)""",
+             doc = r"""Convert a (block_index, inner_index) pair into Pomerol's integer single particle index""")
+
 c.add_property(name = "full_hilbert_space_dim",
                getter = cfunction("std::uint64_t get_full_hilbert_space_dim ()"),
                doc = r"""Dimension of the full Hilbert space""")

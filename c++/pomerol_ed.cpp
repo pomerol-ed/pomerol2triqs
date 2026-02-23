@@ -89,8 +89,8 @@ namespace pomerol2triqs {
     ops_container.release();
   }
 
-  Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const &i) const {
-    auto it = index_converter.find(i);
+  Pomerol::ParticleIndex pomerol_ed::lookup_pomerol_index(indices_t const &indices) const {
+    auto it = index_converter.find(indices);
     if (it == index_converter.end()) return -1;
     return index_info.getIndex(it->second);
   }

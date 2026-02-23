@@ -85,7 +85,6 @@ namespace pomerol2triqs {
     std::set<Pomerol::ParticleIndex> computed_ops;
     std::unique_ptr<Pomerol::FieldOperatorContainer> ops_container;
 
-    Pomerol::ParticleIndex lookup_pomerol_index(indices_t const &i) const;
     std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const;
     template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian);
     void diagonalize_prepare(many_body_op_t const &hamiltonian);
@@ -115,6 +114,9 @@ namespace pomerol2triqs {
 
     /// Diagonalize Hamiltonian optionally employing its symmetries
     void diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries = false);
+
+    /// Convert a (block_index, inner_index) pair into Pomerol's integer single particle index
+    unsigned int lookup_pomerol_index(indices_t const &indices) const;
 
     /// Dimension of the full Hilbert space
     std::uint64_t get_full_hilbert_space_dim() const;

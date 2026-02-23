@@ -68,6 +68,12 @@ index_converter.update({("B%i_%s" % (k, sn), 0) : ("bath" + str(k), 0, "down" if
 # Make PomerolED solver object
 ed = PomerolED(index_converter, verbose = True)
 
+# pomerol_index()
+for pom_i, (k, sn) in enumerate(product(range(len(epsilon)), ['dn', 'up'])):
+    assert ed.pomerol_index(("B%i_%s" % (k, sn), 0)) == pom_i
+assert ed.pomerol_index(("dn", 0)) == 2 * len(epsilon)
+assert ed.pomerol_index(("up", 0)) == 2 * len(epsilon) + 1
+
 # Number of particles on the impurity
 H_loc = -mu*(n('up', 0) + n('dn', 0)) + U * n('up', 0) * n('dn', 0)
 
