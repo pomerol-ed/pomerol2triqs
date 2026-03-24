@@ -95,7 +95,7 @@ assert h_comm(Sz).is_zero()
 assert h_comm(Lz).is_zero()
 
 # Diagonalize H
-ed.diagonalize(H, ignore_symmetries)
+ed.diagonalize(H, ignore_symmetries=ignore_symmetries)
 
 # Compute G(i\omega)
 G_iw = ed.G_iw(gf_struct, beta, n_iw)

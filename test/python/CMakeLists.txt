@@ -35,7 +35,7 @@ foreach(t anderson_gf slater_gf wick chi anomalous)
 endforeach()
 
 # Multiple MPI ranks tests
-foreach(t anderson_g2_matsubara dimer_chi3)
+foreach(t anderson_g2_matsubara dimer_chi3 bosons)
   foreach(numproc 1 2 4)
     add_mpi_test(${t} ${t}.py ${numproc})
   endforeach()

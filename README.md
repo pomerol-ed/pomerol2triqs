@@ -13,6 +13,8 @@ Features
 --------
 
 * Diagonalization of finite fermionic models with Hamiltonians written in terms of second quantization operators.
+* Models with fermion-boson coupling of the form $\sum_m \hat O_m (a^\dagger_m + a_m)$, where $\hat O_m$ are
+  arbitrary Hermitian fermionic operators.
 * Calculation of single-particle Green's functions: $G(\tau)$, $G(i\omega_n)$, $G(\omega)$.
 * Calculation of anomalous single-particle Green's functions: $F(\tau)$, $F(i\omega_n)$, $F(\omega)$.
 * Calculation of two-particle Green's functions: $G(\omega;\nu,\nu')$ and $G(\omega;\ell,\ell')$.
