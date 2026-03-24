@@ -64,6 +64,19 @@ namespace pomerol2triqs {
   using w_nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq, mesh::imfreq>;
   using w_l_lp_t   = mesh::prod<mesh::imfreq, mesh::legendre, mesh::legendre>;
 
+  /// Parameters of a single bosonic mode
+  struct boson_params_t {
+
+    /// Frequency of the boson
+    double frequency;
+
+    /// Fermionic operator coupled to (a^\dagger + a)
+    many_body_op_t coupling;
+
+    /// Binary logarithm of the dimension of the truncated Hilbert space associated with this boson
+    unsigned int n_bits;
+  };
+
   /// Main solver class of pomerol2triqs
   class pomerol_ed {
 
@@ -87,8 +100,10 @@ namespace pomerol2triqs {
     std::unique_ptr<Pomerol::FieldOperatorContainer> ops_container;
 
     std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const;
-    template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian);
-    void diagonalize_prepare(many_body_op_t const &hamiltonian);
+    template <typename HExprType> HExprType translate_operator(many_body_op_t const &op) const;
+    template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian,
+                                                                std::vector<boson_params_t> const &bosons);
+    void diagonalize_prepare(many_body_op_t const &hamiltonian, std::vector<boson_params_t> const &bosons);
 
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
@@ -114,7 +129,9 @@ namespace pomerol2triqs {
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
 
     /// Diagonalize Hamiltonian optionally employing its symmetries
-    void diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries = false);
+    void diagonalize(many_body_op_t const &hamiltonian,
+                     std::vector<boson_params_t> const &bosons = {},
+                     bool ignore_symmetries = false);
 
     /// Convert a (block_index, inner_index) pair into Pomerol's integer single particle index
     unsigned int lookup_pomerol_index(indices_t const &indices) const;

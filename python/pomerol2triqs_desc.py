@@ -34,6 +34,30 @@ module.add_enum("spin", ['undef', 'down', 'up'], "Pomerol::LatticePresets", doc 
 module.add_enum("block_order_t", ['AABB', 'ABBA'], "pomerol2triqs", doc = r"""Order of block indices for Block2Gf objects""")
 module.add_enum("channel_t", ['PP', 'PH', 'xPH', 'AllFermionic'], "pomerol2triqs", doc = r"""Channel in which Matsubara frequency representation is defined""")
 
+# The class boson_params_t
+c = class_(
+        py_type = "BosonParams",  # name of the python class
+        c_type = "pomerol2triqs::boson_params_t",   # name of the C++ class
+        doc = r"""Parameters of a single bosonic mode""",   # doc of the C++ class
+        hdf5 = False,
+)
+
+c.add_constructor("""(double frequency, pomerol2triqs::many_body_op_t coupling, unsigned int n_bits)""", doc = r"""Create a new BosonParams object""")
+
+c.add_property(name = "frequency",
+               getter = cfunction(calling_pattern="auto result = self_c.frequency", signature = "double()"),
+               doc = r"""Frequency of the boson""")
+
+c.add_property(name = "coupling",
+               getter = cfunction(calling_pattern="auto result = self_c.coupling", signature = "pomerol2triqs::many_body_op_t()"),
+               doc = r"""Fermionic operator coupled to (a^\dagger + a)""")
+
+c.add_property(name = "n_bits",
+               getter = cfunction(calling_pattern="auto result = self_c.n_bits", signature = "unsigned int()"),
+               doc = r"""Binary logarithm of the dimension of the truncated Hilbert space associated with this boson""")
+
+module.add_class(c)
+
 # The class pomerol_ed
 c = class_(
         py_type = "PomerolED",  # name of the python class
@@ -75,7 +99,7 @@ c.add_method(name = "subspace_fock_states",
              signature = """std::vector<std::uint64_t> get_subspace_fock_states (std::uint64_t sp)""",
              doc = r"""List of Fock states for an invariant subspace""")
 
-c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, bool ignore_symmetries = false)""",
+c.add_method("""void diagonalize (pomerol2triqs::many_body_op_t hamiltonian, std::vector<pomerol2triqs::boson_params_t> bosons = {}, bool ignore_symmetries = false)""",
              doc = r"""Diagonalize Hamiltonian optionally employing its symmetries""")
 
 c.add_property(name = "energies",

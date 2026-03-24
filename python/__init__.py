@@ -21,6 +21,6 @@
 
 r"""pomerol2triqs Python module"""
 
-from .pomerol2triqs import PomerolED
+from .pomerol2triqs import PomerolED, BosonParams
 
-__all__ = ['PomerolED']
+__all__ = ['PomerolED', 'BosonParams']

@@ -20,6 +20,7 @@
 #include "pomerol_ed.hpp"
 
 #include <algorithm>
+#include <utility>
 
 namespace pomerol2triqs {
 
@@ -34,20 +35,34 @@ namespace pomerol2triqs {
     }
   }
 
-  template <typename HExprType> void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian) {
-    h_expr.reset(new h_expr_t(HExprType()));
-
-    for (auto const &term : hamiltonian) {
+  template <typename HExprType> HExprType pomerol_ed::translate_operator(many_body_op_t const &op) const {
+    HExprType res;
+    for (auto const &term : op) {
       HExprType pom_term(static_cast<typename HExprType::scalar_type>(term.coef));
       for (auto const &o : term.monomial) {
         auto it = index_converter.find(o.indices);
-        if (it == index_converter.end()) TRIQS_RUNTIME_ERROR << "diagonalize: Invalid Hamiltonian, unexpected operator indices " << o.indices;
+        if (it == index_converter.end()) TRIQS_RUNTIME_ERROR << "translate_operator: Invalid operator, unexpected operator indices " << o.indices;
 
         pom_term = pom_term
            * (o.dagger ? Pomerol::Operators::c_dag(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)) :
                          Pomerol::Operators::c(std::get<0>(it->second), (unsigned short)std::get<1>(it->second), std::get<2>(it->second)));
       }
-      std::get<HExprType>(*h_expr) += pom_term;
+      res += pom_term;
+    }
+    return res;
+  }
+
+  template <typename HExprType> void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian,
+                                                                          std::vector<boson_params_t> const &bosons) {
+    h_expr.reset(new h_expr_t(std::move(translate_operator<HExprType>(hamiltonian))));
+
+    for (unsigned short m : range(bosons.size())) {
+      auto const& boson = bosons[m];
+      auto a_dag = Pomerol::Operators::a_dag("B", m, Pomerol::LatticePresets::undef);
+      auto a = Pomerol::Operators::a("B", m, Pomerol::LatticePresets::undef);
+
+      std::get<HExprType>(*h_expr) += boson.frequency * a_dag * a;
+      std::get<HExprType>(*h_expr) += translate_operator<HExprType>(boson.coupling) * (a_dag + a);
     }
 
     if (verbose && !comm.rank()) {
@@ -56,20 +71,36 @@ namespace pomerol2triqs {
     }
   }
 
-  void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian) {
-    using namespace Pomerol::LatticePresets;
+  void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian, const std::vector<boson_params_t >& bosons) {
+    auto term_is_real = [](auto const &term) { return term.coef.is_real(); };
+    bool is_real = std::all_of(hamiltonian.cbegin(), hamiltonian.cend(), term_is_real);
+    for (auto const& boson : bosons) {
+      is_real = is_real && std::all_of(boson.coupling.cbegin(), boson.coupling.cend(), term_is_real);
+      if(!is_real) break;
+    }
 
-    if (std::all_of(hamiltonian.cbegin(), hamiltonian.cend(), [](auto const &term) { return term.coef.is_real(); }))
-      diagonalize_prepare_impl<RealExpr>(hamiltonian);
+    using namespace Pomerol::LatticePresets;
+    if (is_real)
+      diagonalize_prepare_impl<RealExpr>(hamiltonian, bosons);
     else
-      diagonalize_prepare_impl<ComplexExpr>(hamiltonian);
+      diagonalize_prepare_impl<ComplexExpr>(hamiltonian, bosons);
   }
 
-  void pomerol_ed::diagonalize(many_body_op_t const &hamiltonian, bool ignore_symmetries) {
-    diagonalize_prepare(hamiltonian);
+  void pomerol2triqs::pomerol_ed::diagonalize(const many_body_op_t& hamiltonian,
+                                              const std::vector<boson_params_t >& bosons,
+                                              bool ignore_symmetries)
+{
+    diagonalize_prepare(hamiltonian, bosons);
+
+    // Prepare bits_per_boson_map
+    using hs_indices_t = std::tuple<std::string, unsigned short, Pomerol::LatticePresets::spin>;
+    auto bits_per_boson_map = std::map<hs_indices_t, unsigned int>{};
+    for(auto m : range(bosons.size())) {
+      bits_per_boson_map.emplace(hs_indices_t{"B", m, Pomerol::LatticePresets::undef}, bosons[m].n_bits);
+    }
 
     // Create Hilbert space
-    std::visit([&](auto const &h) { hs.reset(new hilbert_space_t(index_info, h)); }, *h_expr);
+    std::visit([&](auto const &h) { hs.reset(new hilbert_space_t(index_info, h, bits_per_boson_map)); }, *h_expr);
     if (!ignore_symmetries) hs->compute();
 
     // Classify many-body states
