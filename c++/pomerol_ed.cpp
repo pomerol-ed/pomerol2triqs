@@ -62,7 +62,10 @@ namespace pomerol2triqs {
       auto a = Pomerol::Operators::a("B", m, Pomerol::LatticePresets::undef);
 
       std::get<HExprType>(*h_expr) += boson.frequency * a_dag * a;
-      std::get<HExprType>(*h_expr) += translate_operator<HExprType>(boson.coupling) * (a_dag + a);
+
+      auto O = translate_operator<HExprType>(boson.coupling);
+      auto O_dag = translate_operator<HExprType>(dagger(boson.coupling));
+      std::get<HExprType>(*h_expr) += O * a_dag + O_dag * a;
     }
 
     if (verbose && !comm.rank()) {

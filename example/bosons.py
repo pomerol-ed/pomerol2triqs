@@ -92,8 +92,9 @@ H -= mu*N
 
 # Bosonic contributions to the Hamiltonian
 #
-# Each bosonic mode contributes the terms w0 a^\dagger a + \hat O (a^\dagger + a),
-# where \hat O is a fermionic coupling operator
+# Each bosonic mode contributes the terms
+# w0 a^\dagger a + \hat O a^\dagger + \hat O^\dagger a, where \hat O is
+# a fermionic coupling operator
 bosons = [
     # Boson coupled to charge
     BosonParams(frequency=w0_ch, coupling=g_ch * (n('up', 0) + n('dn', 0)), n_bits=n_bits),
