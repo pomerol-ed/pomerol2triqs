@@ -72,7 +72,7 @@ index_converter.update({("B%i_%s" % (k, sn), 0) : ("bath" + str(k), 0, "down" if
 
 # Bosonic contributions to the Hamiltonian
 #
-# Each bosonic mode contributes the terms w0 a^\dagger a + \hat O (a^\dagger + a),
+# Each bosonic mode contributes the terms w0 a^\dagger a + \hat O a^\dagger + \hat O^\dagger a,
 # where \hat O is a fermionic coupling operator
 bosons = [
     # Boson coupled to charge

@@ -70,7 +70,7 @@ namespace pomerol2triqs {
     /// Frequency of the boson
     double frequency;
 
-    /// Fermionic operator coupled to (a^\dagger + a)
+    /// Fermionic operator \hat O in coupling term \hat O a^\dagger + \hat O^\dagger a
     many_body_op_t coupling;
 
     /// Binary logarithm of the dimension of the truncated Hilbert space associated with this boson
