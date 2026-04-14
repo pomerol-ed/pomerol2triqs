@@ -45,6 +45,7 @@ namespace pomerol2triqs {
 
   using namespace triqs::gfs;
   namespace mesh = triqs::mesh;
+  using itertools::range;
   using triqs::hilbert_space::gf_struct_t;
 
   using indices_t              = triqs::hilbert_space::fundamental_operator_set::indices_t;
