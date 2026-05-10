@@ -1,7 +1,7 @@
 pomerol2triqs
 =============
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5735413.svg)](https://doi.org/10.5281/zenodo.5735413)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3354450.svg)](https://doi.org/10.5281/zenodo.3354450)
 [![Build and test](https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test.yml/badge.svg)](
 https://github.com/pomerol-ed/pomerol2triqs/actions/workflows/build-and-test.yml)
 
