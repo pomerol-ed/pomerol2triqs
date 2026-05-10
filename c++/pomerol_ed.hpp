@@ -60,7 +60,7 @@ namespace pomerol2triqs {
   // cpp2py does not know how to convert the latter integer type.
   using index_converter_t = std::map<indices_t, std::tuple<std::string, unsigned int, Pomerol::LatticePresets::spin>>;
 
-  using w_nu_t = mesh::prod<mesh::imfreq, mesh::imfreq>;
+  using w_nu_t     = mesh::prod<mesh::imfreq, mesh::imfreq>;
   using w_nu_nup_t = mesh::prod<mesh::imfreq, mesh::imfreq, mesh::imfreq>;
   using w_l_lp_t   = mesh::prod<mesh::imfreq, mesh::legendre, mesh::legendre>;
 
@@ -89,7 +89,7 @@ namespace pomerol2triqs {
     double rho_threshold = 0;
     double ops_melem_tol = 1e-8;
 
-    using h_expr_t = std::variant<Pomerol::LatticePresets::RealExpr, Pomerol::LatticePresets::ComplexExpr>;
+    using h_expr_t    = std::variant<Pomerol::LatticePresets::RealExpr, Pomerol::LatticePresets::ComplexExpr>;
     using rc_matrix_t = std::variant<nda::matrix<double>, nda::matrix<dcomplex>>;
     std::unique_ptr<h_expr_t> h_expr;
     std::unique_ptr<hilbert_space_t> hs;
@@ -101,37 +101,31 @@ namespace pomerol2triqs {
 
     std::set<Pomerol::ParticleIndex> gf_struct_to_pomerol_indices(gf_struct_t const &gf_struct) const;
     template <typename HExprType> HExprType translate_operator(many_body_op_t const &op) const;
-    template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian,
-                                                                std::vector<boson_params_t> const &bosons);
+    template <typename HExprType> void diagonalize_prepare_impl(many_body_op_t const &hamiltonian, std::vector<boson_params_t> const &bosons);
     void diagonalize_prepare(many_body_op_t const &hamiltonian, std::vector<boson_params_t> const &bosons);
 
     void compute_rho(double beta);
     void compute_field_operators(gf_struct_t const &gf_struct);
     template <typename Mesh, typename Filler>
-    block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, bool anomalous,
-                              double pole_res, double coeff_tol) const;
+    block_gf<Mesh> compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, bool anomalous, double pole_res, double coeff_tol) const;
     template <typename Mesh, typename Filler>
     gf<Mesh, scalar_valued> compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
                                         Mesh const &mesh, Filler filler, channel_t channel, double pole_res, double coeff_tol) const;
 
     template <typename Mesh, typename Filler>
     block2_gf<Mesh, tensor_valued<4>> compute_g2(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
-                                                 g2_blocks_t const &g2_blocks, Filler filler,
-                                                 double pole_res, double coeff_tol) const;
+                                                 g2_blocks_t const &g2_blocks, Filler filler, double pole_res, double coeff_tol) const;
 
     template <typename Mesh, typename Filler>
-    block2_gf<Mesh, tensor_valued<4>> compute_chi3(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order,
-                                                   channel_t channel, chi3_blocks_t const &chi3_blocks, Filler filler,
-                                                   double pole_res, double coeff_tol) const;
+    block2_gf<Mesh, tensor_valued<4>> compute_chi3(gf_struct_t const &gf_struct, Mesh const &mesh, block_order_t block_order, channel_t channel,
+                                                   chi3_blocks_t const &chi3_blocks, Filler filler, double pole_res, double coeff_tol) const;
 
     public:
     /// Create a new solver object
     pomerol_ed(index_converter_t const &index_converter, bool verbose = false);
 
     /// Diagonalize Hamiltonian optionally employing its symmetries
-    void diagonalize(many_body_op_t const &hamiltonian,
-                     std::vector<boson_params_t> const &bosons = {},
-                     bool ignore_symmetries = false);
+    void diagonalize(many_body_op_t const &hamiltonian, std::vector<boson_params_t> const &bosons = {}, bool ignore_symmetries = false);
 
     /// Convert a (block_index, inner_index) pair into Pomerol's integer single particle index
     unsigned int lookup_pomerol_index(indices_t const &indices) const;
@@ -167,12 +161,11 @@ namespace pomerol2triqs {
     rc_matrix_t get_subspace_unitary_matrix(std::uint64_t sp) const;
 
     /// Compute the ensemble average of O_i O_j, where O = c or c^+
-    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta,
-                                          std::tuple<bool, bool> const& dagger = {true, false});
+    std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, double beta, std::tuple<bool, bool> const &dagger = {true, false});
 
     /// Compute the ensemble average of O_i O_j O_k O_l, where O = c or c^+
     std::complex<double> ensemble_average(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                          std::tuple<bool, bool, bool, bool> const& dagger = {true, true, false, false});
+                                          std::tuple<bool, bool, bool, bool> const &dagger = {true, true, false, false});
 
     /// Green's function in Matsubara frequencies
     block_gf<mesh::imfreq> G_iw(gf_struct_t const &gf_struct, double beta, int n_iw, double pole_res = 1e-8, double coeff_tol = 1e-8);
@@ -203,24 +196,21 @@ namespace pomerol2triqs {
     block2_gf<w_l_lp_t, tensor_valued<4>> G2_iw_l_lp(g2_iw_l_lp_params_t const &p);
 
     /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part
-    gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                            int n_tau, bool connected = false, channel_t channel = PH,
-                                            double pole_res = 1e-8, double coeff_tol = 1e-8);
+    gf<mesh::imtime, scalar_valued> chi_tau(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta, int n_tau,
+                                            bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8);
 
     /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part in Matsubara frequencies
-    gf<mesh::imfreq, scalar_valued> chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                           int n_iw, bool connected = false, channel_t channel = PH,
-                                           double pole_res = 1e-8, double coeff_tol = 1e-8);
+    gf<mesh::imfreq, scalar_valued> chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta, int n_iw,
+                                           bool connected = false, channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8);
 
     /// Dynamical susceptibility <T c^+_{i}(\tau) c_{j}(\tau) c^+_{k}(0) c_{l}(0)> (if PH channel) or its connected part on real energy axis
     gf<mesh::refreq, scalar_valued> chi_w(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                          std::pair<double, double> const &energy_window, int n_w, double im_shift = 0,
-                                          bool connected = false, channel_t channel = PH,
-                                          double pole_res = 1e-8, double coeff_tol = 1e-8);
+                                          std::pair<double, double> const &energy_window, int n_w, double im_shift = 0, bool connected = false,
+                                          channel_t channel = PH, double pole_res = 1e-8, double coeff_tol = 1e-8);
 
     /// 3-point fermion-boson susceptibility
     CPP2PY_ARG_AS_DICT
-    block2_gf<w_nu_t, tensor_valued<4>> chi3_iw_inu(chi3_iw_inu_params_t const& p);
+    block2_gf<w_nu_t, tensor_valued<4>> chi3_iw_inu(chi3_iw_inu_params_t const &p);
 
     /// Get tolerance for matrix elements of creation/annihilation operators
     double get_ops_melem_tol() const { return ops_melem_tol; }

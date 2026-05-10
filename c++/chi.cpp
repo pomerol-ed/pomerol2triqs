@@ -27,8 +27,7 @@
 
 namespace pomerol2triqs {
 
-  std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j,
-                                                    double beta, std::tuple<bool, bool> const& dagger) {
+  std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j, double beta, std::tuple<bool, bool> const &dagger) {
     Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
     if (pom_i == -1) TRIQS_RUNTIME_ERROR << "ensemble_average: Unexpected index i = " << i;
     Pomerol::ParticleIndex pom_j = lookup_pomerol_index(j);
@@ -47,9 +46,9 @@ namespace pomerol2triqs {
     return EA();
   }
 
-  std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l,
-                                                    double beta, std::tuple<bool, bool, bool, bool> const& dagger) {
-    auto checked_lookup = [&](indices_t const &i, std::string const & i_name) {
+  std::complex<double> pomerol_ed::ensemble_average(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
+                                                    std::tuple<bool, bool, bool, bool> const &dagger) {
+    auto checked_lookup = [&](indices_t const &i, std::string const &i_name) {
       Pomerol::ParticleIndex pom_i = lookup_pomerol_index(i);
       if (pom_i == -1) TRIQS_RUNTIME_ERROR << "compute_chi: Unexpected index " << i_name << " = " << i;
       return pom_i;
@@ -75,8 +74,7 @@ namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
   gf<Mesh, scalar_valued> pomerol_ed::compute_chi(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, bool connected,
-                                                  Mesh const &mesh, Filler filler, channel_t channel,
-                                                  double pole_res, double coeff_tol) const {
+                                                  Mesh const &mesh, Filler filler, channel_t channel, double pole_res, double coeff_tol) const {
     if (!states_class || !matrix_h || !rho) TRIQS_RUNTIME_ERROR << "compute_chi: Internal error!";
 
     auto checked_lookup = [&](indices_t const &i) {
@@ -96,36 +94,35 @@ namespace pomerol2triqs {
     Pomerol::ParticleIndex b1, b2;
     double sign;
 
-    switch(channel) {
+    switch (channel) {
       case PP:
         adag = {true, true};
         bdag = {false, false};
-        a1 = pom_i;
-        a2 = pom_k;
-        b1 = pom_j;
-        b2 = pom_l;
+        a1   = pom_i;
+        a2   = pom_k;
+        b1   = pom_j;
+        b2   = pom_l;
         sign = -1.0;
         break;
       case PH:
         adag = {true, false};
         bdag = {true, false};
-        a1 = pom_i;
-        a2 = pom_j;
-        b1 = pom_k;
-        b2 = pom_l;
+        a1   = pom_i;
+        a2   = pom_j;
+        b1   = pom_k;
+        b2   = pom_l;
         sign = 1.0;
         break;
       case xPH:
         adag = {true, false};
         bdag = {true, false};
-        a1 = pom_i;
-        a2 = pom_l;
-        b1 = pom_k;
-        b2 = pom_j;
+        a1   = pom_i;
+        a2   = pom_l;
+        b1   = pom_k;
+        b2   = pom_j;
         sign = -1.0;
         break;
-      default:
-        TRIQS_RUNTIME_ERROR << "compute_chi: AllFermionic channel is not supported";
+      default: TRIQS_RUNTIME_ERROR << "compute_chi: AllFermionic channel is not supported";
     }
 
     Pomerol::QuadraticOperator A(index_info, *hs, *states_class, *matrix_h, a1, a2, adag);
@@ -137,7 +134,7 @@ namespace pomerol2triqs {
     B.compute(ops_melem_tol);
 
     Pomerol::Susceptibility pom_chi(*states_class, *matrix_h, A, B, *rho);
-    pom_chi.PoleResolution = pole_res;
+    pom_chi.PoleResolution       = pole_res;
     pom_chi.CoefficientTolerance = coeff_tol;
     pom_chi.prepare();
     pom_chi.compute();
@@ -151,8 +148,7 @@ namespace pomerol2triqs {
   }
 
   gf<imtime, scalar_valued> pomerol_ed::chi_tau(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                                int n_tau, bool connected, channel_t channel,
-                                                double pole_res, double coeff_tol) {
+                                                int n_tau, bool connected, channel_t channel, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_tau: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
@@ -162,9 +158,8 @@ namespace pomerol2triqs {
     return compute_chi<imtime>(i, j, k, l, connected, {beta, Boson, n_tau}, filler, channel, pole_res, coeff_tol);
   }
 
-  gf<imfreq, scalar_valued> pomerol_ed::chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                               int n_iw, bool connected, channel_t channel,
-                                               double pole_res, double coeff_tol) {
+  gf<imfreq, scalar_valued> pomerol_ed::chi_iw(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta, int n_iw,
+                                               bool connected, channel_t channel, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_iw: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 
@@ -175,9 +170,8 @@ namespace pomerol2triqs {
   }
 
   gf<refreq, scalar_valued> pomerol_ed::chi_w(indices_t const &i, indices_t const &j, indices_t const &k, indices_t const &l, double beta,
-                                              std::pair<double, double> const &energy_window, int n_w, double im_shift,
-                                              bool connected, channel_t channel,
-                                              double pole_res, double coeff_tol) {
+                                              std::pair<double, double> const &energy_window, int n_w, double im_shift, bool connected,
+                                              channel_t channel, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "chi_w: No Hamiltonian has been diagonalized";
     compute_rho(beta);
 

@@ -26,8 +26,8 @@
 namespace pomerol2triqs {
 
   template <typename Mesh, typename Filler>
-  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, bool anomalous,
-                                        double pole_res, double coeff_tol) const {
+  block_gf<Mesh> pomerol_ed::compute_gf(gf_struct_t const &gf_struct, Mesh const &mesh, Filler filler, bool anomalous, double pole_res,
+                                        double coeff_tol) const {
 
     if (!states_class || !matrix_h || !rho || !ops_container) TRIQS_RUNTIME_ERROR << "compute_gf: Internal error!";
 
@@ -51,17 +51,11 @@ namespace pomerol2triqs {
             std::cout << "fill_gf: Filling GF component (" << bl.first << "," << i1 << ")(" << bl.first << "," << i2 << ")" << std::endl;
           auto g_el = slice_target_to_scalar(g, i1, i2);
 
-          auto pom_g = anomalous ? Pomerol::GreensFunction(*states_class,
-                                                           *matrix_h,
-                                                           ops_container->getAnnihilationOperator(pom_i1),
-                                                           ops_container->getAnnihilationOperator(pom_i2),
-                                                           *rho) :
-                                   Pomerol::GreensFunction(*states_class,
-                                                           *matrix_h,
-                                                           ops_container->getAnnihilationOperator(pom_i1),
-                                                           ops_container->getCreationOperator(pom_i2),
-                                                           *rho);
-          pom_g.PoleResolution = pole_res;
+          auto pom_g                 = anomalous ? Pomerol::GreensFunction(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
+                                                                           ops_container->getAnnihilationOperator(pom_i2), *rho) :
+                                                   Pomerol::GreensFunction(*states_class, *matrix_h, ops_container->getAnnihilationOperator(pom_i1),
+                                                                           ops_container->getCreationOperator(pom_i2), *rho);
+          pom_g.PoleResolution       = pole_res;
           pom_g.CoefficientTolerance = coeff_tol;
           pom_g.prepare();
           pom_g.compute();
@@ -130,7 +124,7 @@ namespace pomerol2triqs {
   }
 
   block_gf<refreq> pomerol_ed::F_w(gf_struct_t const &gf_struct, double beta, std::pair<double, double> const &energy_window, int n_w,
-                                      double im_shift, double pole_res, double coeff_tol) {
+                                   double im_shift, double pole_res, double coeff_tol) {
     if (!matrix_h) TRIQS_RUNTIME_ERROR << "F_w: No Hamiltonian has been diagonalized";
     compute_rho(beta);
     compute_field_operators(gf_struct);

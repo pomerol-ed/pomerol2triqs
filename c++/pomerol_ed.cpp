@@ -52,18 +52,18 @@ namespace pomerol2triqs {
     return res;
   }
 
-  template <typename HExprType> void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian,
-                                                                          std::vector<boson_params_t> const &bosons) {
+  template <typename HExprType>
+  void pomerol_ed::diagonalize_prepare_impl(many_body_op_t const &hamiltonian, std::vector<boson_params_t> const &bosons) {
     h_expr.reset(new h_expr_t(std::move(translate_operator<HExprType>(hamiltonian))));
 
     for (unsigned short m : range(bosons.size())) {
-      auto const& boson = bosons[m];
-      auto a_dag = Pomerol::Operators::a_dag("B", m, Pomerol::LatticePresets::undef);
-      auto a = Pomerol::Operators::a("B", m, Pomerol::LatticePresets::undef);
+      auto const &boson = bosons[m];
+      auto a_dag        = Pomerol::Operators::a_dag("B", m, Pomerol::LatticePresets::undef);
+      auto a            = Pomerol::Operators::a("B", m, Pomerol::LatticePresets::undef);
 
       std::get<HExprType>(*h_expr) += boson.frequency * a_dag * a;
 
-      auto O = translate_operator<HExprType>(boson.coupling);
+      auto O     = translate_operator<HExprType>(boson.coupling);
       auto O_dag = translate_operator<HExprType>(dagger(boson.coupling));
       std::get<HExprType>(*h_expr) += O * a_dag + O_dag * a;
     }
@@ -74,12 +74,12 @@ namespace pomerol2triqs {
     }
   }
 
-  void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian, const std::vector<boson_params_t >& bosons) {
+  void pomerol_ed::diagonalize_prepare(many_body_op_t const &hamiltonian, const std::vector<boson_params_t> &bosons) {
     auto term_is_real = [](auto const &term) { return term.coef.is_real(); };
-    bool is_real = std::all_of(hamiltonian.cbegin(), hamiltonian.cend(), term_is_real);
-    for (auto const& boson : bosons) {
+    bool is_real      = std::all_of(hamiltonian.cbegin(), hamiltonian.cend(), term_is_real);
+    for (auto const &boson : bosons) {
       is_real = is_real && std::all_of(boson.coupling.cbegin(), boson.coupling.cend(), term_is_real);
-      if(!is_real) break;
+      if (!is_real) break;
     }
 
     using namespace Pomerol::LatticePresets;
@@ -89,18 +89,13 @@ namespace pomerol2triqs {
       diagonalize_prepare_impl<ComplexExpr>(hamiltonian, bosons);
   }
 
-  void pomerol2triqs::pomerol_ed::diagonalize(const many_body_op_t& hamiltonian,
-                                              const std::vector<boson_params_t >& bosons,
-                                              bool ignore_symmetries)
-{
+  void pomerol2triqs::pomerol_ed::diagonalize(const many_body_op_t &hamiltonian, const std::vector<boson_params_t> &bosons, bool ignore_symmetries) {
     diagonalize_prepare(hamiltonian, bosons);
 
     // Prepare bits_per_boson_map
-    using hs_indices_t = std::tuple<std::string, unsigned short, Pomerol::LatticePresets::spin>;
+    using hs_indices_t      = std::tuple<std::string, unsigned short, Pomerol::LatticePresets::spin>;
     auto bits_per_boson_map = std::map<hs_indices_t, unsigned int>{};
-    for(auto m : range(bosons.size())) {
-      bits_per_boson_map.emplace(hs_indices_t{"B", m, Pomerol::LatticePresets::undef}, bosons[m].n_bits);
-    }
+    for (auto m : range(bosons.size())) { bits_per_boson_map.emplace(hs_indices_t{"B", m, Pomerol::LatticePresets::undef}, bosons[m].n_bits); }
 
     // Create Hilbert space
     std::visit([&](auto const &h) { hs.reset(new hilbert_space_t(index_info, h, bits_per_boson_map)); }, *h_expr);
@@ -179,104 +174,84 @@ namespace pomerol2triqs {
   }
 
   std::uint64_t pomerol_ed::get_full_hilbert_space_dim() const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_full_hilbert_space_dim: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_full_hilbert_space_dim: No Hamiltonian has been diagonalized";
     return states_class->getNumberOfStates();
   }
 
   std::uint64_t pomerol_ed::get_n_subspaces() const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_n_subspaces: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_n_subspaces: No Hamiltonian has been diagonalized";
     return states_class->getNumberOfBlocks();
   }
 
   std::vector<std::uint64_t> pomerol_ed::get_subspace_dims() const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_subspace_dims: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_subspace_dims: No Hamiltonian has been diagonalized";
     auto n_subspaces = states_class->getNumberOfBlocks();
     std::vector<std::uint64_t> dims(n_subspaces);
-    for (auto sp : range(n_subspaces))
-      dims[sp] = states_class->getBlockSize(sp);
+    for (auto sp : range(n_subspaces)) dims[sp] = states_class->getBlockSize(sp);
     return dims;
   }
 
   std::uint64_t pomerol_ed::get_subspace_dim(std::uint64_t sp) const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_subspace_dim: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_subspace_dim: No Hamiltonian has been diagonalized";
     return states_class->getBlockSize(sp);
   }
 
   std::vector<std::vector<std::uint64_t>> pomerol_ed::get_fock_states() const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_fock_states: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_fock_states: No Hamiltonian has been diagonalized";
     auto n_subspaces = states_class->getNumberOfBlocks();
     std::vector<std::vector<std::uint64_t>> fock_states;
     fock_states.reserve(n_subspaces);
-    for (auto sp : range(n_subspaces))
-      fock_states.emplace_back(std::move(states_class->getFockStates(sp)));
+    for (auto sp : range(n_subspaces)) fock_states.emplace_back(std::move(states_class->getFockStates(sp)));
     return fock_states;
   }
 
   std::vector<std::uint64_t> pomerol_ed::get_subspace_fock_states(std::uint64_t sp) const {
-    if (!states_class)
-      TRIQS_RUNTIME_ERROR << "get_subspace_fock_states: No Hamiltonian has been diagonalized";
+    if (!states_class) TRIQS_RUNTIME_ERROR << "get_subspace_fock_states: No Hamiltonian has been diagonalized";
     return states_class->getFockStates(sp);
   }
 
   std::vector<nda::vector<double>> pomerol_ed::get_energies() const {
-    if (!states_class || !matrix_h)
-      TRIQS_RUNTIME_ERROR << "get_energies: No Hamiltonian has been diagonalized";
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "get_energies: No Hamiltonian has been diagonalized";
     auto n_subspaces = states_class->getNumberOfBlocks();
     std::vector<nda::vector<double>> res;
     res.reserve(n_subspaces);
-    for (auto sp : range(n_subspaces)) {
-      res.emplace_back(get_subspace_energies(sp));
-    }
+    for (auto sp : range(n_subspaces)) { res.emplace_back(get_subspace_energies(sp)); }
     return res;
   }
 
   nda::vector<double> pomerol_ed::get_subspace_energies(std::uint64_t sp) const {
-    if (!states_class || !matrix_h)
-      TRIQS_RUNTIME_ERROR << "get_subspace_energies: No Hamiltonian has been diagonalized";
-    auto const& eigenvalues = matrix_h->getEigenValues(sp);
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "get_subspace_energies: No Hamiltonian has been diagonalized";
+    auto const &eigenvalues = matrix_h->getEigenValues(sp);
     nda::vector<double> res(eigenvalues.size());
     std::copy(eigenvalues.begin(), eigenvalues.end(), res.begin());
     return res;
   }
 
   std::vector<pomerol_ed::rc_matrix_t> pomerol_ed::get_unitary_matrices() const {
-    if (!states_class || !matrix_h)
-      TRIQS_RUNTIME_ERROR << "get_unitary_matrices: No Hamiltonian has been diagonalized";
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "get_unitary_matrices: No Hamiltonian has been diagonalized";
     auto n_subspaces = states_class->getNumberOfBlocks();
     std::vector<rc_matrix_t> res;
     res.reserve(n_subspaces);
-    for (auto sp : range(n_subspaces)) {
-      res.emplace_back(get_subspace_unitary_matrix(sp));
-    }
+    for (auto sp : range(n_subspaces)) { res.emplace_back(get_subspace_unitary_matrix(sp)); }
     return res;
   }
 
   pomerol_ed::rc_matrix_t pomerol_ed::get_subspace_unitary_matrix(std::uint64_t sp) const {
-    if (!states_class || !matrix_h)
-      TRIQS_RUNTIME_ERROR << "get_subspace_unitary_matrix: No Hamiltonian has been diagonalized";
-    auto const& h_part = matrix_h->getPart(sp);
-    auto size = h_part.getSize();
-    if(h_part.isComplex()) {
+    if (!states_class || !matrix_h) TRIQS_RUNTIME_ERROR << "get_subspace_unitary_matrix: No Hamiltonian has been diagonalized";
+    auto const &h_part = matrix_h->getPart(sp);
+    auto size          = h_part.getSize();
+    if (h_part.isComplex()) {
       nda::matrix<dcomplex> res(size, size);
-      auto const& mat = h_part.getMatrix<true>();
+      auto const &mat = h_part.getMatrix<true>();
       for (auto i : range(size)) {
-        for (auto j : range(size)) {
-          res(i, j) = mat(i, j);
-        }
+        for (auto j : range(size)) { res(i, j) = mat(i, j); }
       }
       return res;
     } else {
       nda::matrix<double> res(size, size);
-      auto const& mat = h_part.getMatrix<false>();
+      auto const &mat = h_part.getMatrix<false>();
       for (auto i : range(size)) {
-        for (auto j : range(size)) {
-          res(i, j) = mat(i, j);
-        }
+        for (auto j : range(size)) { res(i, j) = mat(i, j); }
       }
       return res;
     }
