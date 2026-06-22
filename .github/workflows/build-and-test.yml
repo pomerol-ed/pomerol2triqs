@@ -142,8 +142,9 @@ jobs:
     - uses: actions/checkout@v6
 
     - name: Install dependencies
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: 1
       run: |
-           brew update
            brew install llvm libomp open-mpi boost eigen@3 fftw hdf5 \
                         numpy scipy mpi4py
            echo "EIGEN_ROOT=$(brew --prefix eigen@3)" >> $GITHUB_ENV
