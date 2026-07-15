@@ -23,7 +23,7 @@
 
 from h5 import HDFArchive
 from triqs.operators import c, c_dag, n
-from triqs.gf import *
+from triqs.gfs import *
 from triqs.atom_diag import *
 from itertools import product
 from copy import deepcopy
