@@ -20,7 +20,7 @@
 ################################################################################
 
 from h5 import HDFArchive
-from triqs.gf import *
+from triqs.gfs import *
 from triqs.operators import *
 from triqs.operators.util.op_struct import set_operator_structure, get_mkind
 from triqs.operators.util.U_matrix import U_matrix_slater

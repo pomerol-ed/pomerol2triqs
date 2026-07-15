@@ -6,7 +6,7 @@ from cpp2py.wrap_generator import *
 module = module_(full_name = "pomerol2triqs", doc = r"TRIQS wrapper around Pomerol ED library", app_name = "pomerol2triqs")
 
 # Imports
-module.add_imports(*['triqs.gf', 'triqs.gf.meshes', 'triqs.operators'])
+module.add_imports(*['triqs.gfs', 'triqs.mesh', 'triqs.operators'])
 
 # Add here all includes
 module.add_include("pomerol_ed.hpp")

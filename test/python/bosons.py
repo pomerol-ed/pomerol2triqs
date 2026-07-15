@@ -20,7 +20,7 @@
 ################################################################################
 
 from h5 import HDFArchive
-from triqs.gf import *
+from triqs.gfs import *
 from triqs.operators import Operator, c, c_dag, n
 from triqs.utility import mpi
 from triqs.utility.comparison_tests import *
