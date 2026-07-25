@@ -88,7 +88,7 @@ N = sum(n(sn, o) for sn, o in product(spin_names, orb_names))
 H = h_int_kanamori(spin_names, num_orb,
                    np.array([[0, U-3*J], [U-3*J, 0]]),
                    np.array([[U, U-2*J], [U-2*J, U]]),
-                   J, True)
+                   J, spin_flip=True, off_diag=True)
 H -= mu*N
 
 # Diagonalize H
