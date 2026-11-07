@@ -159,7 +159,8 @@ jobs:
            brew install llvm libomp open-mpi boost eigen@3 fftw hdf5 \
                         numpy scipy mpi4py
            echo "EIGEN_ROOT=$(brew --prefix eigen@3)" >> $GITHUB_ENV
-           pip install --user mako
+           echo "$(python3 -m site --user-base)/bin" >> $GITHUB_PATH
+           pip3 install --break-system-packages --user mako
 
     - name: Set PATH and LDFLAGS for Clang
       if: matrix.compiler.name == 'clang'
